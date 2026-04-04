@@ -61,7 +61,9 @@ bot.command("start", async (ctx) => {
   await db
     .update(authTokens)
     .set({ status: "confirmed", telegramId, userId: user.id, updatedAt: new Date() })
-    .where(eq(authTokens.id, authToken.id));
+    .where(eq(authTokens.id, authToken.id)).then(() => {
+      console.log(`User ${user.id} authenticated via Telegram`);
+    });
 
   await ctx.reply("You're signed in! You can now return to the web app.");
 });
