@@ -235,10 +235,6 @@ export default {
   port,
   fetch: app.fetch,
   idleTimeout: 255,
-  tls: {
-    key: Bun.file("../../certs/key.pem"),
-    cert: Bun.file("../../certs/cert.pem"),
-  },
 };
 
 console.log(`Server running on https://localhost:${port}`);
