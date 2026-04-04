@@ -237,4 +237,4 @@ export default {
   idleTimeout: 255,
 };
 
-console.log(`Server running on https://localhost:${port}`);
+console.log(`Server running on http://localhost:${port}`);
