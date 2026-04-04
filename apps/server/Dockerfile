@@ -1,5 +1,5 @@
 # Build stage
-FROM oven/bun:1.2.5-alpine AS builder
+FROM oven/bun:1.3.4-alpine AS builder
 
 WORKDIR /app
 
@@ -12,10 +12,10 @@ COPY packages ./packages
 COPY apps/server ./apps/server
 
 # Install dependencies
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Production stage
-FROM oven/bun:1.2.5-alpine
+FROM oven/bun:1.3.4-alpine
 
 WORKDIR /app
 
