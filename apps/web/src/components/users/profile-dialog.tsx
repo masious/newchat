@@ -1,13 +1,12 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, SubmitEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { Switch } from "@base-ui/react/switch";
 import { RadioGroup } from "@base-ui/react/radio-group";
 import { Radio } from "@base-ui/react/radio";
 import { Field } from "@base-ui/react/field";
-import { Form } from "@base-ui/react/form";
 import { Sun, Moon, VolumeX, Volume2 } from "lucide-react";
 import type { SearchUser, ProfileUser, PresenceSummary } from "@/lib/trpc-types";
 import { trpc } from "@/lib/trpc";
@@ -16,7 +15,7 @@ import { uploadFile } from "@/lib/upload";
 import { formatPresence, userDisplayName } from "@/lib/formatting";
 import { usePushNotifications } from "@/lib/hooks/use-push-notifications";
 import Image from "next/image";
-import { ScrollArea } from "@base-ui/react";
+import { Button, ScrollArea } from "@base-ui/react";
 
 type DisplayUser = (SearchUser | ProfileUser) & {
   presence?: PresenceSummary;
@@ -264,7 +263,8 @@ export function EditProfileDialog({
     setAvatarPreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!user) return;
     setError(null);
 
@@ -335,7 +335,7 @@ export function EditProfileDialog({
     >
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 bg-black/30" />
-        <Dialog.Viewport className="fixed inset-0 flex items-center justify-center px-4 py-8">
+        <Dialog.Viewport className="fixed inset-0 flex items-center justify-center px-4">
           <ScrollArea.Root
             style={{ position: undefined }}
             className="box-border h-full overscroll-contain in-data-ending-style:pointer-events-none"
@@ -343,9 +343,9 @@ export function EditProfileDialog({
             <ScrollArea.Viewport className="box-border h-full overscroll-contain in-data-ending-style:pointer-events-none">
               <ScrollArea.Content className="flex items-center justify-center min-h-full">
                 <Dialog.Popup
-                  render={<Form onFormSubmit={handleSubmit} />}
                   className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-800"
                 >
+                  <form onSubmit={handleSubmit}>
                   <div className="flex items-start justify-between">
                     <div>
                       <Dialog.Description className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
@@ -549,7 +549,7 @@ export function EditProfileDialog({
                     <Dialog.Close className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 dark:border-slate-600 dark:text-slate-300">
                       Cancel
                     </Dialog.Close>
-                    <button
+                    <Button
                       type="submit"
                       disabled={isBusy}
                       className="rounded-full bg-indigo-600 px-6 py-2 text-sm font-semibold text-white disabled:opacity-50"
@@ -559,8 +559,9 @@ export function EditProfileDialog({
                         : updateProfile.isPending
                           ? "Saving..."
                           : "Save changes"}
-                    </button>
+                    </Button>
                   </div>
+                </form>
                 </Dialog.Popup>
               </ScrollArea.Content>
             </ScrollArea.Viewport>
