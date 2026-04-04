@@ -1,0 +1,22 @@
+{
+  "name": "@newchat/db",
+  "private": true,
+  "version": "0.0.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10",
+    "drizzle-orm": "^0.38"
+  },
+  "devDependencies": {
+    "@newchat/typescript-config": "workspace:*",
+    "drizzle-kit": "^0.30"
+  }
+}

@@ -1,0 +1,11 @@
+node_modules
+.turbo
+dist
+.next
+.env
+.env.local
+drizzle/meta
+*.tsbuildinfo
+volumes/*
+certs/
+apps/web/certificates/

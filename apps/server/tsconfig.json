@@ -1,0 +1,9 @@
+{
+  "extends": "@newchat/typescript-config/node.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}

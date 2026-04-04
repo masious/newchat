@@ -1,0 +1,31 @@
+{
+  "name": "@newchat/server",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./trpc": "./src/trpc/index.ts"
+  },
+  "scripts": {
+    "dev": "bun run --hot src/index.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3",
+    "@aws-sdk/s3-request-presigner": "^3.1019.0",
+    "@hono/trpc-server": "^0.3",
+    "@newchat/db": "workspace:*",
+    "@trpc/server": "^11",
+    "drizzle-orm": "^0.38",
+    "hono": "^4",
+    "ioredis": "^5",
+    "jsonwebtoken": "^9",
+    "nanoid": "^5",
+    "web-push": "^3.6.7",
+    "zod": "^3"
+  },
+  "devDependencies": {
+    "@newchat/typescript-config": "workspace:*",
+    "@types/jsonwebtoken": "^9",
+    "@types/web-push": "^3.6.4",
+    "typescript": "^5"
+  }
+}
