@@ -11,8 +11,15 @@ COPY turbo.json ./
 COPY packages ./packages
 COPY apps/server ./apps/server
 
+# Copy all workspace package.json files
+COPY apps/server/package.json ./apps/server/package.json
+COPY apps/web/package.json ./apps/web/package.json
+COPY apps/telegram-bot/package.json ./apps/telegram-bot/package.json
+COPY packages/db/package.json ./packages/db/package.json
+COPY packages/typescript-config/package.json ./packages/typescript-config/package.json
+
 # Install dependencies
-RUN bun install
+RUN bun install --frozen-lockfile
 
 # Production stage
 FROM oven/bun:1.3.4-alpine
