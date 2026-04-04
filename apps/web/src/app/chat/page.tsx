@@ -7,7 +7,10 @@ import { Drawer } from "@base-ui/react/drawer";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { NewChatDialog } from "@/components/chat/new-chat-dialog";
 import { ChatPanel } from "@/components/chat/chat-panel";
-import { EditProfileDialog, ProfileDialog } from "@/components/users/profile-dialog";
+import {
+  EditProfileDialog,
+  ProfileDialog,
+} from "@/components/users/profile-dialog";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/lib/auth-context";
 import { getConversationName } from "@/lib/formatting";
@@ -34,7 +37,9 @@ export default function ChatPage() {
   const selectedId = conversationIdParam ? Number(conversationIdParam) : null;
   const selectedConversation = useMemo(() => {
     if (selectedId) {
-      return conversations.find((conversation) => conversation.id === selectedId);
+      return conversations.find(
+        (conversation) => conversation.id === selectedId,
+      );
     }
     return conversations[0];
   }, [conversations, selectedId]);
@@ -44,11 +49,13 @@ export default function ChatPage() {
 
   const typingUserName = useMemo(() => {
     if (!selectedConversation || !typingUserId) return null;
-    const member = selectedConversation.members.find((m) => m.id === typingUserId);
+    const member = selectedConversation.members.find(
+      (m) => m.id === typingUserId,
+    );
     return member ? member.firstName : null;
   }, [selectedConversation, typingUserId]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (isTyping && typingUserName) {
       document.title = `${typingUserName} is typing...`;
     } else {
@@ -66,7 +73,7 @@ export default function ChatPage() {
     },
   );
   const userResults = shouldSearchUsers
-    ? userSearchQuery.data?.users ?? []
+    ? (userSearchQuery.data?.users ?? [])
     : [];
   const userSearchError = userSearchQuery.error?.message ?? null;
   const isSearchingUsers = userSearchQuery.isFetching && shouldSearchUsers;
@@ -103,36 +110,43 @@ export default function ChatPage() {
           onEditProfile={() => setEditProfileOpen(true)}
         />
       </div>
-      <Drawer.Root modal open={sidebarOpen} onOpenChange={setSidebarOpen} swipeDirection="left">
+      <Drawer.Root
+        modal
+        open={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+        swipeDirection="left"
+      >
         <Drawer.Portal>
           <Drawer.Backdrop className="fixed inset-0 bg-black/40 md:hidden" />
-          <Drawer.Popup
-            className="fixed top-0 bottom-0 left-0 z-50 w-80 outline-none md:hidden"
-            aria-describedby={undefined}
-          >
-            <Drawer.Title className="sr-only">Conversations</Drawer.Title>
-            <ConversationSidebar
-              conversations={conversations}
-              selectedId={selectedConversation?.id ?? null}
-              filter={filter}
-              onFilterChange={setFilter}
-              onSelect={handleSelect}
-              onOpenNewChat={() => setDialogOpen(true)}
-              isLoading={conversationsQuery.isLoading}
-              userResults={userResults}
-              showUserResults={shouldSearchUsers}
-              isSearchingUsers={isSearchingUsers}
-              userSearchError={userSearchError}
-              onViewProfile={(result) => setProfileUser(result)}
-              currentUser={user}
-              onEditProfile={() => {
-                setSidebarOpen(false);
-                setTimeout(() => {
-                  setEditProfileOpen(true);
-                }, 200);
-              }}
-            />
-          </Drawer.Popup>
+          <Drawer.Viewport className="[--viewport-padding:0px] supports-[-webkit-touch-callout:none]:[--viewport-padding:0.625rem] fixed inset-0 flex items-stretch justify-start p-(--viewport-padding)">
+            <Drawer.Popup
+              className="fixed top-0 bottom-0 left-0 z-50 w-80 outline-none md:hidden [--bleed:3rem] touch-auto transform-[translateX(var(--drawer-swipe-movement-x))] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-ending-style:transform-[translateX(calc(-100%+var(--bleed)-var(--viewport-padding)-2px))] data-starting-style:transform-[translateX(calc(-100%+var(--bleed)-var(--viewport-padding)-2px))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)]"
+              aria-describedby={undefined}
+            >
+              <Drawer.Title className="sr-only">Conversations</Drawer.Title>
+              <ConversationSidebar
+                conversations={conversations}
+                selectedId={selectedConversation?.id ?? null}
+                filter={filter}
+                onFilterChange={setFilter}
+                onSelect={handleSelect}
+                onOpenNewChat={() => setDialogOpen(true)}
+                isLoading={conversationsQuery.isLoading}
+                userResults={userResults}
+                showUserResults={shouldSearchUsers}
+                isSearchingUsers={isSearchingUsers}
+                userSearchError={userSearchError}
+                onViewProfile={(result) => setProfileUser(result)}
+                currentUser={user}
+                onEditProfile={() => {
+                  setSidebarOpen(false);
+                  setTimeout(() => {
+                    setEditProfileOpen(true);
+                  }, 200);
+                }}
+              />
+            </Drawer.Popup>
+          </Drawer.Viewport>
         </Drawer.Portal>
       </Drawer.Root>
       <div className="flex min-w-0 flex-1 flex-col">
@@ -141,21 +155,32 @@ export default function ChatPage() {
             key={selectedConversation.id}
             conversationId={selectedConversation.id}
             typingUserName={typingUserName}
-            conversationName={getConversationName(selectedConversation, user?.id ?? 0)}
+            conversationName={getConversationName(
+              selectedConversation,
+              user?.id ?? 0,
+            )}
             isTyping={isTyping}
             onOpenSidebar={() => setSidebarOpen(true)}
             otherMemberId={
               selectedConversation.type === "dm"
-                ? selectedConversation.members.find((m) => m.id !== user?.id)?.id
+                ? selectedConversation.members.find((m) => m.id !== user?.id)
+                    ?.id
                 : undefined
             }
           />
         ) : (
           <section className="flex flex-1 items-center justify-center">
             <div className="flex flex-col items-center text-center text-slate-500 dark:text-slate-400">
-              <MessagesSquare className="h-16 w-16 text-slate-300 dark:text-slate-600" strokeWidth={1} />
-              <p className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-300">Welcome back, {user?.firstName}</p>
-              <p className="mt-2 text-sm">Select a conversation from the sidebar to get started.</p>
+              <MessagesSquare
+                className="h-16 w-16 text-slate-300 dark:text-slate-600"
+                strokeWidth={1}
+              />
+              <p className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-300">
+                Welcome back, {user?.firstName}
+              </p>
+              <p className="mt-2 text-sm">
+                Select a conversation from the sidebar to get started.
+              </p>
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="mt-4 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white md:hidden"
