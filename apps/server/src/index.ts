@@ -49,10 +49,8 @@ app.use(
   "*",
   cors({
     origin: (origin) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return origin;
-      // Check if origin is in allowed list or is a Vercel deployment
-      if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+      if (allowedOrigins.includes(origin)) {
         return origin;
       }
       return null;
