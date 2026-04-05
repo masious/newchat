@@ -27,19 +27,47 @@ Source: `packages/db/src/schema.ts`
 
 | Table                  | PK                             | Key Columns                                                          |
 |------------------------|--------------------------------|----------------------------------------------------------------------|
-| `users`                | `id` (auto-increment)          | telegramId (unique), username, firstName, lastName, avatarUrl, isPublic, notificationChannel |
-| `auth_tokens`          | `id` (auto-increment)          | token (unique), status (enum), telegramId, userId (FK->users)        |
-| `conversations`        | `id` (auto-increment)          | type (enum: dm/group), name                                          |
-| `conversation_members` | `(conversation_id, user_id)`   | joinedAt                                                             |
-| `messages`             | `id` (auto-increment)          | conversationId (FK), senderId (FK), content, attachments (JSONB)     |
-| `read_receipts`        | `(message_id, user_id)`        | readAt                                                               |
-| `push_subscriptions`   | `id` (serial)                  | userId (FK, cascade), endpoint, p256dh, auth                         |
+| `users`                | `id` (identity)                | telegramId (unique), username, firstName, lastName, avatarUrl, isPublic, notificationChannel |
+| `auth_tokens`          | `id` (identity)                | token (unique), status (enum), telegramId, userId (FK→users, cascade) |
+| `conversations`        | `id` (identity)                | type (enum: dm/group), name                                          |
+| `conversation_members` | `(conversation_id, user_id)`   | joinedAt; both FKs cascade on delete                                 |
+| `messages`             | `id` (identity)                | conversationId (FK, cascade), senderId (FK, set null, nullable), content, attachments (JSONB) |
+| `read_receipts`        | `(message_id, user_id)`        | readAt; both FKs cascade on delete                                   |
+| `push_subscriptions`   | `id` (identity)                | userId (FK, cascade), endpoint; unique on (userId, endpoint)          |
 
 ### Enums
 
 - `conversation_type`: `"dm"` | `"group"`
 - `auth_token_status`: `"pending"` | `"confirmed"` | `"expired"`
 - `notification_channel`: `"web"` | `"telegram"` | `"both"` | `"none"`
+
+### Indexes
+
+| Index | Table | Columns | Rationale |
+|-------|-------|---------|-----------|
+| `messages_conversation_id_created_at_idx` | messages | `(conversation_id, created_at DESC)` | Message list pagination, lateral join for last message, unread count subquery |
+| `messages_sender_id_idx` | messages | `sender_id` | Join with users table, unread count exclusion filter |
+| `conversation_members_user_id_idx` | conversation_members | `user_id` | SSE init (get all conversations for a user), conversation summaries query. Composite PK `(conversation_id, user_id)` doesn't cover `user_id`-only lookups |
+| `auth_tokens_status_created_at_idx` | auth_tokens | `(status, created_at)` | Token expiry job runs every 60s: `WHERE status = 'pending' AND created_at < cutoff` |
+| `auth_tokens_user_id_idx` | auth_tokens | `user_id` | FK scanning for cascade deletes when a user is deleted |
+| `push_subscriptions_user_id_endpoint_unique` | push_subscriptions | `(user_id, endpoint)` UNIQUE | Dedup check, targeted unsubscribe, and notification delivery. Unique constraint doubles as index |
+
+### Cascade Delete Behavior
+
+When a user is deleted, the cascade chain is:
+- `auth_tokens` → deleted (cascade)
+- `conversation_members` → deleted (cascade)
+- `messages.sender_id` → set to NULL (message preserved, sender cleared)
+- `read_receipts` → deleted (cascade)
+- `push_subscriptions` → deleted (cascade)
+
+When a conversation is deleted:
+- `conversation_members` → deleted (cascade)
+- `messages` → deleted (cascade) → `read_receipts` → deleted (cascade)
+
+### User Search
+
+`users.search` uses `ILIKE '%term%'` on `username`, `first_name`, and `last_name` filtered to `is_public = true`. B-tree indexes cannot accelerate `ILIKE` with a leading wildcard. If search becomes a bottleneck at scale, add `pg_trgm` GIN indexes on these columns.
 
 ## tRPC Router Groups
 

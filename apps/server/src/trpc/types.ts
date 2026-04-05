@@ -13,7 +13,7 @@ export type MessageWithSender = {
   content: string;
   attachments: Attachment[] | null;
   createdAt: Date;
-  senderId: number;
+  senderId: number | null;
 };
 
 type Member = {

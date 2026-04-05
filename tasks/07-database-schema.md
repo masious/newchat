@@ -1,24 +1,34 @@
 # Database Schema Improvements
 
 **Priority:** Medium
-**Status:** Todo
+**Status:** Done
 
 All changes are in `packages/db/src/schema.ts`.
 
 ## Items
 
-### 1. Add Indexes on Foreign Key Columns
+### 1. Add Indexes
 
 PostgreSQL doesn't auto-create indexes on FK columns. These are frequently queried/joined.
 
-Add indexes to:
-- `messages.conversationId` (line 123) — used in every message list query
-- `messages.senderId` (line 126) — used in message sender lookups
-- `messages.createdAt` (line 131) — used for ordering/pagination
-- `conversationMembers.userId` (line 88) — used to find a user's conversations
-- `readReceipts.userId` (line 153) — used in read receipt lookups
-- `authTokens.createdAt` (line 60) — scanned by cleanup job every 60 seconds
-- `authTokens.userId` (line 59)
+**Composite indexes (high priority):**
+- `messages(conversationId, createdAt DESC)` — covers message list pagination, lateral join for last message in conversation summaries, and unread count subquery. This is the single most impactful index.
+- `pushSubscriptions(userId, endpoint)` — queried in 4 places: subscribe dedup check, unsubscribe all, unsubscribe specific, and notification delivery. Also covers standalone `userId` lookups.
+- `authTokens(status, createdAt)` — the cleanup job runs every 60s with `WHERE status = 'pending' AND created_at < cutoff`. A composite lets Postgres range-scan only pending tokens.
+
+**Single-column indexes (high priority):**
+- `conversationMembers.userId` (line 88) — the composite PK `(conversationId, userId)` does NOT cover lookups by `userId` alone. Queried on SSE init (get all conversations for a user) and in the conversation summaries query.
+- `messages.senderId` (line 126) — used in inner joins with users and the `sender_id <> userId` filter in unread count subquery.
+
+**Single-column indexes (only needed for cascade delete FK scanning):**
+- `authTokens.userId` (line 59) — no query looks up tokens by `userId`, but Postgres needs this to efficiently find child rows during a cascaded user delete.
+
+**Not needed (covered by existing constraints):**
+- `readReceipts.userId` — the composite PK `(messageId, userId)` already covers the only query pattern: `LEFT JOIN rr ON rr.message_id = m2.id AND rr.user_id = X` (seeks `messageId` first).
+- `messages.createdAt` standalone — useless alone; every query that orders by `createdAt` also filters by `conversationId`, so the composite index above covers it.
+
+**Future consideration:**
+- User search (`users.ts:73-80`) does `ILIKE '%term%'` on `username`, `firstName`, `lastName`. B-tree indexes cannot help `ILIKE` with a leading wildcard. If search becomes slow at scale, add `pg_trgm` GIN indexes on these columns.
 
 ### 2. Add Cascade Deletes
 
@@ -32,11 +42,11 @@ Add `{ onDelete: "cascade" }` to:
 - `readReceipts.messageId` (line 152)
 - `readReceipts.userId` (line 155)
 
-Note: `messages.senderId` (line 128) might be better as `SET NULL` rather than cascade — you may want to keep messages from deleted users.
+Note: `messages.senderId` (line 128) should be `{ onDelete: "set null" }` rather than cascade — keeps messages from deleted users visible. **This requires making the column nullable first** (remove `.notNull()` on line 127), otherwise the migration will fail.
 
 ### 3. Unique Constraint on Push Subscription Endpoint — Line 178
 
-Add `.unique()` to `pushSubscriptions.endpoint` or a composite unique on `(userId, endpoint)` to prevent duplicate subscriptions.
+Add a composite unique constraint on `(userId, endpoint)` to prevent duplicate subscriptions. The code already checks for duplicates in `push.ts:21`, but a DB constraint is the proper safeguard.
 
 ### 4. Consistent ID Column Types — Line 174
 
@@ -50,4 +60,5 @@ Add `.unique()` to `pushSubscriptions.endpoint` or a composite unique on `(userI
 
 - Generate migration with `bun db:generate` after schema changes
 - Test migration on a staging DB first — adding indexes is safe but cascade changes affect existing data integrity
-- Verify no orphaned records exist before adding cascades
+- Verify no orphaned records exist before adding cascades (especially before adding cascade deletes on `messages.conversationId` and `conversationMembers`)
+- The `messages.senderId` SET NULL change requires a two-step approach: make column nullable, then add the `onDelete: "set null"` reference

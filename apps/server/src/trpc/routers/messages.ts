@@ -58,7 +58,7 @@ export const messagesRouter = router({
           },
         })
         .from(messages)
-        .innerJoin(users, eq(users.id, messages.senderId))
+        .leftJoin(users, eq(users.id, messages.senderId))
         .where(whereClause)
         .orderBy(desc(messages.createdAt))
         .limit(limit + 1);
@@ -147,7 +147,7 @@ export const messagesRouter = router({
           .map((member) =>
             notifyUserOfMessage(ctx.db, {
               recipientUserId: member.userId,
-              senderName: message.sender.firstName,
+              senderName: message.sender!.firstName,
               content: input.content || "[Attachment]",
               conversationId: input.conversationId,
               conversationName: conversation.type === "group" ? conversation.name ?? undefined : undefined,

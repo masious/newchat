@@ -16,7 +16,7 @@ export async function fetchMessageWithSender(db: Database, messageId: number) {
       },
     })
     .from(messages)
-    .innerJoin(users, eq(users.id, messages.senderId))
+    .leftJoin(users, eq(users.id, messages.senderId))
     .where(eq(messages.id, messageId))
     .limit(1);
   return row ?? null;

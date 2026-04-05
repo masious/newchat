@@ -8,7 +8,8 @@ import {
   timestamp,
   primaryKey,
   jsonb,
-  serial,
+  index,
+  unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -51,15 +52,24 @@ export const usersRelations = relations(users, ({ many }) => ({
 }));
 
 // Auth Tokens
-export const authTokens = pgTable("auth_tokens", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  token: varchar("token", { length: 255 }).notNull().unique(),
-  telegramId: varchar("telegram_id", { length: 64 }),
-  status: authTokenStatusEnum("status").default("pending").notNull(),
-  userId: integer("user_id").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const authTokens = pgTable(
+  "auth_tokens",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    token: varchar("token", { length: 255 }).notNull().unique(),
+    telegramId: varchar("telegram_id", { length: 64 }),
+    status: authTokenStatusEnum("status").default("pending").notNull(),
+    userId: integer("user_id").references(() => users.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => [
+    index("auth_tokens_status_created_at_idx").on(t.status, t.createdAt),
+    index("auth_tokens_user_id_idx").on(t.userId),
+  ],
+);
 
 export const authTokensRelations = relations(authTokens, ({ one }) => ({
   user: one(users, { fields: [authTokens.userId], references: [users.id] }),
@@ -84,13 +94,16 @@ export const conversationMembers = pgTable(
   {
     conversationId: integer("conversation_id")
       .notNull()
-      .references(() => conversations.id),
+      .references(() => conversations.id, { onDelete: "cascade" }),
     userId: integer("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     joinedAt: timestamp("joined_at").defaultNow().notNull(),
   },
-  (t) => [primaryKey({ columns: [t.conversationId, t.userId] })],
+  (t) => [
+    primaryKey({ columns: [t.conversationId, t.userId] }),
+    index("conversation_members_user_id_idx").on(t.userId),
+  ],
 );
 
 export const conversationMembersRelations = relations(
@@ -118,18 +131,28 @@ export type Attachment = {
 };
 
 // Messages
-export const messages = pgTable("messages", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  conversationId: integer("conversation_id")
-    .notNull()
-    .references(() => conversations.id),
-  senderId: integer("sender_id")
-    .notNull()
-    .references(() => users.id),
-  content: text("content").notNull(),
-  attachments: jsonb("attachments").$type<Attachment[]>(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const messages = pgTable(
+  "messages",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    conversationId: integer("conversation_id")
+      .notNull()
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    senderId: integer("sender_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    content: text("content").notNull(),
+    attachments: jsonb("attachments").$type<Attachment[]>(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    index("messages_conversation_id_created_at_idx").on(
+      t.conversationId,
+      t.createdAt.desc(),
+    ),
+    index("messages_sender_id_idx").on(t.senderId),
+  ],
+);
 
 export const messagesRelations = relations(messages, ({ one, many }) => ({
   conversation: one(conversations, {
@@ -149,10 +172,10 @@ export const readReceipts = pgTable(
   {
     messageId: integer("message_id")
       .notNull()
-      .references(() => messages.id),
+      .references(() => messages.id, { onDelete: "cascade" }),
     userId: integer("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     readAt: timestamp("read_at").defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.messageId, t.userId] })],
@@ -170,16 +193,20 @@ export const readReceiptsRelations = relations(readReceipts, ({ one }) => ({
 }));
 
 // Push Subscriptions
-export const pushSubscriptions = pgTable("push_subscriptions", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  endpoint: text("endpoint").notNull(),
-  p256dh: text("p256dh").notNull(),
-  auth: text("auth").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [unique("push_subscriptions_user_id_endpoint_unique").on(t.userId, t.endpoint)],
+);
 
 export const pushSubscriptionsRelations = relations(
   pushSubscriptions,

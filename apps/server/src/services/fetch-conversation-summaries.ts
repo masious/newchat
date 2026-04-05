@@ -23,9 +23,7 @@ export type ConversationRow = {
 
 function mapConversationRow(row: ConversationRow): ConversationSummary {
   const lastMessage =
-    row.last_message_id &&
-    row.last_message_created_at &&
-    row.last_message_sender_id
+    row.last_message_id && row.last_message_created_at
       ? {
           id: row.last_message_id,
           conversationId: row.id,
