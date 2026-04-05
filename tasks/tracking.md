@@ -2,7 +2,7 @@
 
 ## Critical Priority
 
-- [ ] [01 — Auth Token Race Condition](./01-auth-token-race-condition.md) — Fix TOCTOU race in server token exchange and bot confirmation
+- [x] [01 — Auth Token Race Condition](./01-auth-token-race-condition.md) — Fix TOCTOU race in server token exchange and bot confirmation
 - [ ] [03 — Rate Limiting](./03-rate-limiting.md) — Add application-level rate limiting (Railway/Vercel don't provide this)
 
 ## High Priority

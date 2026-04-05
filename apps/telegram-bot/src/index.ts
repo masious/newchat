@@ -1,7 +1,6 @@
 import { Bot } from "grammy";
 import { nanoid } from "nanoid";
-import { createDb, authTokens, users } from "@newchat/db";
-import { eq } from "drizzle-orm";
+import { createDb, authTokens, users, eq, and } from "@newchat/db";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
@@ -30,18 +29,6 @@ bot.command("start", async (ctx) => {
     return;
   }
 
-  // Look up the pending auth token
-  const [authToken] = await db
-    .select()
-    .from(authTokens)
-    .where(eq(authTokens.token, payload))
-    .limit(1);
-
-  if (!authToken || authToken.status !== "pending") {
-    await ctx.reply("This login link is invalid or has expired.");
-    return;
-  }
-
   const telegramId = String(ctx.from?.id);
   const firstName = ctx.from?.first_name ?? "User";
   const lastName = ctx.from?.last_name ?? null;
@@ -57,14 +44,24 @@ bot.command("start", async (ctx) => {
     })
     .returning();
 
-  // Confirm the auth token
-  await db
+  // Atomically confirm the auth token (prevents race condition)
+  const [updated] = await db
     .update(authTokens)
     .set({ status: "confirmed", telegramId, userId: user.id, updatedAt: new Date() })
-    .where(eq(authTokens.id, authToken.id)).then(() => {
-      console.log(`User ${user.id} authenticated via Telegram`);
-    });
+    .where(
+      and(
+        eq(authTokens.token, payload),
+        eq(authTokens.status, "pending"),
+      ),
+    )
+    .returning();
 
+  if (!updated) {
+    await ctx.reply("This login link is invalid or has expired.");
+    return;
+  }
+
+  console.log(`User ${user.id} authenticated via Telegram`);
   await ctx.reply("You're signed in! You can now return to the web app.");
 });
 

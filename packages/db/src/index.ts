@@ -13,3 +13,6 @@ export function createDb(databaseUrl?: string) {
 
 export type Database = ReturnType<typeof createDb>;
 export * from "./schema";
+
+// TODO: remove after fixing drizzle's version mismatch issue
+export { eq, and } from "drizzle-orm";

@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { authTokens } from "@newchat/db";
 import { router, publicProcedure } from "../init";
 
@@ -45,12 +45,19 @@ export const authRouter = router({
   exchange: publicProcedure
     .input(z.object({ token: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const record = await ctx.db.query.authTokens.findFirst({
-        where: eq(authTokens.token, input.token),
-      });
+      const [record] = await ctx.db
+        .update(authTokens)
+        .set({ status: "expired", updatedAt: new Date() })
+        .where(
+          and(
+            eq(authTokens.token, input.token),
+            eq(authTokens.status, "confirmed"),
+          ),
+        )
+        .returning();
 
-      if (!record || record.status !== "confirmed" || !record.userId) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "Token is not confirmed" });
+      if (!record || !record.userId) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid or expired token" });
       }
 
       const jwtSecret = process.env.JWT_SECRET;
@@ -61,11 +68,6 @@ export const authRouter = router({
       const signedToken = jwt.sign({ userId: record.userId }, jwtSecret, {
         expiresIn: "7d",
       });
-
-      await ctx.db
-        .update(authTokens)
-        .set({ status: "expired", updatedAt: new Date() })
-        .where(eq(authTokens.id, record.id));
 
       return { token: signedToken };
     }),
