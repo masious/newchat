@@ -1,7 +1,7 @@
 # Rate Limiting
 
 **Priority:** Critical
-**Status:** Todo
+**Status:** Done
 
 ## Problem
 

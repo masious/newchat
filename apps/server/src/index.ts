@@ -7,7 +7,12 @@ import { createTRPCContext } from "./trpc/init";
 import { createDb, conversationMembers, authTokens } from "@newchat/db";
 import { verifyToken } from "./lib/jwt";
 import { and, eq, lt } from "drizzle-orm";
-import { createRedisSubscriber } from "./lib/redis";
+import { createRedisSubscriber, redisPublisher } from "./lib/redis";
+import {
+  incrementConcurrency,
+  decrementConcurrency,
+} from "./lib/rate-limit";
+import { createRateLimitMiddleware } from "./middleware/rate-limit";
 import {
   markOnline,
   markOffline,
@@ -19,6 +24,8 @@ const app = new Hono();
 const db = createDb();
 const TOKEN_TTL_MS = 5 * 60 * 1000;
 const PRESENCE_REFRESH_MS = 60_000;
+const MAX_SSE_CONNECTIONS = 5;
+const SSE_CONN_TTL_SEC = 300;
 
 async function expirePendingTokens() {
   const cutoff = new Date(Date.now() - TOKEN_TTL_MS);
@@ -56,6 +63,12 @@ app.use(
       return null;
     },
     credentials: true,
+    exposeHeaders: [
+      "X-RateLimit-Limit",
+      "X-RateLimit-Remaining",
+      "X-RateLimit-Reset",
+      "Retry-After",
+    ],
   }),
 );
 
@@ -68,7 +81,11 @@ app.use("*", async (c, next) => {
 });
 
 // Health check
-app.get("/health", (c) => c.json({ status: "ok" }));
+app.get(
+  "/health",
+  createRateLimitMiddleware({ limit: 60, windowSec: 60, prefix: "rl:health" }),
+  (c) => c.json({ status: "ok" }),
+);
 
 // tRPC
 app.use(
@@ -88,6 +105,14 @@ app.get("/events", async (c) => {
   const userId = verifyToken(token);
   if (userId === null) {
     return c.json({ error: "Invalid token" }, 401);
+  }
+
+  // Enforce max concurrent SSE connections per user
+  const sseKey = `sse:conn:${userId}`;
+  const connCount = await incrementConcurrency(redisPublisher, sseKey, SSE_CONN_TTL_SEC);
+  if (connCount > MAX_SSE_CONNECTIONS) {
+    await decrementConcurrency(redisPublisher, sseKey);
+    return c.json({ error: "Too many concurrent connections" }, 429);
   }
 
   return streamSSE(c, async (stream) => {
@@ -210,6 +235,9 @@ app.get("/events", async (c) => {
       clearInterval(keepalive);
       clearInterval(presenceHeartbeat);
       subscriber.disconnect();
+      decrementConcurrency(redisPublisher, sseKey).catch((err) => {
+        console.error("Failed to decrement SSE connection count", err);
+      });
       markOffline(userId).catch((err) => {
         console.error("Failed to mark offline", err);
       });
