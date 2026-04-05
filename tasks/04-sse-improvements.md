@@ -1,11 +1,11 @@
 # SSE Security & Stability
 
-**Priority:** High
+**Priority:** Medium
 **Status:** Todo
 
 ## Items
 
-### 1. Replace JWT in URL with One-Time Ticket — `apps/server/src/index.ts:86`
+### 1. Replace JWT in URL with One-Time Ticket — `apps/server/src/index.ts:100`
 
 JWT is passed as `?token=<jwt>` in the SSE URL. It leaks into server logs, proxy logs, and browser history.
 
@@ -14,7 +14,7 @@ JWT is passed as `?token=<jwt>` in the SSE URL. It leaks into server logs, proxy
 - Client calls this endpoint, gets a ticket, passes it as `?ticket=<ticket>` in the SSE URL
 - SSE endpoint validates the ticket against Redis, deletes it immediately, then proceeds with the connection using the resolved userId
 
-### 2. Stop Logging Tokens — `apps/server/src/index.ts:65-70`
+### 2. Stop Logging Tokens — `apps/server/src/index.ts:76-81`
 
 The request logger logs the full URL including query params.
 
@@ -25,17 +25,10 @@ const url = new URL(c.req.url);
 console.log(`${c.req.method} ${url.pathname} - ${ms}ms`);
 ```
 
-### 3. SSE Connection Limits — `apps/server/src/index.ts:85-229`
+### 3. SSE Max Connection Lifetime — `apps/server/src/index.ts:100-248`
 
-Connections stay open indefinitely with no per-user limit. Each holds a Redis subscriber + intervals.
+~~Per-user connection limit~~ — already implemented (max 5 via Redis concurrency counter). Connections still stay open indefinitely; each holds a Redis subscriber + intervals.
 
-**Fix:**
-- Track active connections per user in Redis
-- Reject new connections beyond limit (e.g., 2-3 per user)
+**Remaining fix:**
 - Add max connection lifetime (e.g., 24h), after which server closes and client reconnects
 
-### 4. SSE Cache Update Race — `apps/web/src/lib/hooks/use-sse.ts:51-119`
-
-When a message arrives, the cache is updated twice (messages list, then conversations list). Another event between them can cause inconsistency.
-
-**Fix:** Consider batching cache updates or wrapping in `queryClient.setQueriesData` to reduce the window.

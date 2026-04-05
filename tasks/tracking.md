@@ -3,16 +3,16 @@
 ## Critical Priority
 
 - [x] [01 — Auth Token Race Condition](./01-auth-token-race-condition.md) — Fix TOCTOU race in server token exchange and bot confirmation
-- [ ] [03 — Rate Limiting](./03-rate-limiting.md) — Add application-level rate limiting (Railway/Vercel don't provide this)
+- [x] [03 — Rate Limiting](./03-rate-limiting.md) — Add application-level rate limiting (Railway/Vercel don't provide this)
 
 ## High Priority
 
 - [x] [02 — JWT Hardening](./02-jwt-hardening.md) — Add claims (iss/aud/alg), runtime validation, consider refresh tokens
-- [ ] [04 — SSE Improvements](./04-sse-improvements.md) — Ticket auth, stop logging tokens, connection limits
 - [ ] [05 — Input Validation](./05-input-validation.md) — Telegram injection, unbounded arrays, markRead, username/avatar
 
 ## Medium Priority
 
+- [ ] [04 — SSE Improvements](./04-sse-improvements.md) — Ticket auth, stop logging tokens, connection max lifetime
 - [ ] [06 — Upload Security](./06-upload-security.md) — ContentLength enforcement, remove SVG, validate attachment URLs
 - [ ] [07 — Database Schema](./07-database-schema.md) — Missing indexes, cascade deletes, consistency
 - [ ] [08 — Frontend Robustness](./08-frontend-robustness.md) — Error boundaries, auth page guard, upload cancellation

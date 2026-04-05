@@ -27,18 +27,12 @@ export function useSSE() {
     utils.messages.list.invalidate();
   }, [utils]);
 
+  const createTicket = trpc.sse.createTicket.useMutation();
+
   useEffect(() => {
     if (!token) return;
-    const url = new URL(`${defaultServerUrl.replace(/\/$/, "")}/events`);
-    url.searchParams.set("token", token);
-    const source = new EventSource(url.toString());
-
-    source.addEventListener("open", () => {
-      if (hasConnectedBefore.current) {
-        refetchAfterReconnect();
-      }
-      hasConnectedBefore.current = true;
-    });
+    let cancelled = false;
+    let source: EventSource | null = null;
 
     const handleConversationEvent = (event: MessageEvent) => {
       try {
@@ -253,15 +247,52 @@ export function useSSE() {
       }
     };
 
-    source.addEventListener("conversation_event", handleConversationEvent);
-    source.addEventListener("membership", handleMembershipEvent);
-    source.addEventListener("presence", handlePresenceEvent);
+    async function connect() {
+      try {
+        const { ticket } = await createTicket.mutateAsync();
+        if (cancelled) return;
+
+        const url = new URL(`${defaultServerUrl.replace(/\/$/, "")}/events`);
+        url.searchParams.set("ticket", ticket);
+        source = new EventSource(url.toString());
+
+        source.addEventListener("open", () => {
+          if (hasConnectedBefore.current) {
+            refetchAfterReconnect();
+          }
+          hasConnectedBefore.current = true;
+        });
+
+        source.addEventListener("error", () => {
+          if (cancelled) return;
+          source?.close();
+          source = null;
+          setTimeout(() => {
+            if (!cancelled) connect();
+          }, 2000);
+        });
+
+        source.addEventListener("conversation_event", handleConversationEvent);
+        source.addEventListener("membership", handleMembershipEvent);
+        source.addEventListener("presence", handlePresenceEvent);
+      } catch (err) {
+        console.error("Failed to create SSE ticket", err);
+        setTimeout(() => {
+          if (!cancelled) connect();
+        }, 5000);
+      }
+    }
+
+    connect();
 
     return () => {
-      source.removeEventListener("conversation_event", handleConversationEvent);
-      source.removeEventListener("membership", handleMembershipEvent);
-      source.removeEventListener("presence", handlePresenceEvent);
-      source.close();
+      cancelled = true;
+      if (source) {
+        source.removeEventListener("conversation_event", handleConversationEvent);
+        source.removeEventListener("membership", handleMembershipEvent);
+        source.removeEventListener("presence", handlePresenceEvent);
+        source.close();
+      }
       typingTimers.current.forEach((timer) => clearTimeout(timer));
       typingTimers.current.clear();
     };

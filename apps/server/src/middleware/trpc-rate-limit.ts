@@ -19,6 +19,7 @@ export const PROCEDURE_RATE_LIMITS: Record<string, ProcedureRateLimit> = {
   "users.search": { limit: 20, windowSec: 60 },
   "uploads.getPresignedUrl": { limit: 20, windowSec: 60 },
   "conversations.create": { limit: 10, windowSec: 60 },
+  "sse.createTicket": { limit: 10, windowSec: 60 },
 };
 
 export const DEFAULT_RATE_LIMIT: ProcedureRateLimit = {

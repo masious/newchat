@@ -5,7 +5,7 @@ import { streamSSE } from "hono/streaming";
 import { appRouter } from "./trpc/router";
 import { createTRPCContext } from "./trpc/init";
 import { createDb, conversationMembers, authTokens, and, eq, lt } from "@newchat/db";
-import { verifyToken } from "./lib/jwt";
+
 import { createRedisSubscriber, redisPublisher } from "./lib/redis";
 import {
   incrementConcurrency,
@@ -25,6 +25,7 @@ const TOKEN_TTL_MS = 5 * 60 * 1000;
 const PRESENCE_REFRESH_MS = 60_000;
 const MAX_SSE_CONNECTIONS = 5;
 const SSE_CONN_TTL_SEC = 300;
+const SSE_MAX_LIFETIME_MS = 24 * 60 * 60 * 1000;
 
 async function expirePendingTokens() {
   const cutoff = new Date(Date.now() - TOKEN_TTL_MS);
@@ -76,7 +77,7 @@ app.use("*", async (c, next) => {
   const start = Date.now();
   await next();
   const ms = Date.now() - start;
-  console.log(`${c.req.method} ${c.req.url} - ${ms}ms`);
+  console.log(`${c.req.method} ${new URL(c.req.url).pathname} - ${ms}ms`);
 });
 
 // Health check
@@ -97,13 +98,18 @@ app.use(
 
 // SSE endpoint for real-time events
 app.get("/events", async (c) => {
-  const token = c.req.query("token");
-  if (!token) {
-    return c.json({ error: "Missing token" }, 401);
+  const ticket = c.req.query("ticket");
+  if (!ticket) {
+    return c.json({ error: "Missing ticket" }, 401);
   }
-  const userId = verifyToken(token);
-  if (userId === null) {
-    return c.json({ error: "Invalid token" }, 401);
+  const ticketKey = `sse:ticket:${ticket}`;
+  const rawUserId = await redisPublisher.getdel(ticketKey);
+  if (!rawUserId) {
+    return c.json({ error: "Invalid or expired ticket" }, 401);
+  }
+  const userId = Number(rawUserId);
+  if (Number.isNaN(userId)) {
+    return c.json({ error: "Invalid ticket data" }, 401);
   }
 
   // Enforce max concurrent SSE connections per user
@@ -242,7 +248,10 @@ app.get("/events", async (c) => {
       });
     });
 
-    await new Promise(() => {});
+    await new Promise<void>((resolve) => {
+      const lifetimeTimer = setTimeout(resolve, SSE_MAX_LIFETIME_MS);
+      stream.onAbort(() => clearTimeout(lifetimeTimer));
+    });
   });
 });
 
