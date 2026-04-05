@@ -3,6 +3,7 @@ import {
   users,
   and,
   eq,
+  ne,
   ilike,
   inArray,
   or,
@@ -37,7 +38,7 @@ export async function updateUser(
 
 export async function searchUsers(
   db: Database,
-  input: { query: string; limit: number },
+  input: { query: string; limit: number; excludeUserId?: number },
 ) {
   const escaped = input.query.replace(/[%_\\]/g, "\\$&");
   const term = `%${escaped}%`;
@@ -54,6 +55,7 @@ export async function searchUsers(
     .where(
       and(
         eq(users.isPublic, true),
+        ...(input.excludeUserId ? [ne(users.id, input.excludeUserId)] : []),
         or(
           ilike(users.username, term),
           ilike(users.firstName, term),

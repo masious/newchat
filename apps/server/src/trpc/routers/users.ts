@@ -41,7 +41,10 @@ export const usersRouter = router({
     )
     .query(async ({ ctx, input }) => {
       try {
-        return await userService.search(ctx.db, input);
+        return await userService.search(ctx.db, {
+          ...input,
+          excludeUserId: ctx.userId!,
+        });
       } catch (err) {
         throw mapDomainError(err);
       }

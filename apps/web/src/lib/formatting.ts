@@ -85,6 +85,7 @@ export function isSameDay(a: string | Date, b: string | Date): boolean {
 
 export function getConversationName(conversation: ConversationSummary, userId: number) {
   if (conversation.type === "group") {
+    if (conversation.name) return conversation.name;
     return conversation.members.map((m) => m.firstName).join(", ");
   } else {
     const otherMember = conversation.members.find((m) => m.id !== userId);

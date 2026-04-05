@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { Toggle } from "@base-ui/react/toggle";
 import { Field } from "@base-ui/react/field";
 import { trpc } from "@/lib/trpc";
+import type { SearchUser } from "@/lib/trpc-types";
+import { UserSearchCombobox } from "./user-search-combobox";
 
 export function NewChatDialog({
   open,
@@ -17,7 +19,8 @@ export function NewChatDialog({
 }) {
   const router = useRouter();
   const [type, setType] = useState<"dm" | "group">("dm");
-  const [memberIds, setMemberIds] = useState("");
+  const [selectedUser, setSelectedUser] = useState<SearchUser | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<SearchUser[]>([]);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const utils = trpc.useUtils();
@@ -25,7 +28,8 @@ export function NewChatDialog({
     onSuccess: async (data) => {
       await utils.conversations.list.invalidate();
       onClose();
-      setMemberIds("");
+      setSelectedUser(null);
+      setSelectedUsers([]);
       setName("");
       router.replace(`/chat?conversationId=${data.conversation.id}`);
     },
@@ -34,17 +38,41 @@ export function NewChatDialog({
     },
   });
 
+  // Check if a DM already exists with the selected user
+  const existingDmId = useMemo(() => {
+    if (type !== "dm" || !selectedUser) return null;
+    const conversations =
+      utils.conversations.list.getData()?.conversations ?? [];
+    const existing = conversations.find(
+      (c) =>
+        c.type === "dm" && c.members.some((m) => m.id === selectedUser.id),
+    );
+    return existing?.id ?? null;
+  }, [type, selectedUser, utils.conversations.list]);
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
-    const ids = memberIds
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean)
-      .map((value) => Number(value))
-      .filter((value) => !Number.isNaN(value));
+
+    // Navigate to existing DM instead of creating a duplicate
+    if (existingDmId) {
+      onClose();
+      setSelectedUser(null);
+      router.replace(`/chat?conversationId=${existingDmId}`);
+      return;
+    }
+
+    const ids =
+      type === "dm"
+        ? selectedUser
+          ? [selectedUser.id]
+          : []
+        : selectedUsers.map((u) => u.id);
+
     if (ids.length === 0) {
-      setError("Provide at least one teammate ID");
+      setError(
+        type === "dm" ? "Select a teammate" : "Select at least one teammate",
+      );
       return;
     }
     if (type === "group" && !name.trim()) {
@@ -90,7 +118,11 @@ export function NewChatDialog({
                 value={[type]}
                 onValueChange={(values) => {
                   if (values.length > 0) {
-                    setType(values[values.length - 1] as "dm" | "group");
+                    const newType = values[values.length - 1] as "dm" | "group";
+                    setType(newType);
+                    setSelectedUser(null);
+                    setSelectedUsers([]);
+                    setError(null);
                   }
                 }}
                 className="flex gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300"
@@ -127,27 +159,41 @@ export function NewChatDialog({
               )}
               <Field.Root className="block text-sm">
                 <Field.Label className="text-slate-600 dark:text-slate-400">
-                  Teammate IDs (comma separated)
+                  {type === "dm" ? "Search teammate" : "Add members"}
                 </Field.Label>
-                <Field.Control
-                  render={
-                    <input
-                      type="text"
-                      value={memberIds}
-                      onChange={(event) => setMemberIds(event.target.value)}
-                      placeholder="2, 5, 9"
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder:text-slate-500"
+                <div className="mt-1">
+                  {type === "dm" ? (
+                    <UserSearchCombobox
+                      value={selectedUser}
+                      onValueChange={setSelectedUser}
+                      placeholder="Search by name or username…"
                     />
-                  }
-                />
+                  ) : (
+                    <UserSearchCombobox
+                      multiple
+                      value={selectedUsers}
+                      onValueChange={setSelectedUsers}
+                      placeholder="Search teammates…"
+                    />
+                  )}
+                </div>
               </Field.Root>
+              {existingDmId && (
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  You already have a conversation with this person.
+                </p>
+              )}
               {error && <p className="text-sm text-red-600">{error}</p>}
               <button
                 type="submit"
                 disabled={createConversation.isPending}
                 className="w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
               >
-                {createConversation.isPending ? "Creating…" : "Create"}
+                {createConversation.isPending
+                  ? "Creating…"
+                  : existingDmId
+                    ? "Go to conversation"
+                    : "Create"}
               </button>
             </div>
           </Dialog.Popup>

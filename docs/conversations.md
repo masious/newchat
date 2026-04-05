@@ -10,6 +10,19 @@ conversation_members: { conversation_id, user_id, joined_at } -- composite PK
 - DMs have `type = "dm"`, `name = null`, exactly 2 members
 - Groups have `type = "group"`, `name` is required, 2+ members
 
+## New Conversation Dialog
+
+The dialog (`apps/web/src/components/chat/new-chat-dialog.tsx`) supports two modes via a toggle:
+
+- **DM mode**: Single-select `UserSearchCombobox` — user searches by name or username, picks one person
+- **Group mode**: Multi-select `UserSearchCombobox` with chips — user searches and selects multiple people, plus enters a group name
+
+The `UserSearchCombobox` (`apps/web/src/components/chat/user-search-combobox.tsx`) uses Base UI's `Combobox` with server-side filtering (`filter={null}`). It calls the existing `users.search` tRPC procedure with debounced input (250ms). Selected users are shown as removable chips in multi-select mode.
+
+**Self-exclusion:** The `users.search` procedure automatically excludes the requesting user from results (`excludeUserId` threaded through the service layer), so users cannot add themselves to conversations.
+
+**Existing DM detection:** When in DM mode, the dialog checks the cached `conversations.list` for an existing DM with the selected user. If found, the button changes to "Go to conversation" and navigates directly instead of creating a duplicate.
+
 ## Creating a DM
 
 ```
@@ -40,6 +53,10 @@ Server:
   4. publishMembershipChange for each member
   5. Return { conversation: ConversationSummary }
 ```
+
+## Group Name Display
+
+Group names are persisted in the `conversations.name` column and displayed in the sidebar (`ConversationListItem`) and chat header (`ChatHeader`). The `getConversationName()` function in `apps/web/src/lib/formatting.ts` uses the stored name for groups, falling back to joining member first names for legacy groups without a name.
 
 ## ConversationSummary Shape
 

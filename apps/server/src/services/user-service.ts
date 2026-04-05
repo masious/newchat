@@ -40,10 +40,14 @@ export async function update(
 
 export async function search(
   db: Database,
-  input: { query: string; limit?: number },
+  input: { query: string; limit?: number; excludeUserId?: number },
 ) {
   const limit = input.limit ?? 10;
-  const rows = await searchUsersQuery(db, { query: input.query, limit });
+  const rows = await searchUsersQuery(db, {
+    query: input.query,
+    limit,
+    excludeUserId: input.excludeUserId,
+  });
 
   const enriched = await Promise.all(
     rows.map(async (user) => ({

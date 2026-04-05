@@ -22,7 +22,7 @@
 ## Low Priority
 
 - [ ] [10 — Code Organization](./10-code-organization.md) — Centralize constants, align drizzle versions, generic error messages
-- [ ] [12 — Backend Layered Architecture Refactor](./12-backend-layered-architecture-refactor.md) — Restructure fat routers into thin routers → services → data access layer
+- [x] [12 — Backend Layered Architecture Refactor](./12-backend-layered-architecture-refactor.md) — Restructure fat routers into thin routers → services → data access layer
 
 ## Dismissed / Not Applicable
 
