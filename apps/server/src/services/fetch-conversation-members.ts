@@ -1,6 +1,4 @@
-import { conversationMembers, Database, users } from "@newchat/db";
-import { eq } from "drizzle-orm/sql/expressions/conditions";
-import { asc } from "drizzle-orm/sql/expressions/select";
+import { conversationMembers, Database, users, eq, asc } from "@newchat/db";
 
 export async function fetchConversationMembers(
   db: Database,

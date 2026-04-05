@@ -4,9 +4,8 @@ import { trpcServer } from "@hono/trpc-server";
 import { streamSSE } from "hono/streaming";
 import { appRouter } from "./trpc/router";
 import { createTRPCContext } from "./trpc/init";
-import { createDb, conversationMembers, authTokens } from "@newchat/db";
+import { createDb, conversationMembers, authTokens, and, eq, lt } from "@newchat/db";
 import { verifyToken } from "./lib/jwt";
-import { and, eq, lt } from "drizzle-orm";
 import { createRedisSubscriber, redisPublisher } from "./lib/redis";
 import {
   incrementConcurrency,

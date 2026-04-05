@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { eq, sql } from "drizzle-orm";
-import { conversations, conversationMembers } from "@newchat/db";
+import { conversations, conversationMembers, sql } from "@newchat/db";
 import { router, protectedProcedure } from "../init";
 import { fetchConversationSummaries, fetchConversationSummary } from "../../services/fetch-conversation-summaries";
 import { fetchConversationMembers } from "../../services/fetch-conversation-members";

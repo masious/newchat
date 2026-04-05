@@ -1,5 +1,4 @@
-import { type Database, pushSubscriptions, users } from "@newchat/db";
-import { eq } from "drizzle-orm";
+import { type Database, pushSubscriptions, users, eq } from "@newchat/db";
 import {
   sendPushNotification,
   type PushPayload,

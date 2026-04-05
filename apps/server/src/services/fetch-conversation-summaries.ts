@@ -1,5 +1,4 @@
-import { Attachment, type Database } from "@newchat/db";
-import { sql } from "drizzle-orm/sql/sql";
+import { Attachment, type Database, sql } from "@newchat/db";
 import { ConversationSummary } from "../trpc/types";
 
 export type ConversationRow = {

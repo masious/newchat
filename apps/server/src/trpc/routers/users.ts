@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { and, eq, ilike, or } from "drizzle-orm";
-import { users } from "@newchat/db";
+import { users, and, eq, ilike, or } from "@newchat/db";
 import { getPresenceStatus } from "../../lib/presence";
 import { router, protectedProcedure } from "../init";
 

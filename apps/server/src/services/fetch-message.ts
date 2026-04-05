@@ -1,5 +1,4 @@
-import { eq } from "drizzle-orm";
-import { users, messages, type Database } from "@newchat/db";
+import { users, messages, type Database, eq } from "@newchat/db";
 
 export async function fetchMessageWithSender(db: Database, messageId: number) {
   const [row] = await db

@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { and, eq } from "drizzle-orm";
-import { pushSubscriptions } from "@newchat/db";
+import { pushSubscriptions, and, eq } from "@newchat/db";
 import { router, protectedProcedure } from "../init";
 
 export const pushRouter = router({

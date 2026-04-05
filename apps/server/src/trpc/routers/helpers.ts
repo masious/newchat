@@ -1,9 +1,11 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, inArray } from "drizzle-orm";
 import {
   users,
   conversationMembers,
   type Database,
+  and,
+  eq,
+  inArray,
 } from "@newchat/db";
 
 export async function ensureConversationMember(

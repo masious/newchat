@@ -1,8 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { nanoid } from "nanoid";
-import { eq, and } from "drizzle-orm";
-import { authTokens } from "@newchat/db";
+import { authTokens, eq, and } from "@newchat/db";
 import { router, publicProcedure } from "../init";
 import { signToken } from "../../lib/jwt";
 
