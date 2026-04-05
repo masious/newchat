@@ -9,8 +9,8 @@ import {
   useState,
 } from "react";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/lib/auth-context";
-import { addToast } from "@/lib/toast-context";
+import { useAuth } from "@/lib/providers/auth-context";
+import { addToast } from "@/lib/providers/toast-context";
 import type { UploadedFile } from "@/lib/upload";
 import {
   registerOptimisticMessage,

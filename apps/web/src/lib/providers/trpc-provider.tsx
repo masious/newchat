@@ -5,8 +5,8 @@ import { httpBatchLink, TRPCClientError, type TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
 import { useState } from "react";
 import * as Sentry from "@sentry/nextjs";
-import { trpc } from "./trpc";
-import { getAuthToken } from "./auth-storage";
+import { trpc } from "../trpc";
+import { getAuthToken } from "../auth-storage";
 import type { AppRouter } from "@newchat/server/trpc";
 
 function makeQueryClient() {

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Checkbox } from "@base-ui/react/checkbox";
 import { Field } from "@base-ui/react/field";
 import { Form } from "@base-ui/react/form";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth } from "@/lib/providers/auth-context";
 import { trpc } from "@/lib/trpc";
 import { uploadFile } from "@/lib/upload";
 import { Check } from "lucide-react";

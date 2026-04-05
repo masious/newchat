@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from "react";
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth } from "@/lib/providers/auth-context";
 import { isOptimisticMessage } from "@/lib/trpc-types";
 import { MessageBubble } from "../message-bubble";
 import { MessageInput, type MessageInputHandle } from "../message-input";

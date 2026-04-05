@@ -10,7 +10,7 @@ import { Field } from "@base-ui/react/field";
 import { Sun, Moon, VolumeX, Volume2 } from "lucide-react";
 import type { SearchUser, ProfileUser, PresenceSummary } from "@/lib/trpc-types";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth } from "@/lib/providers/auth-context";
 import { uploadFile } from "@/lib/upload";
 import { formatPresence, userDisplayName } from "@/lib/formatting";
 import { usePushNotifications } from "@/lib/hooks/use-push-notifications";

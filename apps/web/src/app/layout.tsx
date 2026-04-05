@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { TrpcProvider } from "@/lib/trpc-provider";
-import { ToastProvider } from "@/lib/toast-provider";
-import { AuthProvider } from "@/lib/auth-context";
-import { RealtimeProvider } from "@/lib/realtime-provider";
+import { TrpcProvider } from "@/lib/providers/trpc-provider";
+import { ToastProvider } from "@/lib/providers/toast-provider";
+import { AuthProvider } from "@/lib/providers/auth-context";
+import { RealtimeProvider } from "@/lib/providers/realtime-provider";
 import { AuthGuard } from "@/components/auth-guard";
 import "./globals.css";
 

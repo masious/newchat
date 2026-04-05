@@ -12,7 +12,7 @@ import {
   ProfileDialog,
 } from "@/components/users/profile-dialog";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth } from "@/lib/providers/auth-context";
 import { getConversationName } from "@/lib/formatting";
 import { useNotificationSound } from "@/lib/hooks/use-notification-sound";
 import { useDarkMode } from "@/lib/hooks/use-dark-mode";

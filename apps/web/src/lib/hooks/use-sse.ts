@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { trpc } from "../trpc";
-import { useAuth } from "../auth-context";
+import { useAuth } from "../providers/auth-context";
 import { findAndRemoveOptimistic, cleanupStale } from "../optimistic-messages";
 
 const defaultServerUrl =

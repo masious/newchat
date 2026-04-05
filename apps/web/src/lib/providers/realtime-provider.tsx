@@ -1,6 +1,6 @@
 "use client";
 
-import { useSSE } from "./hooks/use-sse";
+import { useSSE } from "../hooks/use-sse";
 
 export function RealtimeProvider({
   children,

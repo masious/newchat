@@ -1,9 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { CurrentUser } from "./trpc-types";
-import { trpc } from "./trpc";
-import { getAuthToken, setAuthToken, subscribeToAuthToken } from "./auth-storage";
+import type { CurrentUser } from "../trpc-types";
+import { trpc } from "../trpc";
+import { getAuthToken, setAuthToken, subscribeToAuthToken } from "../auth-storage";
 
 type AuthContextValue = {
   status: "loading" | "authenticated" | "unauthenticated";
