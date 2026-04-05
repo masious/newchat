@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { pushSubscriptions, and, eq } from "@newchat/db";
 import { router, protectedProcedure } from "../init";
+import { mapDomainError } from "../error-mapper";
+import * as pushService from "../../services/push-service";
 
 export const pushRouter = router({
   subscribe: protectedProcedure
@@ -16,47 +17,22 @@ export const pushRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Check if subscription already exists for this user + endpoint
-      const existing = await ctx.db.query.pushSubscriptions.findFirst({
-        where: and(
-          eq(pushSubscriptions.userId, ctx.userId!),
-          eq(pushSubscriptions.endpoint, input.subscription.endpoint),
-        ),
-      });
-
-      if (existing) {
-        // Update keys in case they rotated
-        await ctx.db
-          .update(pushSubscriptions)
-          .set({
-            p256dh: input.subscription.keys.p256dh,
-            auth: input.subscription.keys.auth,
-          })
-          .where(eq(pushSubscriptions.id, existing.id));
-
-        return { success: true, subscriptionId: existing.id };
+      try {
+        return await pushService.subscribe(
+          ctx.db,
+          ctx.userId!,
+          input.subscription,
+        );
+      } catch (err) {
+        throw mapDomainError(err);
       }
-
-      // Create new subscription
-      const [created] = await ctx.db
-        .insert(pushSubscriptions)
-        .values({
-          userId: ctx.userId!,
-          endpoint: input.subscription.endpoint,
-          p256dh: input.subscription.keys.p256dh,
-          auth: input.subscription.keys.auth,
-        })
-        .returning({ id: pushSubscriptions.id });
-
-      return { success: true, subscriptionId: created.id };
     }),
   unsubscribe: protectedProcedure.mutation(async ({ ctx }) => {
-    // Remove all push subscriptions for this user
-    await ctx.db
-      .delete(pushSubscriptions)
-      .where(eq(pushSubscriptions.userId, ctx.userId!));
-
-    return { success: true };
+    try {
+      return await pushService.unsubscribe(ctx.db, ctx.userId!);
+    } catch (err) {
+      throw mapDomainError(err);
+    }
   }),
   unsubscribeEndpoint: protectedProcedure
     .input(
@@ -65,16 +41,14 @@ export const pushRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Remove specific subscription by endpoint
-      await ctx.db
-        .delete(pushSubscriptions)
-        .where(
-          and(
-            eq(pushSubscriptions.userId, ctx.userId!),
-            eq(pushSubscriptions.endpoint, input.endpoint),
-          ),
+      try {
+        return await pushService.unsubscribeEndpoint(
+          ctx.db,
+          ctx.userId!,
+          input.endpoint,
         );
-
-      return { success: true };
+      } catch (err) {
+        throw mapDomainError(err);
+      }
     }),
 });

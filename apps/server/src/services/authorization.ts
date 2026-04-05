@@ -1,12 +1,11 @@
-import { TRPCError } from "@trpc/server";
 import {
-  users,
-  conversationMembers,
   type Database,
+  conversationMembers,
   and,
   eq,
-  inArray,
 } from "@newchat/db";
+import { ForbiddenError, BadRequestError } from "../errors";
+import { findUsersByIds } from "../data/user-queries";
 
 export async function ensureConversationMember(
   db: Database,
@@ -23,21 +22,15 @@ export async function ensureConversationMember(
     },
   });
   if (!membership) {
-    throw new TRPCError({ code: "FORBIDDEN" });
+    throw new ForbiddenError("Not a conversation member");
   }
   return membership.conversation;
 }
 
 export async function ensureUsersExist(db: Database, memberIds: number[]) {
   if (!memberIds.length) return;
-  const rows = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(inArray(users.id, memberIds));
+  const rows = await findUsersByIds(db, memberIds);
   if (rows.length !== memberIds.length) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "One or more users do not exist",
-    });
+    throw new BadRequestError("One or more users do not exist");
   }
 }

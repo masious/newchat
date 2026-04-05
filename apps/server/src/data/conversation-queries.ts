@@ -1,7 +1,16 @@
-import { Attachment, type Database, sql } from "@newchat/db";
-import { ConversationSummary } from "../trpc/types";
+import {
+  type Database,
+  Attachment,
+  conversations,
+  conversationMembers,
+  users,
+  sql,
+  eq,
+  asc,
+} from "@newchat/db";
+import type { ConversationSummary } from "../trpc/types";
 
-export type ConversationRow = {
+type ConversationRow = {
   id: number;
   type: "dm" | "group";
   name: string | null;
@@ -118,4 +127,84 @@ export async function fetchConversationSummary(
     conversationId,
   });
   return summary;
+}
+
+export async function findExistingDm(
+  db: Database,
+  userIdA: number,
+  userIdB: number,
+) {
+  const result = await db.execute<{ id: number }>(sql`
+    SELECT c.id
+    FROM conversations c
+    JOIN conversation_members cm1
+      ON cm1.conversation_id = c.id
+     AND cm1.user_id = ${userIdA}
+    JOIN conversation_members cm2
+      ON cm2.conversation_id = c.id
+     AND cm2.user_id = ${userIdB}
+    WHERE c.type = 'dm'
+    GROUP BY c.id
+    HAVING COUNT(*) = 2
+    LIMIT 1
+  `);
+  return result.rows[0]?.id ?? null;
+}
+
+export async function createConversationWithMembers(
+  db: Database,
+  input: {
+    type: "dm" | "group";
+    name: string | null;
+    memberIds: number[];
+  },
+) {
+  return db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(conversations)
+      .values({
+        type: input.type,
+        name: input.name,
+      })
+      .returning({ id: conversations.id });
+
+    await tx.insert(conversationMembers).values(
+      input.memberIds.map((memberId) => ({
+        conversationId: created.id,
+        userId: memberId,
+      })),
+    );
+
+    return created.id;
+  });
+}
+
+export async function getConversationMembers(
+  db: Database,
+  conversationId: number,
+) {
+  return db
+    .select({
+      id: users.id,
+      username: users.username,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      avatarUrl: users.avatarUrl,
+      isPublic: users.isPublic,
+    })
+    .from(conversationMembers)
+    .innerJoin(users, eq(users.id, conversationMembers.userId))
+    .where(eq(conversationMembers.conversationId, conversationId))
+    .orderBy(asc(users.firstName));
+}
+
+export async function getConversationMemberUserIds(
+  db: Database,
+  conversationId: number,
+) {
+  const rows = await db
+    .select({ userId: conversationMembers.userId })
+    .from(conversationMembers)
+    .where(eq(conversationMembers.conversationId, conversationId));
+  return rows.map((r) => r.userId);
 }

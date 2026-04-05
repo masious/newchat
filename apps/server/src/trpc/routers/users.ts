@@ -1,23 +1,18 @@
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { users, and, eq, ilike, or } from "@newchat/db";
-import { getPresenceStatus } from "../../lib/presence";
 import { router, protectedProcedure } from "../init";
+import { mapDomainError } from "../error-mapper";
+import * as userService from "../../services/user-service";
 import { getEnvOrThrow } from "../../lib/r2";
 
 const R2_PUBLIC_URL = getEnvOrThrow("R2_PUBLIC_URL");
 
 export const usersRouter = router({
   me: protectedProcedure.query(async ({ ctx }) => {
-    const user = await ctx.db.query.users.findFirst({
-      where: eq(users.id, ctx.userId!),
-    });
-
-    if (!user) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+    try {
+      return await userService.getMe(ctx.db, ctx.userId!);
+    } catch (err) {
+      throw mapDomainError(err);
     }
-
-    return { user };
   }),
   update: protectedProcedure
     .input(
@@ -31,23 +26,11 @@ export const usersRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const [updated] = await ctx.db
-        .update(users)
-        .set({
-          username: input.username,
-          firstName: input.displayName,
-          avatarUrl: input.avatar ?? null,
-          isPublic: input.isPublic ?? true,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, ctx.userId!))
-        .returning();
-
-      if (!updated) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      try {
+        return await userService.update(ctx.db, ctx.userId!, input);
+      } catch (err) {
+        throw mapDomainError(err);
       }
-
-      return { user: updated };
     }),
   search: protectedProcedure
     .input(
@@ -57,67 +40,32 @@ export const usersRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 10;
-      const escaped = input.query.replace(/[%_\\]/g, "\\$&");
-      const term = `%${escaped}%`;
-      const rows = await ctx.db
-        .select({
-          id: users.id,
-          username: users.username,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          avatarUrl: users.avatarUrl,
-          isPublic: users.isPublic,
-        })
-        .from(users)
-        .where(
-          and(
-            eq(users.isPublic, true),
-            or(
-              ilike(users.username, term),
-              ilike(users.firstName, term),
-              ilike(users.lastName, term),
-            ),
-          ),
-        )
-        .limit(limit);
-
-      const enriched = await Promise.all(
-        rows.map(async (user) => ({
-          ...user,
-          presence: await getPresenceStatus(user.id),
-        })),
-      );
-
-      return { users: enriched };
+      try {
+        return await userService.search(ctx.db, input);
+      } catch (err) {
+        throw mapDomainError(err);
+      }
     }),
   profile: protectedProcedure
     .input(z.object({ userId: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
-      const user = await ctx.db.query.users.findFirst({
-        where: eq(users.id, input.userId),
-      });
-
-      if (!user) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      try {
+        return await userService.getProfile(ctx.db, {
+          targetUserId: input.userId,
+          requesterId: ctx.userId!,
+        });
+      } catch (err) {
+        throw mapDomainError(err);
       }
-      if (!user.isPublic && user.id !== ctx.userId) {
-        throw new TRPCError({ code: "FORBIDDEN" });
-      }
-
-      const presence = await getPresenceStatus(user.id);
-      return { user: { ...user, presence } };
     }),
   presence: protectedProcedure
     .input(z.object({ userIds: z.array(z.number().int().positive()).max(100) }))
     .query(async ({ input }) => {
-      const entries = await Promise.all(
-        input.userIds.map(async (id) => ({
-          userId: id,
-          presence: await getPresenceStatus(id),
-        })),
-      );
-      return { entries };
+      try {
+        return await userService.getPresenceBatch(input.userIds);
+      } catch (err) {
+        throw mapDomainError(err);
+      }
     }),
   updateNotificationPreferences: protectedProcedure
     .input(
@@ -126,19 +74,14 @@ export const usersRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const [updated] = await ctx.db
-        .update(users)
-        .set({
-          notificationChannel: input.channel,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, ctx.userId!))
-        .returning();
-
-      if (!updated) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      try {
+        return await userService.updateNotificationPreferences(
+          ctx.db,
+          ctx.userId!,
+          input.channel,
+        );
+      } catch (err) {
+        throw mapDomainError(err);
       }
-
-      return { user: updated };
     }),
 });
