@@ -1,6 +1,6 @@
 import { initTRPC, TRPCError } from "@trpc/server";
-import jwt from "jsonwebtoken";
 import { createDb, type Database } from "@newchat/db";
+import { verifyToken } from "../lib/jwt";
 
 let _db: Database | undefined;
 function getDb() {
@@ -32,17 +32,11 @@ const enforceUser = t.middleware(({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "JWT secret missing" });
-  }
-
-  try {
-    const payload = jwt.verify(ctx.token, jwtSecret) as { userId: number };
-    return next({ ctx: { ...ctx, userId: payload.userId } });
-  } catch {
+  const userId = verifyToken(ctx.token);
+  if (userId === null) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+  return next({ ctx: { ...ctx, userId } });
 });
 
 export const protectedProcedure = t.procedure.use(enforceUser);

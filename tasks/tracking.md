@@ -7,7 +7,7 @@
 
 ## High Priority
 
-- [ ] [02 — JWT Hardening](./02-jwt-hardening.md) — Add claims (iss/aud/alg), runtime validation, consider refresh tokens
+- [x] [02 — JWT Hardening](./02-jwt-hardening.md) — Add claims (iss/aud/alg), runtime validation, consider refresh tokens
 - [ ] [04 — SSE Improvements](./04-sse-improvements.md) — Ticket auth, stop logging tokens, connection limits
 - [ ] [05 — Input Validation](./05-input-validation.md) — Telegram injection, unbounded arrays, markRead, username/avatar
 

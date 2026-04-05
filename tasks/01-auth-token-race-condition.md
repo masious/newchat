@@ -1,7 +1,7 @@
 # Auth Token Race Condition (TOCTOU)
 
 **Priority:** Critical
-**Status:** Todo
+**Status:** Done
 
 ## Problem
 

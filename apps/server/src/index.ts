@@ -5,7 +5,7 @@ import { streamSSE } from "hono/streaming";
 import { appRouter } from "./trpc/router";
 import { createTRPCContext } from "./trpc/init";
 import { createDb, conversationMembers, authTokens } from "@newchat/db";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "./lib/jwt";
 import { and, eq, lt } from "drizzle-orm";
 import { createRedisSubscriber } from "./lib/redis";
 import {
@@ -85,25 +85,17 @@ app.get("/events", async (c) => {
   if (!token) {
     return c.json({ error: "Missing token" }, 401);
   }
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    console.error("JWT_SECRET is not set");
-    return c.json({ error: "Server misconfigured" }, 500);
-  }
-
-  let payload: { userId: number };
-  try {
-    payload = jwt.verify(token, jwtSecret) as { userId: number };
-  } catch {
+  const userId = verifyToken(token);
+  if (userId === null) {
     return c.json({ error: "Invalid token" }, 401);
   }
 
   return streamSSE(c, async (stream) => {
-    await markOnline(payload.userId);
+    await markOnline(userId);
     const channelsResult = await db
       .select({ conversationId: conversationMembers.conversationId })
       .from(conversationMembers)
-      .where(eq(conversationMembers.userId, payload.userId));
+      .where(eq(conversationMembers.userId, userId));
 
     const subscriber = createRedisSubscriber();
     const conversationChannels = new Set(
@@ -115,12 +107,12 @@ app.get("/events", async (c) => {
     if (conversationChannels.size > 0) {
       await subscriber.subscribe(...conversationChannels);
     }
-    const membershipChannel = `user:${payload.userId}:membership`;
+    const membershipChannel = `user:${userId}:membership`;
     const presenceChannel = PRESENCE_CHANNEL;
     await subscriber.subscribe(membershipChannel);
     await subscriber.subscribe(presenceChannel);
     const presenceHeartbeat = setInterval(() => {
-      setPresenceStatus(payload.userId, {
+      setPresenceStatus(userId, {
         status: "online",
         lastSeen: new Date().toISOString(),
       }).catch((error) => {
@@ -131,7 +123,7 @@ app.get("/events", async (c) => {
     await stream.writeSSE({
       event: "init",
       data: JSON.stringify({
-        userId: payload.userId,
+        userId: userId,
         channels: channelsResult.map((row) => row.conversationId),
       }),
     });
@@ -218,7 +210,7 @@ app.get("/events", async (c) => {
       clearInterval(keepalive);
       clearInterval(presenceHeartbeat);
       subscriber.disconnect();
-      markOffline(payload.userId).catch((err) => {
+      markOffline(userId).catch((err) => {
         console.error("Failed to mark offline", err);
       });
     });

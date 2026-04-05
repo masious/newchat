@@ -1,10 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { nanoid } from "nanoid";
-import jwt from "jsonwebtoken";
 import { eq, and } from "drizzle-orm";
 import { authTokens } from "@newchat/db";
 import { router, publicProcedure } from "../init";
+import { signToken } from "../../lib/jwt";
 
 const TOKEN_TTL_MS = 5 * 60 * 1000;
 
@@ -60,15 +60,6 @@ export const authRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid or expired token" });
       }
 
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "JWT secret missing" });
-      }
-
-      const signedToken = jwt.sign({ userId: record.userId }, jwtSecret, {
-        expiresIn: "7d",
-      });
-
-      return { token: signedToken };
+      return { token: signToken(record.userId) };
     }),
 });
