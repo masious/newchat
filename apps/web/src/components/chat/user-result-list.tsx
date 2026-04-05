@@ -48,7 +48,7 @@ export function UserResultList({
               <li key={user.id}>
                 <button
                   onClick={() => onViewProfile(user)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-left transition hover:border-indigo-400 hover:bg-indigo-50/40 dark:border-slate-700 dark:hover:bg-indigo-900/30"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-left transition hover:border-indigo-400 hover:bg-indigo-50/40 dark:border-slate-700 dark:hover:bg-indigo-900/30"
                 >
                   <div className="flex items-center gap-3">
                     <UserAvatar user={user} />

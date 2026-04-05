@@ -137,7 +137,7 @@ function AuthPageContent() {
         {error && <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>}
 
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-200 p-4">
+          <div className="rounded-lg border border-slate-200 p-4">
             <p className="text-xs uppercase text-slate-500">Deep link</p>
             <p className="truncate text-base font-mono text-slate-900">
               {telegramLink ?? "Generating link..."}
@@ -160,7 +160,7 @@ function AuthPageContent() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-dashed border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
+          <div className="rounded-lg border border-dashed border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
             <p className="font-semibold">Status: {pollStatus}</p>
             <p className="text-indigo-700">
               {pollStatus === "pending" && "Waiting for confirmation in Telegram..."}
@@ -172,7 +172,7 @@ function AuthPageContent() {
         </div>
 
         {exchangeError && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
             <p className="text-sm font-semibold text-red-800">Sign-in failed</p>
             <p className="mt-1 text-sm text-red-600">
               Your identity was confirmed, but we couldn&apos;t complete sign-in.

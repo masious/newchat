@@ -161,7 +161,7 @@ export function UserSearchCombobox(props: UserSearchComboboxProps) {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {userDisplayName(user)}
                   </p>
                   {user.username && (

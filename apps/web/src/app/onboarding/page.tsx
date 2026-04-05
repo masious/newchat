@@ -102,7 +102,7 @@ export default function OnboardingPage() {
 
         <div className="grid gap-6 md:grid-cols-2">
           <Field.Root className="flex flex-col">
-            <Field.Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <Field.Label className="text-sm font-semibold text-slate-700 dark:text-slate-400">
               Username
             </Field.Label>
             <Field.Control
@@ -123,7 +123,7 @@ export default function OnboardingPage() {
           </Field.Root>
 
           <Field.Root className="flex flex-col">
-            <Field.Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <Field.Label className="text-sm font-semibold text-slate-700 dark:text-slate-400">
               Display name
             </Field.Label>
             <Field.Control
@@ -146,7 +146,7 @@ export default function OnboardingPage() {
 
         <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div>
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Avatar</span>
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-400">Avatar</span>
             <div className="mt-2 flex items-center gap-4">
               <div className="h-20 w-20 overflow-hidden rounded-full border border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-slate-700">
                 {avatarPreview ? (
@@ -156,14 +156,14 @@ export default function OnboardingPage() {
                   <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">No image</div>
                 )}
               </div>
-              <label className="cursor-pointer rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700">
+              <label className="cursor-pointer rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-700">
                 Upload
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
               </label>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+          <div className="flex items-start gap-3 rounded-lg border border-slate-200 p-4 dark:border-slate-700">
             <Checkbox.Root
               checked={isPublic}
               onCheckedChange={setIsPublic}
@@ -174,7 +174,7 @@ export default function OnboardingPage() {
               </Checkbox.Indicator>
             </Checkbox.Root>
             <div>
-              <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Public profile</span>
+              <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">Public profile</span>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 When enabled, other people can find you in search and start conversations.
               </p>
@@ -193,7 +193,7 @@ export default function OnboardingPage() {
           <button
             type="button"
             onClick={() => router.replace("/")}
-            className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+            className="text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
           >
             Skip for now
           </button>

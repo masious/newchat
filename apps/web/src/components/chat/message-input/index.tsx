@@ -189,7 +189,7 @@ export const MessageInput = forwardRef<
   return (
     <form
       onSubmit={handleSubmit}
-      className="border-t dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+      className="border-t dark:bg-slate-700 border-slate-200 dark:border-slate-700"
     >
       <PendingAttachments
         entries={fileHandlers.entries}
@@ -215,7 +215,7 @@ export const MessageInput = forwardRef<
         </div>
         <button
           type="submit"
-          className="flex items-center justify-center rounded-full bg-indigo-600 p-2 text-white transition-opacity hover:opacity-80 active:opacity-60 md:hidden"
+          className="flex items-center justify-center rounded-full bg-indigo-600 p-2 text-white transition-opacity hover:opacity-90 active:opacity-80 md:hidden"
         >
           <SendHorizontal size={20} />
         </button>
