@@ -104,6 +104,7 @@ lib/
 ├── rate-limit.ts            # checkRateLimit (fixed-window counter)
 ├── r2.ts                    # R2 client, presigned URL generation
 ├── upload-constants.ts      # Allowed MIME types, max file size
+├── logger.ts                # Pino structured logger (JSON, configurable via LOG_LEVEL)
 ├── web-push.ts              # VAPID setup, sendPushNotification
 └── telegram-notifier.ts     # sendTelegramNotification
 ```
@@ -204,9 +205,9 @@ For non-critical paths (notifications, presence refresh), errors are caught and 
 ```typescript
 // Presence heartbeat — failure is acceptable
 setPresenceStatus(userId, { status: "online", lastSeen: new Date().toISOString() })
-  .catch((error) => console.error("Failed to refresh presence", error));
+  .catch((error) => logger.error({ error }, "Failed to refresh presence"));
 
-// Notifications — never block the send response
+// Notifications ��� never block the send response
 await Promise.allSettled(notificationPromises);
 ```
 

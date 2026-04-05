@@ -25,7 +25,7 @@ export const createTRPCContext = (
   _opts: unknown,
   c: { req: { header: (name: string) => string | undefined } },
 ): Context => {
-  const token = c.req.header("authorization")?.replace("Bearer ", "");
+  const token = c.req.header("authorization")?.match(/^Bearer\s+(\S+)$/i)?.[1];
   const ip =
     c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
     c.req.header("x-real-ip") ||

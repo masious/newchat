@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 function escapeMarkdown(text: string): string {
   return text.replace(/[*_[\]()~`>#+\-=|{}.!\\]/g, "\\$&");
 }
@@ -15,7 +17,7 @@ export async function sendTelegramNotification(
 ) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
-    console.error("TELEGRAM_BOT_TOKEN not configured");
+    logger.error("TELEGRAM_BOT_TOKEN not configured");
     return { success: false };
   }
 
@@ -49,16 +51,16 @@ export async function sendTelegramNotification(
       }
     );
 
-    const result = await response.json();
+    const result = (await response.json()) as { ok: boolean; description?: string };
 
     if (!result.ok) {
-      console.error("Telegram notification failed:", result);
+      logger.error({ result }, "Telegram notification failed");
       return { success: false, error: result.description };
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Failed to send Telegram notification:", error);
+    logger.error({ error }, "Failed to send Telegram notification");
     return { success: false, error };
   }
 }

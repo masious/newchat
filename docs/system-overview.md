@@ -101,11 +101,12 @@ This traces a single `messages.send` call through every layer.
     into React Query cache
     (negative temp ID)
          │
- 3. trpc.messages.send ─────────► 4. CORS middleware
-                                  5. Logging middleware
-                                  6. tRPC handler
+ 3. trpc.messages.send ─────────► 4. Hono middleware chain
+                                     (security headers, CORS,
+                                      pino request logging)
+                                  5. tRPC handler
                                      │
-                                  7. createTRPCContext
+                                  6. createTRPCContext
                                      extract JWT from header
                                      │
                                   8. enforceUser middleware

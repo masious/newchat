@@ -1,4 +1,5 @@
 import webpush from "web-push";
+import { logger } from "./logger";
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -9,9 +10,9 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
   );
-  console.log("Web push configured with VAPID keys");
+  logger.info("Web push configured with VAPID keys");
 } else {
-  console.warn("VAPID keys not configured - web push notifications will be disabled");
+  logger.warn("VAPID keys not configured - web push notifications will be disabled");
 }
 
 export interface PushSubscription {
@@ -49,7 +50,7 @@ export async function sendPushNotification(
     if (error.statusCode === 410 || error.statusCode === 404) {
       return { success: false, expired: true };
     }
-    console.error("Push notification failed:", error);
+    logger.error({ error }, "Push notification failed");
     return { success: false, expired: false };
   }
 }

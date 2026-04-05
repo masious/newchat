@@ -1,4 +1,5 @@
 import type { Database, Attachment } from "@newchat/db";
+import { logger } from "../lib/logger";
 import { BadRequestError } from "../errors";
 import { ensureConversationMember } from "./authorization";
 import {
@@ -93,7 +94,9 @@ export async function send(
         }),
       );
 
-    Promise.allSettled(notificationPromises).catch(console.error);
+    Promise.allSettled(notificationPromises).catch((error) => {
+      logger.error({ error }, "Notification dispatch failed");
+    });
   }
 
   return { message };

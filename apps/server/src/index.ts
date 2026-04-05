@@ -18,9 +18,19 @@ import {
   setPresenceStatus,
   PRESENCE_CHANNEL,
 } from "./lib/presence";
+import { logger } from "./lib/logger";
 
 const app = new Hono();
 const db = createDb();
+
+// Security headers
+app.use("*", async (c, next) => {
+  await next();
+  c.header("X-Content-Type-Options", "nosniff");
+  c.header("X-Frame-Options", "DENY");
+  c.header("Referrer-Policy", "no-referrer");
+  c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+});
 const TOKEN_TTL_MS = 5 * 60 * 1000;
 const PRESENCE_REFRESH_MS = 60_000;
 const MAX_SSE_CONNECTIONS = 5;
@@ -37,7 +47,7 @@ async function expirePendingTokens() {
         and(eq(authTokens.status, "pending"), lt(authTokens.createdAt, cutoff)),
       );
   } catch (error) {
-    console.error("Failed to expire tokens", error);
+    logger.error({ error }, "Failed to expire tokens");
   }
 }
 
@@ -72,12 +82,15 @@ app.use(
   }),
 );
 
-// hono logging
+// Request logging
 app.use("*", async (c, next) => {
   const start = Date.now();
   await next();
   const ms = Date.now() - start;
-  console.log(`${c.req.method} ${new URL(c.req.url).pathname} - ${ms}ms`);
+  logger.info(
+    { method: c.req.method, path: new URL(c.req.url).pathname, status: c.res.status, ms },
+    "request",
+  );
 });
 
 // Health check
@@ -146,7 +159,7 @@ app.get("/events", async (c) => {
         status: "online",
         lastSeen: new Date().toISOString(),
       }).catch((error) => {
-        console.error("Failed to refresh presence status", error);
+        logger.error({ error }, "Failed to refresh presence status");
       });
     }, PRESENCE_REFRESH_MS);
 
@@ -197,7 +210,7 @@ app.get("/events", async (c) => {
                 await subscriber.subscribe(newChannel);
                 conversationChannels.add(newChannel);
               } catch (err) {
-                console.error("Failed to subscribe to new conversation", err);
+                logger.error({ err }, "Failed to subscribe to new conversation");
               }
             }
           } else if (
@@ -241,10 +254,10 @@ app.get("/events", async (c) => {
       clearInterval(presenceHeartbeat);
       subscriber.disconnect();
       decrementConcurrency(redisPublisher, sseKey).catch((err) => {
-        console.error("Failed to decrement SSE connection count", err);
+        logger.error({ err }, "Failed to decrement SSE connection count");
       });
       markOffline(userId).catch((err) => {
-        console.error("Failed to mark offline", err);
+        logger.error({ err }, "Failed to mark offline");
       });
     });
 
@@ -263,4 +276,4 @@ export default {
   idleTimeout: 255,
 };
 
-console.log(`Server running on http://localhost:${port}`);
+logger.info({ port }, "Server running");

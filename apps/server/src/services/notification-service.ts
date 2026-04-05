@@ -1,4 +1,5 @@
 import { type Database } from "@newchat/db";
+import { logger } from "../lib/logger";
 import {
   sendPushNotification,
   type PushPayload,
@@ -78,7 +79,7 @@ async function sendWebPushNotifications(db: Database, payload: NotificationPaylo
         },
         pushPayload,
       ).catch((error) => {
-        console.error("Error sending push notification:", error);
+        logger.error({ error }, "Error sending push notification");
         return { success: false, expired: false };
       });
 
