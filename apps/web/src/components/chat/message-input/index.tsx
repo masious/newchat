@@ -2,7 +2,6 @@
 
 import {
   ChangeEvent,
-  forwardRef,
   KeyboardEvent,
   SubmitEvent,
   useImperativeHandle,
@@ -29,10 +28,13 @@ import type { MessageInputHandle } from "./types";
 
 export type { MessageInputHandle };
 
-export const MessageInput = forwardRef<
-  MessageInputHandle,
-  { conversationId: number }
->(function MessageInput({ conversationId }, ref) {
+export function MessageInput({
+  conversationId,
+  ref,
+}: {
+  conversationId: number;
+  ref?: React.Ref<MessageInputHandle>;
+}) {
   const utils = trpc.useUtils();
   const { user } = useAuth();
   const [message, setMessage] = useState("");
@@ -222,4 +224,4 @@ export const MessageInput = forwardRef<
       </div>
     </form>
   );
-});
+}
