@@ -57,7 +57,11 @@ Bun monorepo managed by Turborepo with three apps and two shared packages.
 
 ### Detailed Flows
 
-See **[docs/](docs/README.md)** for comprehensive documentation of every runtime flow. Consult before making implementation decisions:
+See **[docs/](docs/README.md)** for comprehensive documentation. Consult before making implementation decisions:
+- [system-overview.md](docs/system-overview.md) — Architecture diagram, service dependencies, end-to-end request lifecycles
+- [backend-architecture.md](docs/backend-architecture.md) — Layered architecture, event-driven patterns, error handling, scaling, testing
+- [frontend-architecture.md](docs/frontend-architecture.md) — Provider tree, state management, component organization, real-time cache updates
+- [design-system.md](docs/design-system.md) — Color palette, dark mode pairing, typography, spacing, component patterns, anti-patterns
 - [auth.md](docs/auth.md) — Telegram login, JWT, protected procedures, rate limiting
 - [sse-realtime.md](docs/sse-realtime.md) — SSE connection, event types, client handling
 - [conversations.md](docs/conversations.md) — DM vs group, creation, ConversationSummary shape
