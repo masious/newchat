@@ -9,7 +9,8 @@
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:nuke": "bun run src/scripts/nuke.ts --confirm"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10",

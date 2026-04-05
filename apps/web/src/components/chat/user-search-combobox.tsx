@@ -68,8 +68,8 @@ export function UserSearchCombobox(props: UserSearchComboboxProps) {
         </Fragment>
       );
     }
-    if (trimmed === "" && !blockStartStatus) {
-      return selectedArray.length > 0 ? null : "Start typing to search…";
+    if (trimmed.length < MIN_QUERY_LENGTH && !blockStartStatus) {
+      return selectedArray.length > 0 ? null : "Type at least 2 characters to search…";
     }
     if (searchResults.length === 0 && !blockStartStatus) {
       return `No matches for "${trimmed}".`;
