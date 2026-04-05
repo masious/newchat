@@ -17,3 +17,15 @@ export type ConversationMember = ConversationSummary["members"][number];
 // Messages
 export type Message = RouterOutputs["messages"]["list"]["messages"][number];
 export type Attachment = NonNullable<Message["attachments"]>[number];
+
+// Optimistic messages (client-only, pending send confirmation)
+export type OptimisticMessage = Message & {
+  _optimisticId: string;
+  _status: "pending" | "failed";
+};
+
+export function isOptimisticMessage(
+  msg: Message,
+): msg is OptimisticMessage {
+  return "_optimisticId" in msg;
+}

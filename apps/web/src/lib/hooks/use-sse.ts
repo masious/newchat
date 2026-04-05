@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { trpc } from "../trpc";
 import { useAuth } from "../auth-context";
+import { findAndRemoveOptimistic, cleanupStale } from "../optimistic-messages";
 
 const defaultServerUrl =
   process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:4000";
@@ -48,6 +49,9 @@ export function useSSE() {
         if (detail.type === "new_message" && detail.message) {
           const message = detail.message;
           const conversationId = detail.conversationId as number;
+          const pendingEntry = findAndRemoveOptimistic(conversationId, message);
+          cleanupStale();
+
           utils.messages.list.setInfiniteData(
             { conversationId },
             (previous) => {
@@ -56,6 +60,20 @@ export function useSSE() {
                 page.messages.some((m) => m.id === message.id),
               );
               if (alreadyExists) return previous;
+
+              if (pendingEntry) {
+                // Replace the optimistic message in-place with the real one
+                return {
+                  pages: previous.pages.map((page) => ({
+                    ...page,
+                    messages: page.messages.map((m) =>
+                      m.id === pendingEntry.negativeId ? message : m,
+                    ),
+                  })),
+                  pageParams: previous.pageParams,
+                };
+              }
+
               const firstPage = previous.pages[0];
               const restPages = previous.pages.slice(1);
               const updatedFirstPage = firstPage

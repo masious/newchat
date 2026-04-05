@@ -3,6 +3,7 @@
 import { useCallback, useRef } from "react";
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { useAuth } from "@/lib/auth-context";
+import { isOptimisticMessage } from "@/lib/trpc-types";
 import { MessageBubble } from "../message-bubble";
 import { MessageInput, type MessageInputHandle } from "../message-input";
 import type { Attachment } from "../message-bubble/components/AttachmentPreview";
@@ -67,11 +68,16 @@ export function ChatPanel({
       const prev = arrayIndex > 0 ? flatMessages[arrayIndex - 1] : null;
       const showDateSeparator =
         !prev || !isSameDay(prev.createdAt, message.createdAt);
+      const optimistic = isOptimisticMessage(message);
 
       return (
         <div
-          className="px-4 pb-3 md:px-6"
-          ref={(el) => observeRef(el, message.id, message.sender.id)}
+          className={`px-4 pb-3 md:px-6${optimistic ? " animate-message-send" : ""}`}
+          ref={
+            optimistic
+              ? undefined
+              : (el) => observeRef(el, message.id, message.sender.id)
+          }
         >
           <div className="mx-auto max-w-3xl">
             {showDateSeparator && (
@@ -87,6 +93,8 @@ export function ChatPanel({
               attachments={
                 (message as { attachments?: Attachment[] | null }).attachments
               }
+              isPending={optimistic && message._status === "pending"}
+              isFailed={optimistic && message._status === "failed"}
             />
           </div>
         </div>

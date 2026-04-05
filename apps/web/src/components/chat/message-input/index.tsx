@@ -9,8 +9,14 @@ import {
   useState,
 } from "react";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/lib/auth-context";
 import { addToast } from "@/lib/toast-context";
 import type { UploadedFile } from "@/lib/upload";
+import {
+  registerOptimisticMessage,
+  markOptimisticFailed,
+} from "@/lib/optimistic-messages";
+import type { OptimisticMessage } from "@/lib/trpc-types";
 import { useTypingIndicator } from "./hooks/useTypingIndicator";
 import { useAutoResizeTextarea } from "./hooks/useAutoResizeTextarea";
 import { useFileAttachments } from "./hooks/useFileAttachments";
@@ -27,6 +33,7 @@ export const MessageInput = forwardRef<
   { conversationId: number }
 >(function MessageInput({ conversationId }, ref) {
   const utils = trpc.useUtils();
+  const { user } = useAuth();
   const [message, setMessage] = useState("");
 
   const { notifyTyping, resetTypingThrottle } =
@@ -38,17 +45,7 @@ export const MessageInput = forwardRef<
     addFiles: fileHandlers.addFiles,
   }));
 
-  const sendMessage = trpc.messages.send.useMutation({
-    onSuccess: () => {
-      setMessage("");
-      fileHandlers.resetFiles();
-      resetHeight();
-      resetTypingThrottle();
-    },
-    onError: (err) => {
-      addToast(err.message || "Failed to send message");
-    },
-  });
+  const sendMessage = trpc.messages.send.useMutation();
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(event.target.value);
@@ -84,6 +81,7 @@ export const MessageInput = forwardRef<
     const hasText = message.trim().length > 0;
     const hasFiles = fileHandlers.pendingFiles.length > 0;
     if (!hasText && !hasFiles) return;
+    if (!user) return;
 
     let attachments: UploadedFile[] | undefined;
 
@@ -96,11 +94,94 @@ export const MessageInput = forwardRef<
       }
     }
 
-    sendMessage.mutate({
+    const trimmedContent = message.trim();
+    const optimisticId = crypto.randomUUID();
+    const negativeId = -(Date.now());
+    const now = new Date().toISOString();
+
+    const optimisticMessage: OptimisticMessage = {
+      id: negativeId,
       conversationId,
-      content: message.trim(),
-      attachments,
+      content: trimmedContent || "",
+      attachments: attachments ?? null,
+      createdAt: now,
+      sender: {
+        id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        avatarUrl: user.avatarUrl,
+      },
+      _optimisticId: optimisticId,
+      _status: "pending",
+    };
+
+    // Clear input immediately
+    setMessage("");
+    fileHandlers.resetFiles();
+    resetHeight();
+    resetTypingThrottle();
+
+    // Insert optimistic message into cache
+    utils.messages.list.setInfiniteData(
+      { conversationId },
+      (current) => {
+        if (!current) return current;
+        const firstPage = current.pages[0];
+        return {
+          pages: [
+            {
+              ...firstPage,
+              messages: [
+                optimisticMessage as unknown as (typeof firstPage.messages)[number],
+                ...firstPage.messages,
+              ],
+            },
+            ...current.pages.slice(1),
+          ],
+          pageParams: current.pageParams,
+        };
+      },
+    );
+
+    // Register for SSE deduplication
+    registerOptimisticMessage({
+      optimisticId,
+      negativeId,
+      conversationId,
+      content: trimmedContent || null,
+      sentAt: Date.now(),
     });
+
+    // Fire mutation
+    try {
+      await sendMessage.mutateAsync({
+        conversationId,
+        content: trimmedContent,
+        attachments,
+      });
+    } catch (err) {
+      markOptimisticFailed(optimisticId);
+      utils.messages.list.setInfiniteData(
+        { conversationId },
+        (current) => {
+          if (!current) return current;
+          return {
+            pages: current.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((msg) =>
+                msg.id === negativeId
+                  ? { ...msg, _status: "failed" }
+                  : msg,
+              ),
+            })),
+            pageParams: current.pageParams,
+          };
+        },
+      );
+      const message =
+        err instanceof Error ? err.message : "Failed to send message";
+      addToast(message);
+    }
   };
 
   return (
