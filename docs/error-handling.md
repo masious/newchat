@@ -121,6 +121,23 @@ addToast(message: string, type?: ToastType)  // callable anywhere via import
 useToast() → { addToast, removeToast }       // React hook version
 ```
 
+### Global Mutation Error Feedback
+
+**File**: `apps/web/src/lib/providers/trpc-provider.tsx`
+
+A `MutationCache` with a global `onError` callback catches unhandled mutation errors:
+
+```
+MutationCache.onError:
+  → Skip if mutation has its own onError handler (handled locally)
+  → Skip 401/403 errors (handled by AuthProvider)
+  → For 5xx errors: addToast("Server error — please try again")
+  → For network errors (no response data): addToast("Network error — check your connection")
+  → Fallback: addToast(error.message)
+```
+
+This ensures mutations that don't define their own error handling still show feedback to the user.
+
 ### Mutation Error Patterns
 
 Most mutations follow this pattern:
@@ -146,17 +163,75 @@ const mutation = trpc.something.useMutation({
 | `message-input`     | Toast notification              | Also marks optimistic message as failed |
 | File upload          | Toast notification              | "Failed to upload file"            |
 
-### Optimistic Message Failure
+### Optimistic Message Failure + Retry
 
 When `messages.send` fails after optimistic insertion:
 
 ```
 1. markOptimisticFailed(optimisticId) — flags entry in optimistic store
-2. Updates React Query cache: message status set to show failure state
+2. Updates React Query cache: message._status set to "failed"
 3. addToast(err.message) — shows error to user
+4. MessageBubble renders "Failed to send" with Retry + Discard buttons
 ```
 
-### Sentry Integration
+**Retry flow** (ChatPanel `handleRetryMessage`):
+1. Set `_status` back to `"pending"` in the cache
+2. Re-register for SSE dedup via `registerOptimisticMessage`
+3. Re-fire `sendMessage.mutateAsync`
+4. On second failure: mark failed again + show toast
+
+**Discard flow** (ChatPanel `handleDiscardMessage`):
+- Filter the message out of the infinite query cache entirely
+
+### Feature Boundaries (Error Boundaries)
+
+**File**: `apps/web/src/components/ui/feature-boundary.tsx`
+
+React class component wrapping each major feature. On render error:
+1. Catches the error in `componentDidCatch`
+2. Reports to Sentry with `feature_boundary` tag and component name
+3. Renders a fallback based on mode:
+   - `"card"` — centered error card with "Something went wrong" + "Try again" button (resets error state)
+   - `"inline"` — single-line bar with warning icon + refresh button
+   - `"hidden"` — renders a minimal `<div>` placeholder (prevents virtualized list height issues)
+
+**Wrapped locations**:
+| Feature | Fallback |
+|---------|----------|
+| ChatPanel | card |
+| ConversationSidebar (desktop + drawer) | card |
+| MessageInput (3 locations) | inline |
+| MessageBubble (per message) | hidden |
+| RealtimeProvider | card |
+| NewChatDialog, ProfileDialog, EditProfileDialog | hidden |
+
+### SSE Disconnection
+
+**File**: `apps/web/src/lib/hooks/use-sse.ts`
+
+SSE retry uses exponential backoff with a hard cap:
+- Base delay: 2s (error), 5s (ticket failure)
+- Multiplier: 1.5x per retry
+- Max delay: 30s
+- Max retries: 10
+
+After exhausting retries, dispatches `newchat:sse-disconnected` CustomEvent. The `OfflineBanner` (`components/ui/offline-banner.tsx`) shows a red bar with "Connection lost" and a "Reconnect" button. Clicking dispatches `newchat:sse-reconnect`, which resets the retry counter and reconnects.
+
+On successful reconnection, dispatches `newchat:sse-reconnected` to hide the banner.
+
+### Auth Token Exchange Error
+
+**File**: `apps/web/src/app/auth/page.tsx`
+
+When Telegram confirms the auth token but the JWT exchange fails:
+1. Catches the error in a try/catch around `exchangeToken.mutateAsync`
+2. Sets `exchangeError` state to true, clears the polling interval
+3. Renders an error card with "Something went wrong during sign-in" + "Retry sign-in" button
+4. Retry re-attempts the exchange; on success, proceeds to login
+
+A `useRef(false)` guard prevents double `createToken.mutate()` calls in React Strict Mode.
+
+
 
 **File**: `apps/web/src/lib/providers/trpc-provider.tsx`
 

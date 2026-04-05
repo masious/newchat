@@ -77,7 +77,7 @@ The token is also cached in memory (`auth-storage.ts`) to avoid repeated localSt
 
 ### localStorage — Persistent Preferences
 
-Small user preferences that should survive page reloads:
+Small user preferences that should survive page reloads. All reads/writes go through `safeLocalStorage` (`lib/safe-local-storage.ts`), which wraps `window.localStorage` in try/catch and falls back to an in-memory `Map` when localStorage is unavailable (private browsing, quota exceeded, SSR). The `<head>` script in `layout.tsx` is the only exception — it runs before React hydration and uses its own IIFE with silent failure.
 
 | Key | Value | Used By |
 |---|---|---|
@@ -154,7 +154,9 @@ components/
 └── ui/
     ├── skeleton.tsx                          # Loading placeholder
     ├── icon-tooltip.tsx                      # Hover tooltip
-    └── toast-container.tsx                   # Toast notification display
+    ├── toast-container.tsx                   # Toast notification display
+    ├── feature-boundary.tsx                  # React error boundary (per-feature)
+    └── offline-banner.tsx                    # SSE disconnected banner + reconnect
 ```
 
 ### Patterns
@@ -166,6 +168,8 @@ components/
 **Custom hooks for logic**: Any logic more complex than "set state on click" goes into a custom hook. This keeps components focused on rendering and makes logic testable in isolation.
 
 **Imperative handles**: `MessageInput` uses `forwardRef` + `useImperativeHandle` to expose `addFiles()` to its parent (ChatPanel). This lets drag-and-drop on the panel add files to the input without prop drilling.
+
+**Error boundaries**: `FeatureBoundary` (`components/ui/feature-boundary.tsx`) is a React class component that wraps each feature. It catches render errors and reports to Sentry with a `feature_boundary` tag. Three fallback modes: `"card"` (error card with retry), `"inline"` (single-line bar), `"hidden"` (minimal placeholder). Used around ChatPanel, ConversationSidebar, MessageInput, MessageBubble, RealtimeProvider, NewChatDialog, ProfileDialog, and EditProfileDialog.
 
 ## Data Fetching Patterns
 
@@ -264,10 +268,13 @@ presence                  ──►     1. Invalidate users.profile / users.pres
 
 ### Reconnection
 
-When the SSE connection drops and reconnects:
+When the SSE connection drops, it retries with exponential backoff (2s base, 1.5x multiplier, 30s cap). After 10 failed retries, it stops and dispatches a `newchat:sse-disconnected` CustomEvent. The `OfflineBanner` component listens for this and shows a red bar with a "Reconnect" button that dispatches `newchat:sse-reconnect` (resets retry counter).
+
+When the SSE connection successfully reconnects:
 1. Invalidate `conversations.list` (may have missed membership changes)
 2. Invalidate `messages.list` for the active conversation (may have missed messages)
 3. Both queries refetch in the background — UI shows stale data until fresh data arrives
+4. Dispatch `newchat:sse-reconnected` CustomEvent (hides offline banner)
 
 ## Optimistic Updates
 
@@ -396,7 +403,7 @@ The message list uses `react-virtualized` with `CellMeasurer` for dynamic row he
 
 - **Conversation list**: Not virtualized — chat apps rarely have thousands of conversations. Simple `.map()` is fine.
 - **User search**: No client-side caching of search results beyond React Query's 60-second staleTime. Search is fast enough server-side.
-- **File uploads**: No retry logic. Uploads that fail show a toast and the user retries manually. This keeps the upload flow simple.
+- **File uploads**: Uses `Promise.allSettled` for partial failure tolerance. Upload state lives in a module-level store (`lib/upload-store.ts`) keyed by conversationId, so uploads survive conversation switches. Each batch gets an `AbortController` for cancellation. Individual XHR uploads have a 60-second timeout.
 
 ## Key Files
 
@@ -410,7 +417,11 @@ The message list uses `react-virtualized` with `CellMeasurer` for dynamic row he
 | `lib/hooks/use-sse.ts` | SSE connection, all real-time cache update logic |
 | `lib/optimistic-messages.ts` | Module-level Map for pending message tracking |
 | `lib/auth-storage.ts` | In-memory token cache with pub/sub for subscribers |
-| `lib/upload.ts` | Presigned URL fetch + R2 PUT with progress tracking |
+| `lib/upload.ts` | Presigned URL fetch + R2 PUT with progress tracking + AbortSignal |
+| `lib/upload-store.ts` | Module-level upload state per conversation (cross-conversation persistence) |
+| `lib/safe-local-storage.ts` | Try/catch localStorage wrapper with in-memory fallback |
+| `components/ui/feature-boundary.tsx` | React error boundary with Sentry integration |
+| `components/ui/offline-banner.tsx` | SSE disconnected banner with manual reconnect |
 | `components/auth-guard.tsx` | Route protection logic |
 | `components/chat/chat-panel/hooks/useVirtualizedMessages.ts` | Infinite query + scroll virtualization |
 | `components/chat/chat-panel/hooks/useMarkReadOnVisible.ts` | IntersectionObserver → batched markRead |

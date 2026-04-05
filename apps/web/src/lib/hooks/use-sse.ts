@@ -8,6 +8,8 @@ import { findAndRemoveOptimistic, cleanupStale } from "../optimistic-messages";
 const defaultServerUrl =
   process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:4000";
 
+const MAX_RETRIES = 10;
+
 function normalizeDate(value: string | Date | undefined) {
   if (!value) return 0;
   const date = value instanceof Date ? value : new Date(value);
@@ -247,6 +249,8 @@ export function useSSE() {
       }
     };
 
+    let retryCount = 0;
+
     async function connect() {
       try {
         const { ticket } = await createTicket.mutateAsync();
@@ -257,19 +261,27 @@ export function useSSE() {
         source = new EventSource(url.toString());
 
         source.addEventListener("open", () => {
+          retryCount = 0;
           if (hasConnectedBefore.current) {
             refetchAfterReconnect();
           }
           hasConnectedBefore.current = true;
+          window.dispatchEvent(new CustomEvent("newchat:sse-reconnected"));
         });
 
         source.addEventListener("error", () => {
           if (cancelled) return;
           source?.close();
           source = null;
+          retryCount++;
+          if (retryCount > MAX_RETRIES) {
+            window.dispatchEvent(new CustomEvent("newchat:sse-disconnected"));
+            return;
+          }
+          const delay = Math.min(2000 * Math.pow(1.5, retryCount - 1), 30_000);
           setTimeout(() => {
             if (!cancelled) connect();
-          }, 2000);
+          }, delay);
         });
 
         source.addEventListener("conversation_event", handleConversationEvent);
@@ -277,16 +289,29 @@ export function useSSE() {
         source.addEventListener("presence", handlePresenceEvent);
       } catch (err) {
         console.error("Failed to create SSE ticket", err);
+        retryCount++;
+        if (retryCount > MAX_RETRIES) {
+          window.dispatchEvent(new CustomEvent("newchat:sse-disconnected"));
+          return;
+        }
+        const delay = Math.min(5000 * Math.pow(1.5, retryCount - 1), 30_000);
         setTimeout(() => {
           if (!cancelled) connect();
-        }, 5000);
+        }, delay);
       }
     }
+
+    const handleManualReconnect = () => {
+      retryCount = 0;
+      connect();
+    };
+    window.addEventListener("newchat:sse-reconnect", handleManualReconnect);
 
     connect();
 
     return () => {
       cancelled = true;
+      window.removeEventListener("newchat:sse-reconnect", handleManualReconnect);
       if (source) {
         source.removeEventListener("conversation_event", handleConversationEvent);
         source.removeEventListener("membership", handleMembershipEvent);

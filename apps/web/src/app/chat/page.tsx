@@ -17,6 +17,8 @@ import { getConversationName } from "@/lib/formatting";
 import { useNotificationSound } from "@/lib/hooks/use-notification-sound";
 import { useDarkMode } from "@/lib/hooks/use-dark-mode";
 import { MessagesSquare } from "lucide-react";
+import { FeatureBoundary } from "@/components/ui/feature-boundary";
+import { OfflineBanner } from "@/components/ui/offline-banner";
 
 const emptyArray: never[] = [];
 
@@ -90,25 +92,29 @@ export default function ChatPage() {
   };
 
   return (
-    <main className="flex h-dvh bg-slate-50 dark:bg-slate-900">
+    <main className="flex h-dvh flex-col bg-slate-50 dark:bg-slate-900">
+      <OfflineBanner />
+      <div className="flex min-h-0 flex-1">
       {/* Sidebar: static on md+, drawer on mobile */}
       <div className="hidden md:block">
-        <ConversationSidebar
-          conversations={conversations}
-          selectedId={selectedConversation?.id ?? null}
-          filter={filter}
-          onFilterChange={setFilter}
-          onSelect={handleSelect}
-          onOpenNewChat={() => setDialogOpen(true)}
-          isLoading={conversationsQuery.isLoading}
-          userResults={userResults}
-          showUserResults={shouldSearchUsers}
-          isSearchingUsers={isSearchingUsers}
-          userSearchError={userSearchError}
-          onViewProfile={(result) => setProfileUser(result)}
-          currentUser={user}
-          onEditProfile={() => setEditProfileOpen(true)}
-        />
+        <FeatureBoundary name="ConversationSidebar">
+          <ConversationSidebar
+            conversations={conversations}
+            selectedId={selectedConversation?.id ?? null}
+            filter={filter}
+            onFilterChange={setFilter}
+            onSelect={handleSelect}
+            onOpenNewChat={() => setDialogOpen(true)}
+            isLoading={conversationsQuery.isLoading}
+            userResults={userResults}
+            showUserResults={shouldSearchUsers}
+            isSearchingUsers={isSearchingUsers}
+            userSearchError={userSearchError}
+            onViewProfile={(result) => setProfileUser(result)}
+            currentUser={user}
+            onEditProfile={() => setEditProfileOpen(true)}
+          />
+        </FeatureBoundary>
       </div>
       <Drawer.Root
         modal
@@ -124,50 +130,54 @@ export default function ChatPage() {
               aria-describedby={undefined}
             >
               <Drawer.Title className="sr-only">Conversations</Drawer.Title>
-              <ConversationSidebar
-                conversations={conversations}
-                selectedId={selectedConversation?.id ?? null}
-                filter={filter}
-                onFilterChange={setFilter}
-                onSelect={handleSelect}
-                onOpenNewChat={() => setDialogOpen(true)}
-                isLoading={conversationsQuery.isLoading}
-                userResults={userResults}
-                showUserResults={shouldSearchUsers}
-                isSearchingUsers={isSearchingUsers}
-                userSearchError={userSearchError}
-                onViewProfile={(result) => setProfileUser(result)}
-                currentUser={user}
-                onEditProfile={() => {
-                  setSidebarOpen(false);
-                  setTimeout(() => {
-                    setEditProfileOpen(true);
-                  }, 200);
-                }}
-              />
+              <FeatureBoundary name="ConversationSidebar">
+                <ConversationSidebar
+                  conversations={conversations}
+                  selectedId={selectedConversation?.id ?? null}
+                  filter={filter}
+                  onFilterChange={setFilter}
+                  onSelect={handleSelect}
+                  onOpenNewChat={() => setDialogOpen(true)}
+                  isLoading={conversationsQuery.isLoading}
+                  userResults={userResults}
+                  showUserResults={shouldSearchUsers}
+                  isSearchingUsers={isSearchingUsers}
+                  userSearchError={userSearchError}
+                  onViewProfile={(result) => setProfileUser(result)}
+                  currentUser={user}
+                  onEditProfile={() => {
+                    setSidebarOpen(false);
+                    setTimeout(() => {
+                      setEditProfileOpen(true);
+                    }, 200);
+                  }}
+                />
+              </FeatureBoundary>
             </Drawer.Popup>
           </Drawer.Viewport>
         </Drawer.Portal>
       </Drawer.Root>
       <div className="flex min-w-0 flex-1 flex-col">
         {selectedConversation ? (
-          <ChatPanel
-            key={selectedConversation.id}
-            conversationId={selectedConversation.id}
-            typingUserName={typingUserName}
-            conversationName={getConversationName(
-              selectedConversation,
-              user?.id ?? 0,
-            )}
-            isTyping={isTyping}
-            onOpenSidebar={() => setSidebarOpen(true)}
-            otherMemberId={
-              selectedConversation.type === "dm"
-                ? selectedConversation.members.find((m) => m.id !== user?.id)
-                    ?.id
-                : undefined
-            }
-          />
+          <FeatureBoundary name="ChatPanel">
+            <ChatPanel
+              key={selectedConversation.id}
+              conversationId={selectedConversation.id}
+              typingUserName={typingUserName}
+              conversationName={getConversationName(
+                selectedConversation,
+                user?.id ?? 0,
+              )}
+              isTyping={isTyping}
+              onOpenSidebar={() => setSidebarOpen(true)}
+              otherMemberId={
+                selectedConversation.type === "dm"
+                  ? selectedConversation.members.find((m) => m.id !== user?.id)
+                      ?.id
+                  : undefined
+              }
+            />
+          </FeatureBoundary>
         ) : (
           <section className="flex flex-1 items-center justify-center">
             <div className="flex flex-col items-center text-center text-slate-500 dark:text-slate-400">
@@ -191,21 +201,28 @@ export default function ChatPage() {
           </section>
         )}
       </div>
-      <NewChatDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
-      <ProfileDialog
-        userId={profileUser?.id ?? null}
-        initialUser={profileUser}
-        open={Boolean(profileUser)}
-        onClose={() => setProfileUser(null)}
-      />
-      <EditProfileDialog
-        open={editProfileOpen}
-        onClose={() => setEditProfileOpen(false)}
-        isDark={isDark}
-        onToggleDarkMode={toggleDarkMode}
-        muted={muted}
-        onToggleMute={toggleMute}
-      />
+      <FeatureBoundary name="NewChatDialog" fallback="hidden">
+        <NewChatDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
+      </FeatureBoundary>
+      <FeatureBoundary name="ProfileDialog" fallback="hidden">
+        <ProfileDialog
+          userId={profileUser?.id ?? null}
+          initialUser={profileUser}
+          open={Boolean(profileUser)}
+          onClose={() => setProfileUser(null)}
+        />
+      </FeatureBoundary>
+      <FeatureBoundary name="EditProfileDialog" fallback="hidden">
+        <EditProfileDialog
+          open={editProfileOpen}
+          onClose={() => setEditProfileOpen(false)}
+          isDark={isDark}
+          onToggleDarkMode={toggleDarkMode}
+          muted={muted}
+          onToggleMute={toggleMute}
+        />
+      </FeatureBoundary>
+      </div>
     </main>
   );
 }

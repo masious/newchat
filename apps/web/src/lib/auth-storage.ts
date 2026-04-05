@@ -1,3 +1,5 @@
+import { safeLocalStorage } from "./safe-local-storage";
+
 const AUTH_STORAGE_KEY = "newchat.jwt";
 let inMemoryToken: string | null = null;
 const listeners = new Set<(token: string | null) => void>();
@@ -11,7 +13,7 @@ export function getAuthToken() {
     return inMemoryToken;
   }
   if (inMemoryToken) return inMemoryToken;
-  const stored = window.localStorage.getItem(AUTH_STORAGE_KEY);
+  const stored = safeLocalStorage.getItem(AUTH_STORAGE_KEY);
   inMemoryToken = stored;
   return inMemoryToken;
 }
@@ -20,9 +22,9 @@ export function setAuthToken(token: string | null) {
   inMemoryToken = token;
   if (typeof window !== "undefined") {
     if (token) {
-      window.localStorage.setItem(AUTH_STORAGE_KEY, token);
+      safeLocalStorage.setItem(AUTH_STORAGE_KEY, token);
     } else {
-      window.localStorage.removeItem(AUTH_STORAGE_KEY);
+      safeLocalStorage.removeItem(AUTH_STORAGE_KEY);
     }
   }
   notify(inMemoryToken);

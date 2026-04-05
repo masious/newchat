@@ -1,7 +1,8 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError, type TRPCLink } from "@trpc/client";
+import { addToast } from "./toast-context";
 import { observable } from "@trpc/server/observable";
 import { useState } from "react";
 import * as Sentry from "@sentry/nextjs";
@@ -16,6 +17,28 @@ function makeQueryClient() {
         staleTime: 30 * 1000,
       },
     },
+    mutationCache: new MutationCache({
+      onError: (error, _variables, _context, mutation) => {
+        // Skip if the mutation has its own onError (handled locally)
+        if (mutation.options.onError) return;
+
+        if (error instanceof TRPCClientError) {
+          const httpStatus = error.data?.httpStatus;
+          // 401/403 handled by AuthProvider
+          if (httpStatus === 401 || httpStatus === 403) return;
+          if (httpStatus && httpStatus >= 500) {
+            addToast("Server error. Please try again later.");
+            return;
+          }
+          if (!error.data) {
+            addToast("Network error. Check your connection.");
+            return;
+          }
+        }
+
+        addToast("Something went wrong. Please try again.");
+      },
+    }),
   });
 }
 

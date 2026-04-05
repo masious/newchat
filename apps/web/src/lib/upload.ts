@@ -11,14 +11,28 @@ async function getImageDimensions(file: File): Promise<{ width: number; height: 
   return new Promise((resolve) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
+    let settled = false;
+
+    const cleanup = () => {
+      if (settled) return;
+      settled = true;
+      URL.revokeObjectURL(url);
+    };
+
+    const timeout = setTimeout(() => {
+      cleanup();
+      resolve(null);
+    }, 5000);
 
     img.onload = () => {
-      URL.revokeObjectURL(url);
+      clearTimeout(timeout);
+      cleanup();
       resolve({ width: img.naturalWidth, height: img.naturalHeight });
     };
 
     img.onerror = () => {
-      URL.revokeObjectURL(url);
+      clearTimeout(timeout);
+      cleanup();
       resolve(null);
     };
 
@@ -66,6 +80,7 @@ export async function uploadFileWithProgress(
   file: File,
   utils: TrpcClient,
   onProgress: (percent: number) => void,
+  signal?: AbortSignal,
 ): Promise<UploadedFile> {
   const contentType = file.type || "application/octet-stream";
 
@@ -82,6 +97,12 @@ export async function uploadFileWithProgress(
 
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+
+    const timeoutId = setTimeout(() => {
+      xhr.abort();
+      reject(new Error("Upload timed out after 60 seconds"));
+    }, 60_000);
+
     xhr.open("PUT", uploadUrl);
     xhr.setRequestHeader("Content-Type", contentType);
     xhr.upload.onprogress = (e) => {
@@ -90,13 +111,29 @@ export async function uploadFileWithProgress(
       }
     };
     xhr.onload = () => {
+      clearTimeout(timeoutId);
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve();
       } else {
         reject(new Error(`Upload failed: ${xhr.status}`));
       }
     };
-    xhr.onerror = () => reject(new Error("Upload failed"));
+    xhr.onerror = () => {
+      clearTimeout(timeoutId);
+      reject(new Error("Upload failed"));
+    };
+    xhr.onabort = () => {
+      clearTimeout(timeoutId);
+    };
+
+    if (signal) {
+      if (signal.aborted) {
+        reject(new Error("Upload was cancelled"));
+        return;
+      }
+      signal.addEventListener("abort", () => xhr.abort(), { once: true });
+    }
+
     xhr.send(file);
   });
 

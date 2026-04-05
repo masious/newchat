@@ -14,6 +14,8 @@ export function MessageBubble({
   isPending = false,
   isFailed = false,
   onImageLoad,
+  onRetry,
+  onDiscard,
 }: {
   content: string | null;
   createdAt: string | Date;
@@ -23,6 +25,8 @@ export function MessageBubble({
   isPending?: boolean;
   isFailed?: boolean;
   onImageLoad?: () => void;
+  onRetry?: () => void;
+  onDiscard?: () => void;
 }) {
   return (
     <div className={cn("flex", isMine ? "justify-end" : "justify-start")}>
@@ -68,7 +72,19 @@ export function MessageBubble({
           )}
         </span>
         {isFailed && (
-          <p className="mt-1 text-[10px] text-red-300">Failed to send</p>
+          <div className="mt-1 flex items-center gap-2 text-[10px]">
+            <span className="text-red-300">Failed to send</span>
+            {onRetry && (
+              <button onClick={onRetry} className="font-semibold text-white underline">
+                Retry
+              </button>
+            )}
+            {onDiscard && (
+              <button onClick={onDiscard} className="font-semibold text-red-300 underline">
+                Discard
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

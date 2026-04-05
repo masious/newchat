@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/lib/providers/auth-context";
@@ -28,6 +28,7 @@ function AuthPageContent() {
   const [pollStatus, setPollStatus] = useState<PollStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [exchangeError, setExchangeError] = useState(false);
 
   const createToken = trpc.auth.createToken.useMutation({
     onSuccess: (data: { token: string; expiresAt: string }) => {
@@ -50,7 +51,10 @@ function AuthPageContent() {
     return `https://t.me/${BOT_USERNAME}?start=${tokenInfo.token}`;
   }, [tokenInfo]);
 
+  const initiated = useRef(false);
   useEffect(() => {
+    if (initiated.current) return;
+    initiated.current = true;
     createToken.mutate();
   }, []);
 
@@ -67,10 +71,16 @@ function AuthPageContent() {
         }
         setPollStatus(status);
         if (status === "confirmed") {
-          const exchanged = await exchangeToken.mutateAsync({ token: tokenInfo.token });
-          login(exchanged.token);
-          const next = searchParams.get("next");
-          router.replace(next ?? "/onboarding");
+          try {
+            const exchanged = await exchangeToken.mutateAsync({ token: tokenInfo.token });
+            login(exchanged.token);
+            const next = searchParams.get("next");
+            router.replace(next ?? "/onboarding");
+          } catch (exchangeErr) {
+            console.error("Token exchange failed:", exchangeErr);
+            setExchangeError(true);
+            clearInterval(interval);
+          }
         } else if (status === "expired") {
           clearInterval(interval);
         }
@@ -90,6 +100,20 @@ function AuthPageContent() {
     await navigator.clipboard.writeText(telegramLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRetryExchange = async () => {
+    if (!tokenInfo) return;
+    setExchangeError(false);
+    try {
+      const exchanged = await exchangeToken.mutateAsync({ token: tokenInfo.token });
+      login(exchanged.token);
+      const next = searchParams.get("next");
+      router.replace(next ?? "/onboarding");
+    } catch (err) {
+      console.error("Token exchange retry failed:", err);
+      setExchangeError(true);
+    }
   };
 
   const handleRegenerate = () => {
@@ -146,6 +170,22 @@ function AuthPageContent() {
             </p>
           </div>
         </div>
+
+        {exchangeError && (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-semibold text-red-800">Sign-in failed</p>
+            <p className="mt-1 text-sm text-red-600">
+              Your identity was confirmed, but we couldn&apos;t complete sign-in.
+            </p>
+            <button
+              onClick={handleRetryExchange}
+              disabled={exchangeToken.isPending}
+              className="mt-3 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {exchangeToken.isPending ? "Retrying..." : "Retry sign-in"}
+            </button>
+          </div>
+        )}
 
         {pollStatus === "expired" && (
           <div className="mt-6 text-center">

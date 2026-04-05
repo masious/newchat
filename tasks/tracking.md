@@ -15,7 +15,7 @@
 - [x] [04 — SSE Improvements](./04-sse-improvements.md) — Ticket auth, stop logging tokens, connection max lifetime
 - [x] [06 — Upload Security](./06-upload-security.md) — ContentLength enforcement, remove SVG, validate attachment URLs
 - [x] [07 — Database Schema](./07-database-schema.md) — Missing indexes, cascade deletes, consistency
-- [ ] [08 — Frontend Robustness](./08-frontend-robustness.md) — Error boundaries, auth page guard, upload cancellation
+- [x] [08 — Frontend Robustness](./08-frontend-robustness.md) — Error boundaries, auth page guard, upload cancellation
 - [ ] [09 — Server Hardening](./09-server-hardening.md) — Security headers, structured logging, bot error handling, auth header parsing
 - [ ] [11 — Design System Consistency](./11-design-system-consistency.md) — Fix ~7 categories of UI inconsistencies to match design-system.md
 

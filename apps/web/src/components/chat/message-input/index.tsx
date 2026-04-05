@@ -40,7 +40,7 @@ export const MessageInput = forwardRef<
   const { notifyTyping, resetTypingThrottle } =
     useTypingIndicator(conversationId);
   const { textareaRef, resetHeight } = useAutoResizeTextarea(message);
-  const fileHandlers = useFileAttachments();
+  const fileHandlers = useFileAttachments(conversationId);
 
   useImperativeHandle(ref, () => ({
     addFiles: fileHandlers.addFiles,
@@ -192,9 +192,8 @@ export const MessageInput = forwardRef<
       className="border-t dark:bg-slate-800 border-slate-200 dark:border-slate-700"
     >
       <PendingAttachments
-        files={fileHandlers.pendingFiles}
+        entries={fileHandlers.entries}
         onRemove={fileHandlers.removeFile}
-        uploadProgress={fileHandlers.uploadProgress}
       />
       <div className="mx-auto flex items-center max-w-3xl gap-2 px-2 py-2 md:gap-3 md:px-2 md:py-4">
         <AttachButton

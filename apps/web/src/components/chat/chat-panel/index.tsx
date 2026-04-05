@@ -17,7 +17,10 @@ import {
 import type { ListRowProps } from "react-virtualized";
 import "react-virtualized/styles.css";
 import { useAuth } from "@/lib/providers/auth-context";
-import { isOptimisticMessage } from "@/lib/trpc-types";
+import { trpc } from "@/lib/trpc";
+import { addToast } from "@/lib/providers/toast-context";
+import { registerOptimisticMessage, markOptimisticFailed } from "@/lib/optimistic-messages";
+import { isOptimisticMessage, type OptimisticMessage } from "@/lib/trpc-types";
 import { MessageBubble } from "../message-bubble";
 import { MessageInput, type MessageInputHandle } from "../message-input";
 import type { Attachment } from "../message-bubble/components/AttachmentPreview";
@@ -35,6 +38,7 @@ import { useVirtualizedMessages } from "./hooks/useVirtualizedMessages";
 import type { ChatListContext } from "./types";
 import LoadingHeader from "./components/LoadingHeader";
 import TypingFooter from "./components/TypingFooter";
+import { FeatureBoundary } from "@/components/ui/feature-boundary";
 
 const HEADER_ROW_COUNT = 1;
 const AT_BOTTOM_THRESHOLD = 50;
@@ -64,12 +68,83 @@ export function ChatPanel({
     inputRef.current?.addFiles(files);
   });
 
+  const utils = trpc.useUtils();
+  const sendMessage = trpc.messages.send.useMutation();
+
   const {
     messagesQuery,
     flatMessages,
     prevMessageCountRef,
     handleScrollNearTop,
   } = useVirtualizedMessages(conversationId);
+
+  const handleRetryMessage = useCallback(
+    async (message: OptimisticMessage) => {
+      // Set status back to pending
+      utils.messages.list.setInfiniteData({ conversationId }, (current) => {
+        if (!current) return current;
+        return {
+          pages: current.pages.map((page) => ({
+            ...page,
+            messages: page.messages.map((msg) =>
+              msg.id === message.id ? { ...msg, _status: "pending" } : msg,
+            ),
+          })),
+          pageParams: current.pageParams,
+        };
+      });
+
+      // Re-register for SSE dedup
+      registerOptimisticMessage({
+        optimisticId: message._optimisticId,
+        negativeId: message.id,
+        conversationId,
+        content: message.content ?? null,
+        sentAt: Date.now(),
+      });
+
+      try {
+        await sendMessage.mutateAsync({
+          conversationId,
+          content: message.content ?? "",
+          attachments: message.attachments ?? undefined,
+        });
+      } catch (err) {
+        markOptimisticFailed(message._optimisticId);
+        utils.messages.list.setInfiniteData({ conversationId }, (current) => {
+          if (!current) return current;
+          return {
+            pages: current.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((msg) =>
+                msg.id === message.id ? { ...msg, _status: "failed" } : msg,
+              ),
+            })),
+            pageParams: current.pageParams,
+          };
+        });
+        const errorMsg = err instanceof Error ? err.message : "Failed to send message";
+        addToast(errorMsg);
+      }
+    },
+    [conversationId, utils, sendMessage],
+  );
+
+  const handleDiscardMessage = useCallback(
+    (messageId: number) => {
+      utils.messages.list.setInfiniteData({ conversationId }, (current) => {
+        if (!current) return current;
+        return {
+          pages: current.pages.map((page) => ({
+            ...page,
+            messages: page.messages.filter((msg) => msg.id !== messageId),
+          })),
+          pageParams: current.pageParams,
+        };
+      });
+    },
+    [conversationId, utils],
+  );
 
   // Keep a ref to flatMessages for keyMapper access during cache operations
   const flatMessagesRef = useRef(flatMessages);
@@ -207,7 +282,7 @@ export function ChatPanel({
       const message = flatMessages[messageIndex];
       if (!message) return null;
 
-      const isMine = message.sender.id === user?.id;
+      const isMine = message.sender?.id === user?.id;
       const prev = messageIndex > 0 ? flatMessages[messageIndex - 1] : null;
       const showDateSeparator =
         !prev || !isSameDay(prev.createdAt, message.createdAt);
@@ -234,7 +309,7 @@ export function ChatPanel({
                 ref={
                   optimistic
                     ? undefined
-                    : (el) => observeRef(el, message.id, message.sender.id)
+                    : (el) => observeRef(el, message.id, message.sender?.id ?? 0)
                 }
               >
                 <div className="mx-auto max-w-3xl">
@@ -243,21 +318,33 @@ export function ChatPanel({
                       label={formatDateSeparator(message.createdAt)}
                     />
                   )}
-                  <MessageBubble
-                    content={message.content ?? null}
-                    createdAt={message.createdAt}
-                    isMine={isMine}
-                    readByOthers={Boolean(
-                      (message as { readByOthers?: boolean }).readByOthers,
-                    )}
-                    attachments={
-                      (message as { attachments?: Attachment[] | null })
-                        .attachments
-                    }
-                    isPending={optimistic && message._status === "pending"}
-                    isFailed={optimistic && message._status === "failed"}
-                    onImageLoad={measure}
-                  />
+                  <FeatureBoundary name="MessageBubble" fallback="hidden">
+                    <MessageBubble
+                      content={message.content ?? null}
+                      createdAt={message.createdAt}
+                      isMine={isMine}
+                      readByOthers={Boolean(
+                        (message as { readByOthers?: boolean }).readByOthers,
+                      )}
+                      attachments={
+                        (message as { attachments?: Attachment[] | null })
+                          .attachments
+                      }
+                      isPending={optimistic && message._status === "pending"}
+                      isFailed={optimistic && message._status === "failed"}
+                      onImageLoad={measure}
+                      onRetry={
+                        optimistic && message._status === "failed"
+                          ? () => handleRetryMessage(message)
+                          : undefined
+                      }
+                      onDiscard={
+                        optimistic && message._status === "failed"
+                          ? () => handleDiscardMessage(message.id)
+                          : undefined
+                      }
+                    />
+                  </FeatureBoundary>
                 </div>
               </div>
             </div>
@@ -265,7 +352,7 @@ export function ChatPanel({
         </CellMeasurer>
       );
     },
-    [cache, flatMessages, user?.id, observeRef, listContext],
+    [cache, flatMessages, user?.id, observeRef, listContext, handleRetryMessage, handleDiscardMessage],
   );
 
   const headerContent = (
@@ -287,7 +374,9 @@ export function ChatPanel({
             <LoadingMessages />
           </div>
         </div>
-        <MessageInput ref={inputRef} conversationId={conversationId} />
+        <FeatureBoundary name="MessageInput" fallback="inline">
+          <MessageInput ref={inputRef} conversationId={conversationId} />
+        </FeatureBoundary>
       </section>
     );
   }
@@ -301,7 +390,9 @@ export function ChatPanel({
             <EmptyMessages />
           </div>
         </div>
-        <MessageInput ref={inputRef} conversationId={conversationId} />
+        <FeatureBoundary name="MessageInput" fallback="inline">
+          <MessageInput ref={inputRef} conversationId={conversationId} />
+        </FeatureBoundary>
       </section>
     );
   }
@@ -339,7 +430,9 @@ export function ChatPanel({
       </div>
 
       <TypingFooter context={listContext} />
-      <MessageInput ref={inputRef} conversationId={conversationId} />
+      <FeatureBoundary name="MessageInput" fallback="inline">
+        <MessageInput ref={inputRef} conversationId={conversationId} />
+      </FeatureBoundary>
     </section>
   );
 }
