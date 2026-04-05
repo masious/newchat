@@ -15,7 +15,7 @@ export function AttachButton({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center justify-center text-slate-500 dark:text-slate-400"
+          className="flex items-center size-9 justify-center text-slate-500 dark:text-slate-400"
         >
           <Paperclip className="h-5 w-5" />
         </button>

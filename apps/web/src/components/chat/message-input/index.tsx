@@ -196,7 +196,7 @@ export const MessageInput = forwardRef<
         onRemove={fileHandlers.removeFile}
         uploadProgress={fileHandlers.uploadProgress}
       />
-      <div className="mx-auto flex items-center max-w-3xl gap-2 px-4 py-3 md:gap-3 md:px-6 md:py-4">
+      <div className="mx-auto flex items-center max-w-3xl gap-2 px-2 py-2 md:gap-3 md:px-2 md:py-4">
         <AttachButton
           fileInputRef={fileHandlers.fileInputRef}
           onFileSelect={handleFileSelect}
@@ -207,7 +207,7 @@ export const MessageInput = forwardRef<
           onKeyDown={handleKeyDown}
           textareaRef={textareaRef}
         />
-        <div className="hidden md:block">
+        <div className="hidden md:block size-9 p-2">
           <EmojiButton
             onEmojiSelect={(emoji) => {
               setMessage((prev) => prev + emoji);
