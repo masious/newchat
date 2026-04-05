@@ -3,27 +3,7 @@ import { z } from "zod";
 import { nanoid } from "nanoid";
 import { router, protectedProcedure } from "../init";
 import { getPresignedUploadUrl, getPublicUrl } from "../../lib/r2";
-
-const ALLOWED_CONTENT_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-  "image/svg+xml",
-  "video/mp4",
-  "video/webm",
-  "audio/mpeg",
-  "audio/ogg",
-  "audio/wav",
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-excel",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "text/plain",
-]);
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+import { ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE } from "../../lib/upload-constants";
 
 export const uploadsRouter = router({
   getPresignedUrl: protectedProcedure
@@ -51,7 +31,7 @@ export const uploadsRouter = router({
       const safeFilename = input.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
       const key = `uploads/${ctx.userId}/${nanoid(12)}/${safeFilename}`;
 
-      const uploadUrl = await getPresignedUploadUrl(key, input.contentType);
+      const uploadUrl = await getPresignedUploadUrl(key, input.contentType, input.size);
       const publicUrl = getPublicUrl(key);
 
       return { uploadUrl, publicUrl, key };

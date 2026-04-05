@@ -3,8 +3,9 @@ import { z } from "zod";
 import { users, and, eq, ilike, or } from "@newchat/db";
 import { getPresenceStatus } from "../../lib/presence";
 import { router, protectedProcedure } from "../init";
+import { getEnvOrThrow } from "../../lib/r2";
 
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL ?? "";
+const R2_PUBLIC_URL = getEnvOrThrow("R2_PUBLIC_URL");
 
 export const usersRouter = router({
   me: protectedProcedure.query(async ({ ctx }) => {

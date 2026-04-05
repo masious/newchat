@@ -16,6 +16,10 @@ import { notifyUserOfMessage } from "../../services/notification-service";
 import { fetchMessageWithSender } from "../../services/fetch-message";
 import { publishConversationEvent } from "../../services/realtime-events";
 import { ensureConversationMember } from "./helpers";
+import { getEnvOrThrow } from "../../lib/r2";
+import { ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE } from "../../lib/upload-constants";
+
+const R2_PUBLIC_URL = getEnvOrThrow("R2_PUBLIC_URL");
 
 export const messagesRouter = router({
   list: protectedProcedure
@@ -77,10 +81,16 @@ export const messagesRouter = router({
         attachments: z
           .array(
             z.object({
-              url: z.string().url().max(2048),
+              url: z.string().url().max(2048).refine(
+                (url) => url.startsWith(R2_PUBLIC_URL),
+                { message: "Attachment URL must point to the upload storage" },
+              ),
               name: z.string().max(255),
-              type: z.string().max(127),
-              size: z.number().int().nonnegative(),
+              type: z.string().max(127).refine(
+                (t) => ALLOWED_CONTENT_TYPES.has(t),
+                { message: "Content type not allowed" },
+              ),
+              size: z.number().int().nonnegative().max(MAX_FILE_SIZE),
               width: z.number().int().positive().optional(),
               height: z.number().int().positive().optional(),
             }),

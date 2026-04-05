@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-function getEnvOrThrow(name: string): string {
+export function getEnvOrThrow(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`${name} is not set`);
   return value;
@@ -28,11 +28,14 @@ function getClient(): S3Client {
 export async function getPresignedUploadUrl(
   key: string,
   contentType: string,
+  size: number,
 ): Promise<string> {
   const command = new PutObjectCommand({
     Bucket: getEnvOrThrow("R2_BUCKET_NAME"),
     Key: key,
     ContentType: contentType,
+    ContentLength: size,
+    ContentDisposition: contentType.startsWith("image/") ? "inline" : "attachment",
   });
   return getSignedUrl(getClient(), command, { expiresIn: 300 });
 }
