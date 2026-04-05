@@ -1,6 +1,6 @@
-import { VirtuosoContext } from "../types";
+import { ChatListContext } from "../types";
 
-export default function LoadingHeader({ context }: { context?: VirtuosoContext }) {
+export default function LoadingHeader({ context }: { context?: ChatListContext }) {
   if (!context) return null;
   if (context.isFetchingOlder) {
     return (

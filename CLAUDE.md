@@ -12,7 +12,7 @@ bun install
 bun dev
 
 # Build all apps
-bun build
+bun run build
 
 # Lint all apps
 bun lint

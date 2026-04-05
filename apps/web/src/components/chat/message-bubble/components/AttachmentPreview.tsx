@@ -9,9 +9,11 @@ export type { Attachment };
 export function AttachmentPreview({
   attachment,
   isMine,
+  onImageLoad,
 }: {
   attachment: Attachment;
   isMine: boolean;
+  onImageLoad?: () => void;
 }) {
   if (isImageType(attachment.type)) {
     const { width, height } = attachment;
@@ -54,6 +56,7 @@ export function AttachmentPreview({
             loading="lazy"
             width={width}
             height={height}
+            onLoad={onImageLoad}
           />
         </div>
       </a>

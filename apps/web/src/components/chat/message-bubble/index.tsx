@@ -13,6 +13,7 @@ export function MessageBubble({
   attachments,
   isPending = false,
   isFailed = false,
+  onImageLoad,
 }: {
   content: string | null;
   createdAt: string | Date;
@@ -21,6 +22,7 @@ export function MessageBubble({
   attachments?: Attachment[] | null;
   isPending?: boolean;
   isFailed?: boolean;
+  onImageLoad?: () => void;
 }) {
   return (
     <div className={cn("flex", isMine ? "justify-end" : "justify-start")}>
@@ -36,7 +38,7 @@ export function MessageBubble({
         {attachments && attachments.length > 0 && (
           <div className="mb-1.5 flex flex-col gap-1.5 -mx-2">
             {attachments.map((att, i) => (
-              <AttachmentPreview key={i} attachment={att} isMine={isMine} />
+              <AttachmentPreview key={i} attachment={att} isMine={isMine} onImageLoad={onImageLoad} />
             ))}
           </div>
         )}

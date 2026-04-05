@@ -1,7 +1,7 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 
-const START_INDEX = 100_000;
+const SCROLL_THRESHOLD = 200;
 
 export function useVirtualizedMessages(conversationId: number) {
   const messagesQuery = trpc.messages.list.useInfiniteQuery(
@@ -22,29 +22,29 @@ export function useVirtualizedMessages(conversationId: number) {
     });
   }, [messagesQuery.data]);
 
-  const firstItemIndex = useMemo(
-    () => START_INDEX - flatMessages.length,
-    [flatMessages.length],
+  const prevMessageCountRef = useRef(flatMessages.length);
+
+  const handleScrollNearTop = useCallback(
+    (scrollTop: number) => {
+      if (
+        scrollTop < SCROLL_THRESHOLD &&
+        messagesQuery.hasNextPage &&
+        !messagesQuery.isFetchingNextPage
+      ) {
+        messagesQuery.fetchNextPage();
+      }
+    },
+    [
+      messagesQuery.hasNextPage,
+      messagesQuery.isFetchingNextPage,
+      messagesQuery.fetchNextPage,
+    ],
   );
-
-  const [atBottom, setAtBottom] = useState(true);
-
-  const handleStartReached = useCallback(() => {
-    if (messagesQuery.hasNextPage && !messagesQuery.isFetchingNextPage) {
-      messagesQuery.fetchNextPage();
-    }
-  }, [
-    messagesQuery.hasNextPage,
-    messagesQuery.isFetchingNextPage,
-    messagesQuery.fetchNextPage,
-  ]);
 
   return {
     messagesQuery,
     flatMessages,
-    firstItemIndex,
-    atBottom,
-    setAtBottom,
-    handleStartReached,
+    prevMessageCountRef,
+    handleScrollNearTop,
   };
 }

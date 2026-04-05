@@ -8,6 +8,7 @@ import {
   useImperativeHandle,
   useState,
 } from "react";
+import { SendHorizontal } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/lib/providers/auth-context";
 import { addToast } from "@/lib/providers/toast-context";
@@ -53,18 +54,19 @@ export const MessageInput = forwardRef<
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (
-      event.key === "Enter" &&
-      !event.shiftKey &&
-      !event.ctrlKey &&
-      !event.metaKey
-    ) {
+    if (event.key !== "Enter") return;
+
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+
+    if (isDesktop && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+      // Desktop: plain Enter sends, Shift/Ctrl/Meta+Enter inserts newline
       event.preventDefault();
       const form = event.currentTarget.form;
       if (form) {
         form.requestSubmit();
       }
     }
+    // Mobile: Enter always inserts newline (default behavior)
   };
 
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
@@ -212,6 +214,12 @@ export const MessageInput = forwardRef<
             }}
           />
         </div>
+        <button
+          type="submit"
+          className="flex items-center justify-center rounded-full bg-indigo-600 p-2 text-white transition-opacity hover:opacity-80 active:opacity-60 md:hidden"
+        >
+          <SendHorizontal size={20} />
+        </button>
       </div>
     </form>
   );

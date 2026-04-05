@@ -20,7 +20,7 @@
     "next": "^15",
     "react": "^19",
     "react-dom": "^19",
-    "react-virtuoso": "^4.18.4",
+    "react-virtualized": "^9.22.5",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
@@ -34,6 +34,7 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-virtualized": "^9.21.30",
     "@typescript-eslint/eslint-plugin": "^8.13.0",
     "@typescript-eslint/parser": "^8.13.0",
     "@rushstack/eslint-patch": "^1.10.4",
