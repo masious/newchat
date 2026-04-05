@@ -55,10 +55,28 @@ Bun monorepo managed by Turborepo with three apps and two shared packages.
 - **File uploads**: Client gets presigned URL from server → PUTs directly to R2 → stores public URL in message attachments (JSONB column).
 - **Path alias**: All apps use `@/*` → `src/*`.
 
+### Detailed Flows
+
+See **[docs/](docs/README.md)** for comprehensive documentation of every runtime flow. Consult before making implementation decisions:
+- [auth.md](docs/auth.md) — Telegram login, JWT, protected procedures, rate limiting
+- [sse-realtime.md](docs/sse-realtime.md) — SSE connection, event types, client handling
+- [conversations.md](docs/conversations.md) — DM vs group, creation, ConversationSummary shape
+- [messages.md](docs/messages.md) — Send, optimistic UI, delivery, read receipts
+- [presence-and-typing.md](docs/presence-and-typing.md) — Presence lifecycle, typing indicators
+- [file-uploads.md](docs/file-uploads.md) — Presigned URLs, R2, attachment schema
+- [push-notifications.md](docs/push-notifications.md) — Web Push & Telegram delivery, notification channel, subscription flow
+- [user-profiles.md](docs/user-profiles.md) — users.me/update/search/profile, isPublic flag, avatar upload, presence
+- [error-handling.md](docs/error-handling.md) — tRPC error codes, ensureConversationMember, client error handling
+- [input-validation.md](docs/input-validation.md) — Zod schemas, message/username/attachment constraints, sanitization
+- [reference.md](docs/reference.md) — Redis keys, DB schema, tRPC routers, constants
+
 ## Environment
 
 Copy `apps/server/.env.example` to `apps/server/.env`. Required: `DATABASE_URL` (Neon), `REDIS_URL`, `TELEGRAM_BOT_TOKEN`, `JWT_SECRET`, `R2_*` credentials. The web app needs `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` set.
 
 
-## Workflow Rules 
+## Workflow Rules
 Before starting edits, present your plan and wait for explicit user approval. Do not begin modifying files until the approach is confirmed. When the user asks for a specific change, do exactly that change — do not make additional 'improvement' edits beyond scope.
+
+## Keeping Docs in Sync
+After implementing a new feature, changing an architectural pattern, modifying data shapes, adding/removing tRPC procedures, changing Redis keys/channels, or updating configuration constants, update the relevant file(s) in `docs/` to reflect the change. Docs must stay in sync with the actual implementation — treat them as part of the deliverable, not an afterthought.
