@@ -1,3 +1,7 @@
+function escapeMarkdown(text: string): string {
+  return text.replace(/[*_[\]()~`>#+\-=|{}.!\\]/g, "\\$&");
+}
+
 export interface TelegramNotificationPayload {
   senderName: string;
   content: string;
@@ -23,9 +27,12 @@ export async function sendTelegramNotification(
     ? payload.content.substring(0, 100) + "..."
     : payload.content;
 
+  const safeSender = escapeMarkdown(payload.senderName);
+  const safeContent = escapeMarkdown(content);
+
   const text = payload.conversationName
-    ? `💬 *${payload.senderName}* in *${payload.conversationName}*:\n${content}\n\n[Open in NewChat](${conversationUrl})`
-    : `💬 *${payload.senderName}*:\n${content}\n\n[Open in NewChat](${conversationUrl})`;
+    ? `💬 *${safeSender}* in *${escapeMarkdown(payload.conversationName)}*:\n${safeContent}\n\n[Open in NewChat](${conversationUrl})`
+    : `💬 *${safeSender}*:\n${safeContent}\n\n[Open in NewChat](${conversationUrl})`;
 
   try {
     const response = await fetch(

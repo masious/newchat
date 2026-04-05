@@ -17,7 +17,7 @@ export const authRouter = router({
     };
   }),
   pollToken: publicProcedure
-    .input(z.object({ token: z.string().min(1) }))
+    .input(z.object({ token: z.string().regex(/^[a-zA-Z0-9_-]{32}$/) }))
     .query(async ({ ctx, input }) => {
       const record = await ctx.db.query.authTokens.findFirst({
         where: eq(authTokens.token, input.token),
@@ -42,7 +42,7 @@ export const authRouter = router({
       return { status: record.status };
     }),
   exchange: publicProcedure
-    .input(z.object({ token: z.string().min(1) }))
+    .input(z.object({ token: z.string().regex(/^[a-zA-Z0-9_-]{32}$/) }))
     .mutation(async ({ ctx, input }) => {
       const [record] = await ctx.db
         .update(authTokens)

@@ -16,7 +16,7 @@ export const conversationsRouter = router({
     .input(
       z.object({
         type: z.enum(["dm", "group"]),
-        memberUserIds: z.array(z.number().int().positive()),
+        memberUserIds: z.array(z.number().int().positive()).max(100),
         name: z.string().min(1).max(255).optional(),
       }),
     )

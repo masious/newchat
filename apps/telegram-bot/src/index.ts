@@ -15,6 +15,11 @@ const botUsername =
 bot.command("start", async (ctx) => {
   const payload = ctx.match; // deep link payload = login token
 
+  if (payload && !/^[a-zA-Z0-9_-]{32}$/.test(payload)) {
+    await ctx.reply("This login link is invalid or has expired.");
+    return;
+  }
+
   if (!payload) {
     const generatedToken = nanoid(32);
     await db.insert(authTokens).values({ token: generatedToken });

@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   users,
@@ -7,6 +8,7 @@ import {
   and,
   desc,
   eq,
+  inArray,
   lt,
 } from "@newchat/db";
 import { router, protectedProcedure } from "../init";
@@ -157,6 +159,19 @@ export const messagesRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       await ensureConversationMember(ctx.db, input.conversationId, ctx.userId!);
+
+      const validMessages = await ctx.db
+        .select({ id: messages.id })
+        .from(messages)
+        .where(
+          and(
+            inArray(messages.id, input.messageIds),
+            eq(messages.conversationId, input.conversationId),
+          ),
+        );
+      if (validMessages.length !== input.messageIds.length) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid messageIds" });
+      }
 
       const now = new Date();
       await ctx.db
