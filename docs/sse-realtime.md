@@ -17,13 +17,15 @@ Server /events handler:
   1. Redis GETDEL sse:ticket:{ticket} -> userId  (one-time use)
   2. If missing -> 401
   3. Redis INCR sse:conn:{userId} (concurrency check, max 5)
-  4. If over limit -> 429
-  5. Open SSE stream
+  4. If over limit -> DECR (without refreshing TTL) -> 429
+  5. If under limit -> EXPIRE sse:conn:{userId} 300 -> open SSE stream
 ```
 
 - Ticket TTL: 30 seconds
 - Max concurrent connections per user: 5
-- Defined in `apps/server/src/trpc/routers/sse.ts` and `apps/server/src/index.ts:100-256`
+- Concurrency key TTL: 300s (safety net), refreshed every 60s by the presence heartbeat while connection is active
+- Rejected connection attempts do NOT refresh the TTL, allowing stale counts to expire naturally
+- Defined in `apps/server/src/trpc/routers/sse.ts` and `apps/server/src/index.ts`
 
 ## Connection Lifecycle
 
@@ -37,9 +39,9 @@ SSE stream opened:
      - presence:updates
   4. Send init event: { userId, channels: [conversationId, ...] }
   5. Start keepalive ping every 30 seconds
-  6. Start presence heartbeat every 60 seconds
+  6. Start presence heartbeat every 60 seconds (also refreshes concurrency key TTL)
 
-SSE stream closed (onAbort):
+SSE stream closed (cleanup — runs once via onAbort, keepalive error, or write error):
   1. clearInterval(keepalive)
   2. clearInterval(presenceHeartbeat)
   3. subscriber.disconnect()

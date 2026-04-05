@@ -7,10 +7,7 @@ import { createTRPCContext } from "./trpc/init";
 import { createDb, conversationMembers, authTokens, and, eq, lt } from "@newchat/db";
 
 import { createRedisSubscriber, redisPublisher } from "./lib/redis";
-import {
-  incrementConcurrency,
-  decrementConcurrency,
-} from "./lib/rate-limit";
+import { decrementConcurrency } from "./lib/rate-limit";
 import { createRateLimitMiddleware } from "./middleware/rate-limit";
 import {
   markOnline,
@@ -127,11 +124,14 @@ app.get("/events", async (c) => {
 
   // Enforce max concurrent SSE connections per user
   const sseKey = `sse:conn:${userId}`;
-  const connCount = await incrementConcurrency(redisPublisher, sseKey, SSE_CONN_TTL_SEC);
-  if (connCount > MAX_SSE_CONNECTIONS) {
-    await decrementConcurrency(redisPublisher, sseKey);
+  const currentCount = await redisPublisher.incr(sseKey);
+  if (currentCount > MAX_SSE_CONNECTIONS) {
+    // Decrement but do NOT refresh TTL — let stale counts expire naturally
+    await redisPublisher.decr(sseKey);
     return c.json({ error: "Too many concurrent connections" }, 429);
   }
+  // Only refresh TTL after successful admission
+  await redisPublisher.expire(sseKey, SSE_CONN_TTL_SEC);
 
   return streamSSE(c, async (stream) => {
     await markOnline(userId);
@@ -161,6 +161,8 @@ app.get("/events", async (c) => {
       }).catch((error) => {
         logger.error({ error }, "Failed to refresh presence status");
       });
+      // Keep concurrency key alive while connection is active
+      redisPublisher.expire(sseKey, SSE_CONN_TTL_SEC).catch(() => {});
     }, PRESENCE_REFRESH_MS);
 
     await stream.writeSSE({
@@ -171,13 +173,26 @@ app.get("/events", async (c) => {
       }),
     });
 
+    let cleaned = false;
+    function cleanup() {
+      if (cleaned) return;
+      cleaned = true;
+      clearInterval(keepalive);
+      clearInterval(presenceHeartbeat);
+      subscriber.disconnect();
+      decrementConcurrency(redisPublisher, sseKey).catch((err) => {
+        logger.error({ err }, "Failed to decrement SSE connection count");
+      });
+      markOffline(userId).catch((err) => {
+        logger.error({ err }, "Failed to mark offline");
+      });
+    }
+
     const keepalive = setInterval(async () => {
       try {
         await stream.writeSSE({ data: "", event: "ping", id: "" });
       } catch {
-        clearInterval(keepalive);
-        clearInterval(presenceHeartbeat);
-        subscriber.disconnect();
+        cleanup();
       }
     }, 30_000);
 
@@ -243,22 +258,12 @@ app.get("/events", async (c) => {
           data: JSON.stringify({ channel, payload: parsed }),
         });
       } catch {
-        clearInterval(keepalive);
-        clearInterval(presenceHeartbeat);
-        subscriber.disconnect();
+        cleanup();
       }
     });
 
     stream.onAbort(() => {
-      clearInterval(keepalive);
-      clearInterval(presenceHeartbeat);
-      subscriber.disconnect();
-      decrementConcurrency(redisPublisher, sseKey).catch((err) => {
-        logger.error({ err }, "Failed to decrement SSE connection count");
-      });
-      markOffline(userId).catch((err) => {
-        logger.error({ err }, "Failed to mark offline");
-      });
+      cleanup();
     });
 
     await new Promise<void>((resolve) => {

@@ -1,7 +1,7 @@
 # Design System Consistency
 
 **Priority:** Medium
-**Status:** Todo
+**Status:** Done
 **Reference:** [docs/design-system.md](../docs/design-system.md)
 
 Audit found ~7 categories of inconsistency between existing components and the design system doc. Each item below lists the deviation, the canonical pattern from the doc, and every file that needs updating.
