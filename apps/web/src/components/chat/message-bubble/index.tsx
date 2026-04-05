@@ -1,3 +1,4 @@
+import { cn } from "@/lib/cn";
 import { Clock } from "lucide-react";
 import { formatRelativeTime, formatAbsoluteTime } from "@/lib/formatting";
 import { AttachmentPreview, type Attachment } from "./components/AttachmentPreview";
@@ -22,13 +23,15 @@ export function MessageBubble({
   isFailed?: boolean;
 }) {
   return (
-    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+    <div className={cn("flex", isMine ? "justify-end" : "justify-start")}>
       <div
-        className={`max-w-md rounded-2xl px-4 py-2 text-sm shadow ${
+        className={cn(
+          "max-w-md rounded-2xl px-4 py-2 text-sm shadow",
           isMine
             ? "bg-indigo-600 text-white"
-            : "bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100"
-        }${isPending ? " opacity-85" : ""}`}
+            : "bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100",
+          isPending && "opacity-85",
+        )}
       >
         {attachments && attachments.length > 0 && (
           <div className="mb-1.5 flex flex-col gap-1.5 -mx-2">
@@ -39,9 +42,10 @@ export function MessageBubble({
         )}
         {content && <p>{content}</p>}
         <span
-          className={`mt-1 flex justify-end items-center gap-1 text-[10px] opacity-80 ${
-            isMine ? "text-white" : "text-slate-600 dark:text-slate-400"
-          }`}
+          className={cn(
+            "mt-1 flex justify-end items-center gap-1 text-[10px] opacity-80",
+            isMine ? "text-white" : "text-slate-600 dark:text-slate-400",
+          )}
           title={isPending ? "Sending..." : formatAbsoluteTime(createdAt)}
         >
           {isPending ? "Sending" : formatRelativeTime(createdAt)}

@@ -9,6 +9,7 @@ import { MessageInput, type MessageInputHandle } from "../message-input";
 import type { Attachment } from "../message-bubble/components/AttachmentPreview";
 import { formatDateSeparator, isSameDay } from "@/lib/formatting";
 import { useTimeTick } from "@/lib/hooks/use-relative-time";
+import { cn } from "@/lib/cn";
 import { useDragAndDrop } from "./hooks/useDragAndDrop";
 import { ChatHeader } from "./components/ChatHeader";
 import { DragOverlay } from "./components/DragOverlay";
@@ -72,7 +73,7 @@ export function ChatPanel({
 
       return (
         <div
-          className={`px-4 pb-3 md:px-6${optimistic ? " animate-message-send" : ""}`}
+          className={cn("px-4 pb-3 md:px-6", optimistic && "animate-message-send")}
           ref={
             optimistic
               ? undefined

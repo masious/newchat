@@ -1,3 +1,4 @@
+import { cn } from "@/lib/cn";
 import { userDisplayName } from "@/lib/formatting";
 import { Avatar } from "@base-ui/react/avatar";
 import { Collapsible } from "@base-ui/react/collapsible";
@@ -99,9 +100,7 @@ export function PresenceIndicator({ presence }: { presence?: PresenceSummary }) 
   return (
     <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
       <span
-        className={`h-2 w-2 rounded-full ${
-          isOnline ? "bg-emerald-500" : "bg-slate-400"
-        }`}
+        className={cn("h-2 w-2 rounded-full", isOnline ? "bg-emerald-500" : "bg-slate-400")}
       />
       <span>{label}</span>
     </div>

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/cn";
 import { ContextMenu } from "@base-ui/react/context-menu";
 import { VolumeX, Trash2 } from "lucide-react";
 import type { ConversationSummary } from "../types";
@@ -16,7 +17,7 @@ function Avatar({
   if (avatarUrl) {
     return (
       <div
-        className={`${size} shrink-0 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700`}
+        className={cn(size, "shrink-0 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700")}
       >
         <img
           src={avatarUrl}
@@ -28,7 +29,7 @@ function Avatar({
   }
   return (
     <div
-      className={`${size} flex shrink-0 items-center justify-center rounded-full bg-slate-100 ${textSize} font-semibold text-slate-500 dark:bg-slate-700 dark:text-slate-400`}
+      className={cn(size, "flex shrink-0 items-center justify-center rounded-full bg-slate-100 font-semibold text-slate-500 dark:bg-slate-700 dark:text-slate-400", textSize)}
     >
       {name.slice(0, 1)}
     </div>
@@ -110,9 +111,10 @@ export function ConversationListItem({
           render={
             <button
               onClick={() => onSelect(conversation.id)}
-              className={`flex w-full items-center gap-3 px-4 py-3 text-left transition ${
-                isSelected ? "bg-indigo-50 dark:bg-indigo-900/30" : "hover:bg-slate-50 dark:hover:bg-slate-700"
-              }`}
+              className={cn(
+                "flex w-full items-center gap-3 px-4 py-3 text-left transition",
+                isSelected ? "bg-indigo-50 dark:bg-indigo-900/30" : "hover:bg-slate-50 dark:hover:bg-slate-700",
+              )}
             />
           }
         >
