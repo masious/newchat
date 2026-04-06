@@ -1,6 +1,5 @@
 "use client";
 
-import { Form } from "@base-ui/react/form";
 import { useOnboardingForm } from "./hooks/useOnboardingForm";
 import { ProfileFields } from "./components/ProfileFields";
 import { AvatarPicker } from "./components/AvatarPicker";
@@ -11,8 +10,11 @@ export default function OnboardingPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-900">
-      <Form
-        onFormSubmit={form.handleSubmit}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit();
+        }}
         className="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-lg dark:bg-slate-800"
       >
         <div className="mb-6">
@@ -71,7 +73,7 @@ export default function OnboardingPage() {
                 : "Complete setup"}
           </button>
         </div>
-      </Form>
+      </form>
     </main>
   );
 }
