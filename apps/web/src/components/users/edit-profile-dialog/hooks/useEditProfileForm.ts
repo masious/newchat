@@ -5,7 +5,6 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/lib/providers/auth-context";
 import { uploadFile } from "@/lib/upload";
 import { usePushNotifications } from "@/lib/hooks/use-push-notifications";
-import type { NotificationChannel } from "../types";
 
 export function useEditProfileForm(open: boolean, onClose: () => void) {
   const { user, refreshUser } = useAuth();
@@ -13,8 +12,10 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
 
   const [username, setUsername] = useState(user?.username ?? "");
   const [displayName, setDisplayName] = useState(user?.firstName ?? "");
-  const [notificationChannel, setNotificationChannel] =
-    useState<NotificationChannel>(user?.notificationChannel ?? "both");
+  const initTelegram = user?.notificationChannel === "telegram" || user?.notificationChannel === "both";
+  const initWeb = user?.notificationChannel === "web" || user?.notificationChannel === "both";
+  const [enableTelegram, setEnableTelegram] = useState(initTelegram ?? true);
+  const [enableWeb, setEnableWeb] = useState(initWeb ?? false);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(
     user?.avatarUrl ?? undefined,
   );
@@ -29,7 +30,8 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
     if (!open) return;
     setUsername(user?.username ?? "");
     setDisplayName(user?.firstName ?? "");
-    setNotificationChannel(user?.notificationChannel ?? "both");
+    setEnableTelegram(user?.notificationChannel === "telegram" || user?.notificationChannel === "both");
+    setEnableWeb(user?.notificationChannel === "web" || user?.notificationChannel === "both");
     setAvatarPreview(user?.avatarUrl ?? undefined);
     setAvatarFile(null);
     setUsernameError(null);
@@ -118,11 +120,16 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
       avatar: avatarUrl,
     });
 
-    await updateNotificationPrefs.mutateAsync({
-      channel: notificationChannel,
-    });
+    // Derive channel from toggles
+    let channel: "both" | "web" | "telegram" | "none";
+    if (enableWeb && enableTelegram) channel = "both";
+    else if (enableWeb) channel = "web";
+    else if (enableTelegram) channel = "telegram";
+    else channel = "none";
 
-    if (notificationChannel === "web" || notificationChannel === "both") {
+    await updateNotificationPrefs.mutateAsync({ channel });
+
+    if (enableWeb) {
       if (pushNotifications.isSupported) {
         try {
           await pushNotifications.requestPermission();
@@ -130,10 +137,7 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
           console.error("Failed to setup push notifications:", err);
         }
       }
-    } else if (
-      notificationChannel === "telegram" ||
-      notificationChannel === "none"
-    ) {
+    } else {
       if (pushNotifications.isSubscribed) {
         try {
           await pushNotifications.unsubscribe();
@@ -159,8 +163,10 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
     setUsername,
     displayName,
     setDisplayName,
-    notificationChannel,
-    setNotificationChannel,
+    enableTelegram,
+    setEnableTelegram,
+    enableWeb,
+    setEnableWeb,
     avatarPreview,
     handleAvatarChange,
     handleSubmit,

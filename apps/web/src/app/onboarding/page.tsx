@@ -50,12 +50,13 @@ export default function OnboardingPage() {
           onAvatarChange={form.handleAvatarChange}
         />
 
-        {form.isNotificationsSupported && (
-          <NotificationToggle
-            enabled={form.enableWebNotifications}
-            onToggle={form.setEnableWebNotifications}
-          />
-        )}
+        <NotificationToggle
+          webEnabled={form.enableWebNotifications}
+          onWebToggle={form.setEnableWebNotifications}
+          webSupported={form.isWebNotificationsSupported}
+          telegramEnabled={form.enableTelegramNotifications}
+          onTelegramToggle={form.setEnableTelegramNotifications}
+        />
 
         <div className="mt-8">
           <button

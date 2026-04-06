@@ -30,8 +30,10 @@ export function useOnboardingForm() {
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Notification preference
+  // Notification preferences
   const [enableWebNotifications, setEnableWebNotifications] = useState(false);
+  const [enableTelegramNotifications, setEnableTelegramNotifications] =
+    useState(true);
   const pushNotifications = usePushNotifications();
 
   // Fetch Telegram avatar on mount (only if user has no existing avatar)
@@ -138,16 +140,26 @@ export function useOnboardingForm() {
       return;
     }
 
-    // Handle notification permission (non-blocking)
-    if (enableWebNotifications && pushNotifications.isSupported) {
-      try {
-        const granted = await pushNotifications.requestPermission();
-        if (granted) {
-          await updateNotificationPrefs.mutateAsync({ channel: "both" });
-        }
-      } catch {
-        // Non-fatal: notification setup failure shouldn't block onboarding
-      }
+    // Handle notification preferences (non-blocking)
+    try {
+      const wantsWeb =
+        enableWebNotifications && pushNotifications.isSupported;
+      const webGranted = wantsWeb
+        ? await pushNotifications.requestPermission()
+        : false;
+
+      const web = webGranted;
+      const telegram = enableTelegramNotifications;
+
+      let channel: "both" | "web" | "telegram" | "none";
+      if (web && telegram) channel = "both";
+      else if (web) channel = "web";
+      else if (telegram) channel = "telegram";
+      else channel = "none";
+
+      await updateNotificationPrefs.mutateAsync({ channel });
+    } catch {
+      // Non-fatal: notification setup failure shouldn't block onboarding
     }
 
     await refreshUser();
@@ -175,7 +187,9 @@ export function useOnboardingForm() {
     // Notifications
     enableWebNotifications,
     setEnableWebNotifications,
-    isNotificationsSupported: pushNotifications.isSupported,
+    enableTelegramNotifications,
+    setEnableTelegramNotifications,
+    isWebNotificationsSupported: pushNotifications.isSupported,
 
     // Form
     handleSubmit,

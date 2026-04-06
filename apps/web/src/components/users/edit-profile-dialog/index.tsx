@@ -94,8 +94,10 @@ export function EditProfileDialog({
                     />
 
                     <NotificationSection
-                      value={form.notificationChannel}
-                      onChange={form.setNotificationChannel}
+                      telegramEnabled={form.enableTelegram}
+                      onTelegramToggle={form.setEnableTelegram}
+                      webEnabled={form.enableWeb}
+                      onWebToggle={form.setEnableWeb}
                     />
 
                     <DialogFooter
