@@ -307,7 +307,7 @@ export function ChatPanel({
                   optimistic && "animate-message-send",
                 )}
                 ref={
-                  optimistic
+                  optimistic || message.readByMe
                     ? undefined
                     : (el) => observeRef(el, message.id, message.sender?.id ?? 0)
                 }
@@ -323,9 +323,7 @@ export function ChatPanel({
                       content={message.content ?? null}
                       createdAt={message.createdAt}
                       isMine={isMine}
-                      readByOthers={Boolean(
-                        (message as { readByOthers?: boolean }).readByOthers,
-                      )}
+                      readByOthers={Boolean(message.readByOthers)}
                       attachments={
                         (message as { attachments?: Attachment[] | null })
                           .attachments

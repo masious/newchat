@@ -9,7 +9,27 @@ export function useMarkReadOnVisible(
   conversationId: number,
   userId: number | undefined,
 ) {
-  const markRead = trpc.messages.markRead.useMutation();
+  const utils = trpc.useUtils();
+  const markRead = trpc.messages.markRead.useMutation({
+    onSuccess: (_data, variables) => {
+      const readIds = new Set(variables.messageIds);
+      utils.messages.list.setInfiniteData(
+        { conversationId: variables.conversationId },
+        (current) => {
+          if (!current) return current;
+          return {
+            pages: current.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((msg) =>
+                readIds.has(msg.id) ? { ...msg, readByMe: true } : msg,
+              ),
+            })),
+            pageParams: current.pageParams,
+          };
+        },
+      );
+    },
+  });
 
   const observerRef = useRef<IntersectionObserver | null>(null);
   const pendingIdsRef = useRef<Set<number>>(new Set());

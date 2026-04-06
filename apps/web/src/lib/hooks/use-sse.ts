@@ -47,7 +47,7 @@ export function useSSE() {
         } else if (detail.type === "typing") {
           handleTyping(utils, detail, user?.id, typingTimers.current);
         } else if (detail.type === "message_read") {
-          handleMessageRead(utils, detail);
+          handleMessageRead(utils, detail, user?.id);
         }
       } catch (error) {
         console.error("Failed to process SSE conversation event", error);

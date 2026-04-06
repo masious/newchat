@@ -9,11 +9,12 @@ import {
   eq,
   inArray,
   lt,
+  sql,
 } from "@newchat/db";
 
 export async function listMessages(
   db: Database,
-  input: { conversationId: number; cursor?: number; limit: number },
+  input: { conversationId: number; userId: number; cursor?: number; limit: number },
 ) {
   const conditions = [eq(messages.conversationId, input.conversationId)];
   if (input.cursor) {
@@ -35,9 +36,22 @@ export async function listMessages(
         firstName: users.firstName,
         avatarUrl: users.avatarUrl,
       },
+      readByMe: sql<boolean>`${readReceipts.readAt} is not null`.as("read_by_me"),
+      readByOthers: sql<boolean>`exists (
+        select 1 from read_receipts rr2
+        where rr2.message_id = ${messages.id}
+        and rr2.user_id != ${messages.senderId}
+      )`.as("read_by_others"),
     })
     .from(messages)
     .leftJoin(users, eq(users.id, messages.senderId))
+    .leftJoin(
+      readReceipts,
+      and(
+        eq(readReceipts.messageId, messages.id),
+        eq(readReceipts.userId, input.userId),
+      ),
+    )
     .where(whereClause)
     .orderBy(desc(messages.createdAt))
     .limit(input.limit + 1);

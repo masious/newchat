@@ -115,6 +115,8 @@ export function MessageInput({
         firstName: user.firstName,
         avatarUrl: user.avatarUrl,
       },
+      readByMe: true,
+      readByOthers: false,
       _optimisticId: optimisticId,
       _status: "pending",
     };

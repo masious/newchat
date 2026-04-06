@@ -155,8 +155,10 @@ export function handleMessageRead(
   utils: SSEUtils,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   detail: Record<string, any>,
+  currentUserId?: number,
 ) {
   const readIds = new Set(detail.messageIds as number[]);
+  const isMyRead = detail.userId === currentUserId;
   utils.messages.list.setInfiniteData(
     { conversationId: detail.conversationId },
     (current) => {
@@ -164,11 +166,19 @@ export function handleMessageRead(
       return {
         pages: current.pages.map((page) => ({
           ...page,
-          messages: page.messages.map((msg) =>
-            readIds.has(msg.id) && msg.sender?.id !== detail.userId
-              ? { ...msg, readByOthers: true }
-              : msg,
-          ),
+          messages: page.messages.map((msg) => {
+            if (!readIds.has(msg.id)) return msg;
+            const updates: Record<string, boolean> = {};
+            if (msg.sender?.id !== detail.userId) {
+              updates.readByOthers = true;
+            }
+            if (isMyRead) {
+              updates.readByMe = true;
+            }
+            return Object.keys(updates).length > 0
+              ? { ...msg, ...updates }
+              : msg;
+          }),
         })),
         pageParams: current.pageParams,
       };

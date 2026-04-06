@@ -27,6 +27,7 @@ export async function list(
   const limit = input.limit ?? 25;
   const rows = await listMessagesQuery(db, {
     conversationId: input.conversationId,
+    userId: input.senderId,
     cursor: input.cursor,
     limit,
   });
