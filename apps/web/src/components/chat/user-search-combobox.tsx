@@ -1,15 +1,12 @@
 "use client";
 
-import { Fragment, useMemo, useRef, useState, useTransition } from "react";
+import { Fragment, useMemo } from "react";
 import Image from "next/image";
 import { Combobox } from "@base-ui/react/combobox";
 import { Check, X } from "lucide-react";
-import { trpc } from "@/lib/trpc";
 import { userDisplayName } from "@/lib/formatting";
 import type { SearchUser } from "@/lib/trpc-types";
-
-const DEBOUNCE_MS = 250;
-const MIN_QUERY_LENGTH = 2;
+import { useComboboxSearch } from "./use-combobox-search";
 
 type UserSearchComboboxProps =
   | {
@@ -28,99 +25,20 @@ type UserSearchComboboxProps =
 export function UserSearchCombobox(props: UserSearchComboboxProps) {
   const { placeholder = "Search by name or username..." } = props;
 
-  const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [blockStartStatus, setBlockStartStatus] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  const utils = trpc.useUtils();
-  const abortRef = useRef<AbortController | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const selectedRef = useRef<SearchUser[]>([]);
-
   const selectedArray = useMemo(
     () => (props.multiple ? props.value : props.value ? [props.value] : []),
     [props.multiple, props.value],
   );
 
-  const items = useMemo(() => {
-    if (selectedArray.length === 0) return searchResults;
-    const merged = [...searchResults];
-    for (const user of selectedArray) {
-      if (!searchResults.some((r) => r.id === user.id)) {
-        merged.push(user);
-      }
-    }
-    return merged;
-  }, [searchResults, selectedArray]);
-
-  const trimmed = inputValue.trim();
-
-  function getStatus() {
-    if (isPending) {
-      return (
-        <Fragment>
-          <span
-            aria-hidden
-            className="inline-block size-3 animate-spin rounded-full border border-current border-r-transparent"
-          />
-          Searching…
-        </Fragment>
-      );
-    }
-    if (trimmed.length < MIN_QUERY_LENGTH && !blockStartStatus) {
-      return selectedArray.length > 0 ? null : "Type at least 2 characters to search…";
-    }
-    if (searchResults.length === 0 && !blockStartStatus) {
-      return `No matches for "${trimmed}".`;
-    }
-    return null;
-  }
-
-  function getEmptyMessage() {
-    if (trimmed === "" || isPending || searchResults.length > 0) return null;
-    return "Try a different search term.";
-  }
-
-  function handleInputValueChange(
-    nextValue: string,
-    { reason }: Combobox.Root.ChangeEventDetails,
-  ) {
-    setInputValue(nextValue);
-
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    abortRef.current?.abort();
-
-    if (nextValue === "") {
-      setSearchResults(selectedRef.current);
-      setBlockStartStatus(false);
-      return;
-    }
-
-    if (reason === "item-press") return;
-
-    const query = nextValue.trim();
-    if (query.length < MIN_QUERY_LENGTH) return;
-
-    debounceRef.current = setTimeout(() => {
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      startTransition(async () => {
-        try {
-          const data = await utils.users.search.fetch({
-            query,
-            limit: 10,
-          });
-          if (!controller.signal.aborted) {
-            startTransition(() => setSearchResults(data.users));
-          }
-        } catch {
-          // aborted or network error
-        }
-      });
-    }, DEBOUNCE_MS);
-  }
+  const {
+    items,
+    isPending,
+    getStatus,
+    getEmptyMessage,
+    handleInputValueChange,
+    resetAfterSelection,
+    handleOpenChangeComplete,
+  } = useComboboxSearch(selectedArray);
 
   const sharedPopup = (
     <Combobox.Portal>
@@ -188,23 +106,11 @@ export function UserSearchCombobox(props: UserSearchComboboxProps) {
         filter={null}
         value={props.value}
         onValueChange={(nextValues) => {
-          selectedRef.current = nextValues;
+          resetAfterSelection(nextValues);
           props.onValueChange(nextValues);
-          setInputValue("");
-          if (nextValues.length === 0) {
-            setSearchResults([]);
-            setBlockStartStatus(false);
-          } else {
-            setBlockStartStatus(true);
-          }
         }}
         onInputValueChange={handleInputValueChange}
-        onOpenChangeComplete={(open) => {
-          if (!open) {
-            setSearchResults(selectedRef.current);
-            setBlockStartStatus(false);
-          }
-        }}
+        onOpenChangeComplete={handleOpenChangeComplete}
       >
         <Combobox.InputGroup className="flex min-h-10 w-full flex-wrap rounded-lg border border-slate-200 bg-white px-1.5 py-1 focus-within:border-indigo-500 focus-within:outline-none dark:border-slate-600 dark:bg-slate-700">
           <Combobox.Chips className="flex w-full flex-wrap items-center gap-1">
@@ -252,22 +158,11 @@ export function UserSearchCombobox(props: UserSearchComboboxProps) {
       filter={null}
       value={props.value}
       onValueChange={(nextValue) => {
-        selectedRef.current = nextValue ? [nextValue] : [];
+        resetAfterSelection(nextValue ? [nextValue] : []);
         props.onValueChange(nextValue);
-        if (!nextValue) {
-          setSearchResults([]);
-          setBlockStartStatus(false);
-        } else {
-          setBlockStartStatus(true);
-        }
       }}
       onInputValueChange={handleInputValueChange}
-      onOpenChangeComplete={(open) => {
-        if (!open) {
-          setSearchResults(selectedRef.current);
-          setBlockStartStatus(false);
-        }
-      }}
+      onOpenChangeComplete={handleOpenChangeComplete}
     >
       <Combobox.InputGroup className="flex min-h-10 w-full rounded-lg border border-slate-200 bg-white px-1.5 py-1 focus-within:border-indigo-500 focus-within:outline-none dark:border-slate-600 dark:bg-slate-700">
         <Combobox.Input

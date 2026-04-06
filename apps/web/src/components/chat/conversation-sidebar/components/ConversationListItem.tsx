@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 import { ContextMenu } from "@base-ui/react/context-menu";
 import { VolumeX, Trash2 } from "lucide-react";
-import type { ConversationSummary } from "../types";
+import type { ConversationSummary } from "@/lib/trpc-types";
 
 function Avatar({
   avatarUrl,

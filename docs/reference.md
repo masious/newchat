@@ -99,20 +99,26 @@ Per-procedure limits configured in `apps/server/src/middleware/trpc-rate-limit.t
 
 ## Configuration Constants
 
+Server-side constants are centralized in `server/src/lib/constants.ts`. Client-side constants live in the relevant hooks.
+
 | Constant                 | Value        | Location                          |
 |--------------------------|--------------|-----------------------------------|
-| JWT expiry               | 7 days       | `server/src/lib/jwt.ts`           |
-| Auth token TTL           | 5 minutes    | `server/src/trpc/routers/auth.ts` |
-| SSE ticket TTL           | 30 seconds   | `server/src/trpc/routers/sse.ts`  |
-| SSE max connections/user | 5            | `server/src/index.ts`             |
-| SSE max lifetime         | 24 hours     | `server/src/index.ts`             |
-| SSE keepalive interval   | 30 seconds   | `server/src/index.ts`             |
-| Presence TTL             | 5 minutes    | `server/src/lib/presence.ts`      |
-| Presence heartbeat       | 60 seconds   | `server/src/index.ts`             |
+| JWT expiry               | 7 days       | `server/src/lib/constants.ts`     |
+| Auth token TTL           | 5 minutes    | `server/src/lib/constants.ts`     |
+| Auth token pattern       | 32 alphanum  | `server/src/lib/constants.ts`     |
+| SSE ticket TTL           | 30 seconds   | `server/src/lib/constants.ts`     |
+| SSE max connections/user | 5            | `server/src/lib/constants.ts`     |
+| SSE max lifetime         | 24 hours     | `server/src/lib/constants.ts`     |
+| SSE keepalive interval   | 30 seconds   | `server/src/lib/constants.ts`     |
+| SSE connection TTL       | 5 minutes    | `server/src/lib/constants.ts`     |
+| Presence TTL             | 5 minutes    | `server/src/lib/constants.ts`     |
+| Presence heartbeat       | 60 seconds   | `server/src/lib/constants.ts`     |
+| Messages default limit   | 25           | `server/src/lib/constants.ts`     |
+| Messages max limit       | 50           | `server/src/lib/constants.ts`     |
+| User search max limit    | 25           | `server/src/lib/constants.ts`     |
 | Typing throttle (send)   | 2 seconds    | `web useTypingIndicator hook`     |
 | Typing timeout (display) | 3 seconds    | `web use-sse.ts`                  |
 | Read receipt debounce    | 300ms        | `web useMarkReadOnVisible`        |
-| Message page size        | 25           | `server messages.list`            |
 | Max attachments/message  | 10           | `server messages.send`            |
-| Max file size            | 10 MB        | `server uploads router`           |
+| Max file size            | 10 MB        | `server/src/lib/upload-constants.ts` |
 | Max message length       | 10,000 chars | `server messages.send`            |

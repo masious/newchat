@@ -1,4 +1,4 @@
-import { ConversationSummary } from "@/components/chat/conversation-sidebar";
+import type { ConversationSummary } from "@/lib/trpc-types";
 
 export function formatTimestamp(value: string | Date | undefined): string {
   if (!value) return "";

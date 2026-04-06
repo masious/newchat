@@ -78,6 +78,8 @@ services/
 ├── message-service.ts          # send, markRead — message lifecycle
 ├── conversation-service.ts     # create, listForUser — conversation lifecycle
 ├── notification-service.ts     # notifyUserOfMessage — fan-out to web push / Telegram
+├── upload-service.ts           # getPresignedUrl — upload validation + presigned URL generation
+├── sse-handler.ts              # SSE endpoint handler (extracted from index.ts)
 ├── realtime-events.ts          # publishConversationEvent, publishMembershipChange
 ├── fetch-conversation-summaries.ts   # Read-optimized conversation list query
 └── fetch-message.ts            # fetchMessageWithSender (message + user join)
@@ -98,12 +100,14 @@ Data access functions should be:
 
 ```
 lib/
-├── jwt.ts                   # signToken, verifyToken
+├── constants.ts             # Centralized server constants (TTLs, limits, patterns)
+├── client-ip.ts             # IP extraction from X-Forwarded-For / X-Real-IP headers
+├── jwt.ts                   # signToken, verifyToken (JWT_SECRET validated at import time)
 ├── redis.ts                 # Publisher singleton + subscriber factory
 ├── presence.ts              # markOnline, markOffline, setPresenceStatus, getPresenceStatus
 ├── rate-limit.ts            # checkRateLimit (fixed-window counter)
-├── r2.ts                    # R2 client, presigned URL generation
-├── upload-constants.ts      # Allowed MIME types, max file size
+├── r2.ts                    # R2 client, presigned URL generation (env vars validated at import time)
+├── upload-constants.ts      # Allowed MIME types, max file size, r2UrlSchema
 ├── logger.ts                # Pino structured logger (JSON, configurable via LOG_LEVEL)
 ├── web-push.ts              # VAPID setup, sendPushNotification
 └── telegram-notifier.ts     # sendTelegramNotification
@@ -405,7 +409,10 @@ test("message send triggers SSE event", async () => {
 
 | File | What to read it for |
 |---|---|
-| `index.ts` | Middleware chain, SSE handler, background jobs |
+| `index.ts` | Middleware chain, route mounting, background jobs (SSE handler extracted to services/) |
+| `services/sse-handler.ts` | SSE endpoint: ticket auth, Redis subscriptions, event forwarding, cleanup |
+| `services/upload-service.ts` | Upload validation + presigned URL generation |
+| `types/domain.ts` | Canonical domain types (MessageWithSender, ConversationSummary, Member) |
 | `trpc/init.ts` | Context creation, enforceUser/rateLimit middleware, procedure types |
 | `trpc/router.ts` | Router composition, AppRouter type export |
 | `trpc/routers/messages.ts` | Most complex router — send, list, markRead, typing |

@@ -3,7 +3,7 @@ import { userDisplayName } from "@/lib/formatting";
 import { Avatar } from "@base-ui/react/avatar";
 import { Collapsible } from "@base-ui/react/collapsible";
 import { Search, ChevronDown } from "lucide-react";
-import type { UserSearchResult, PresenceSummary } from "./conversation-sidebar";
+import type { SearchUser, PresenceSummary } from "@/lib/trpc-types";
 
 export function UserResultList({
   results,
@@ -12,11 +12,11 @@ export function UserResultList({
   filter,
   onViewProfile,
 }: {
-  results: UserSearchResult[];
+  results: SearchUser[];
   isLoading: boolean;
   error?: string | null;
   filter: string;
-  onViewProfile: (user: UserSearchResult) => void;
+  onViewProfile: (user: SearchUser) => void;
 }) {
   return (
     <Collapsible.Root defaultOpen className="border-y border-slate-100 px-4 py-3 dark:border-slate-700">
@@ -72,7 +72,7 @@ export function UserResultList({
   );
 }
 
-export function UserAvatar({ user }: { user: UserSearchResult }) {
+export function UserAvatar({ user }: { user: SearchUser }) {
   return (
     <Avatar.Root className="h-10 w-10 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
       <Avatar.Image

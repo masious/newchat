@@ -9,9 +9,9 @@ import { SearchInput } from "./components/SearchInput";
 import { ConversationListItem } from "./components/ConversationListItem";
 import { EmptyState } from "./components/EmptyState";
 import { LoadingSkeleton } from "./components/LoadingSkeleton";
-import type { ConversationSummary, UserSearchResult } from "./types";
+import type { ConversationSummary, SearchUser } from "@/lib/trpc-types";
 
-export type { ConversationSummary, PresenceSummary, UserSearchResult } from "./types";
+export type { ConversationSummary, PresenceSummary } from "@/lib/trpc-types";
 
 export function ConversationSidebar({
   conversations,
@@ -36,11 +36,11 @@ export function ConversationSidebar({
   onSelect: (id: number) => void;
   onOpenNewChat: () => void;
   isLoading: boolean;
-  userResults: UserSearchResult[];
+  userResults: SearchUser[];
   showUserResults: boolean;
   isSearchingUsers: boolean;
   userSearchError?: string | null;
-  onViewProfile: (user: UserSearchResult) => void;
+  onViewProfile: (user: SearchUser) => void;
   currentUser?: {
     id: number;
     firstName: string;

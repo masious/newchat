@@ -7,10 +7,8 @@ import { Drawer } from "@base-ui/react/drawer";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { NewChatDialog } from "@/components/chat/new-chat-dialog";
 import { ChatPanel } from "@/components/chat/chat-panel";
-import {
-  EditProfileDialog,
-  ProfileDialog,
-} from "@/components/users/profile-dialog";
+import { ProfileDialog } from "@/components/users/profile-dialog";
+import { EditProfileDialog } from "@/components/users/edit-profile-dialog";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/lib/providers/auth-context";
 import { getConversationName } from "@/lib/formatting";

@@ -148,9 +148,12 @@ components/
 │   │       ├── SidebarHeader.tsx            # Logo + new chat button
 │   │       └── EmptyState.tsx
 │   ├── new-chat-dialog.tsx                  # Create DM or group
+│   ├── user-search-combobox.tsx             # Combobox for user search (single/multi-select)
+│   ├── use-combobox-search.ts               # Search/debounce logic extracted from combobox
 │   └── user-result-list.tsx                 # User search results
 ├── users/
-│   └── profile-dialog.tsx                   # View/edit profile modal
+│   ├── profile-dialog.tsx                   # View profile modal (read-only)
+│   └── edit-profile-dialog.tsx              # Edit profile modal (form)
 └── ui/
     ├── skeleton.tsx                          # Loading placeholder
     ├── icon-tooltip.tsx                      # Hover tooltip
@@ -414,7 +417,8 @@ The message list uses `react-virtualized` with `CellMeasurer` for dynamic row he
 | `app/auth/page.tsx` | Token creation → polling → exchange → redirect |
 | `lib/providers/auth-context.tsx` | Auth state machine, hydration, token management |
 | `lib/providers/trpc-provider.tsx` | tRPC client config, React Query staleTime, auth headers |
-| `lib/hooks/use-sse.ts` | SSE connection, all real-time cache update logic |
+| `lib/hooks/use-sse.ts` | SSE connection lifecycle, reconnection, event routing |
+| `lib/sse-cache-updaters.ts` | React Query cache update handlers for SSE events |
 | `lib/optimistic-messages.ts` | Module-level Map for pending message tracking |
 | `lib/auth-storage.ts` | In-memory token cache with pub/sub for subscribers |
 | `lib/upload.ts` | Presigned URL fetch + R2 PUT with progress tracking + AbortSignal |
