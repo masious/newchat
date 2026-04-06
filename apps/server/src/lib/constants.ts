@@ -4,7 +4,7 @@ export const AUTH_TOKEN_PATTERN = /^[a-zA-Z0-9_-]{32}$/;
 export const JWT_EXPIRY = "7d" as const;
 
 // SSE
-export const MAX_SSE_CONNECTIONS = 5;
+export const MAX_SSE_CONNECTIONS = process.env.NODE_ENV === "development" ? 50 : 5;
 export const SSE_CONN_TTL_SEC = 300;
 export const SSE_MAX_LIFETIME_MS = 24 * 60 * 60 * 1000;
 export const SSE_KEEPALIVE_MS = 30_000;
