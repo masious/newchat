@@ -34,8 +34,9 @@ export async function update(
       avatarUrl: input.avatar ?? null,
       isPublic: input.isPublic ?? true,
     });
-  } catch (err: any) {
-    if (err?.code === "23505" && err?.constraint?.includes("username")) {
+  } catch (err: unknown) {
+    const dbErr = err as { code?: string; constraint?: string };
+    if (dbErr.code === "23505" && dbErr.constraint?.includes("username")) {
       throw new BadRequestError("Username is already taken");
     }
     throw err;

@@ -2,10 +2,8 @@ import { z } from "zod";
 import { router, protectedProcedure } from "../init";
 import { mapDomainError } from "../error-mapper";
 import * as messageService from "../../services/message-service";
-import { getEnvOrThrow } from "../../lib/r2";
-import { ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE } from "../../lib/upload-constants";
-
-const R2_PUBLIC_URL = getEnvOrThrow("R2_PUBLIC_URL");
+import { ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE, r2UrlSchema } from "../../lib/upload-constants";
+import { MESSAGES_MAX_LIMIT } from "../../lib/constants";
 
 export const messagesRouter = router({
   list: protectedProcedure
@@ -13,7 +11,7 @@ export const messagesRouter = router({
       z.object({
         conversationId: z.number().int().positive(),
         cursor: z.number().int().optional(),
-        limit: z.number().int().min(1).max(50).optional(),
+        limit: z.number().int().min(1).max(MESSAGES_MAX_LIMIT).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -34,10 +32,7 @@ export const messagesRouter = router({
         attachments: z
           .array(
             z.object({
-              url: z.string().url().max(2048).refine(
-                (url) => url.startsWith(R2_PUBLIC_URL),
-                { message: "Attachment URL must point to the upload storage" },
-              ),
+              url: r2UrlSchema,
               name: z.string().max(255),
               type: z.string().max(127).refine(
                 (t) => ALLOWED_CONTENT_TYPES.has(t),

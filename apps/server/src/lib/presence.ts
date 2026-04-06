@@ -1,11 +1,10 @@
 import { redisPublisher } from "./redis";
+import { PRESENCE_TTL_SEC } from "./constants";
 
 export type PresenceStatus = {
   status: "online" | "offline";
   lastSeen: string;
 };
-
-const PRESENCE_TTL_SECONDS = 60 * 5; // 5 minutes refresh window
 const presenceKey = (userId: number) => `presence:${userId}`;
 
 export const PRESENCE_CHANNEL = "presence:updates";
@@ -18,7 +17,7 @@ export async function setPresenceStatus(
     presenceKey(userId),
     JSON.stringify(status),
     "EX",
-    PRESENCE_TTL_SECONDS,
+    PRESENCE_TTL_SEC,
   );
 }
 

@@ -1,8 +1,7 @@
 import { nanoid } from "nanoid";
 import { router, protectedProcedure } from "../init";
 import { redisPublisher } from "../../lib/redis";
-
-const SSE_TICKET_TTL_SEC = 30;
+import { SSE_TICKET_TTL_SEC } from "../../lib/constants";
 
 export const sseRouter = router({
   createTicket: protectedProcedure.mutation(async ({ ctx }) => {

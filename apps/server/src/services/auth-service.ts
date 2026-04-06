@@ -8,8 +8,7 @@ import {
   exchangeConfirmedToken,
 } from "../data/auth-queries";
 import { signToken } from "../lib/jwt";
-
-const TOKEN_TTL_MS = 5 * 60 * 1000;
+import { TOKEN_TTL_MS } from "../lib/constants";
 
 export async function createToken(db: Database) {
   const token = nanoid(32);

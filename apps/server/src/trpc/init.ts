@@ -3,6 +3,7 @@ import { createDb, type Database } from "@newchat/db";
 import { verifyToken } from "../lib/jwt";
 import { redisPublisher } from "../lib/redis";
 import { checkRateLimit } from "../lib/rate-limit";
+import { getClientIp } from "../lib/client-ip";
 import {
   PROCEDURE_RATE_LIMITS,
   DEFAULT_RATE_LIMIT,
@@ -26,10 +27,7 @@ export const createTRPCContext = (
   c: { req: { header: (name: string) => string | undefined } },
 ): Context => {
   const token = c.req.header("authorization")?.match(/^Bearer\s+(\S+)$/i)?.[1];
-  const ip =
-    c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
-    c.req.header("x-real-ip") ||
-    "unknown";
+  const ip = getClientIp((name) => c.req.header(name));
   return { db: getDb(), token, ip };
 };
 

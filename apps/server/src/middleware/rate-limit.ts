@@ -1,6 +1,7 @@
 import type { Context, MiddlewareHandler } from "hono";
 import { redisPublisher } from "../lib/redis";
 import { checkRateLimit } from "../lib/rate-limit";
+import { getClientIp } from "../lib/client-ip";
 
 type RateLimitConfig = {
   /** Max requests allowed in the window */
@@ -10,14 +11,6 @@ type RateLimitConfig = {
   /** Redis key prefix (e.g. "rl:health") */
   prefix: string;
 };
-
-export function getClientIp(c: Context): string {
-  return (
-    c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
-    c.req.header("x-real-ip") ||
-    "unknown"
-  );
-}
 
 function setRateLimitHeaders(
   c: Context,
@@ -34,7 +27,7 @@ export function createRateLimitMiddleware(
   config: RateLimitConfig,
 ): MiddlewareHandler {
   return async (c, next) => {
-    const ip = getClientIp(c);
+    const ip = getClientIp((name) => c.req.header(name));
     const key = `${config.prefix}:${ip}`;
 
     const result = await checkRateLimit(

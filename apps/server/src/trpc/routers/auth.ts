@@ -2,6 +2,9 @@ import { z } from "zod";
 import { router, publicProcedure } from "../init";
 import { mapDomainError } from "../error-mapper";
 import * as authService from "../../services/auth-service";
+import { AUTH_TOKEN_PATTERN } from "../../lib/constants";
+
+const authTokenSchema = z.string().regex(AUTH_TOKEN_PATTERN);
 
 export const authRouter = router({
   createToken: publicProcedure.mutation(async ({ ctx }) => {
@@ -12,7 +15,7 @@ export const authRouter = router({
     }
   }),
   pollToken: publicProcedure
-    .input(z.object({ token: z.string().regex(/^[a-zA-Z0-9_-]{32}$/) }))
+    .input(z.object({ token: authTokenSchema }))
     .query(async ({ ctx, input }) => {
       try {
         return await authService.pollToken(ctx.db, input.token);
@@ -21,7 +24,7 @@ export const authRouter = router({
       }
     }),
   exchange: publicProcedure
-    .input(z.object({ token: z.string().regex(/^[a-zA-Z0-9_-]{32}$/) }))
+    .input(z.object({ token: authTokenSchema }))
     .mutation(async ({ ctx, input }) => {
       try {
         return await authService.exchange(ctx.db, input.token);

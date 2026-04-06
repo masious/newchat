@@ -1,3 +1,6 @@
+// Raw SQL is used for fetchConversationSummaries because the query
+// requires lateral joins and json_agg which aren't expressible via
+// the Drizzle query builder without losing readability / performance.
 import {
   type Database,
   Attachment,
@@ -8,7 +11,7 @@ import {
   eq,
   asc,
 } from "@newchat/db";
-import type { ConversationSummary } from "../trpc/types";
+import type { ConversationSummary } from "../types/domain";
 
 type ConversationRow = {
   id: number;

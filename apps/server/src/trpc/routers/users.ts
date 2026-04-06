@@ -2,9 +2,8 @@ import { z } from "zod";
 import { router, protectedProcedure } from "../init";
 import { mapDomainError } from "../error-mapper";
 import * as userService from "../../services/user-service";
-import { getEnvOrThrow } from "../../lib/r2";
-
-const R2_PUBLIC_URL = getEnvOrThrow("R2_PUBLIC_URL");
+import { r2UrlSchema } from "../../lib/upload-constants";
+import { USER_SEARCH_MAX_LIMIT } from "../../lib/constants";
 
 export const usersRouter = router({
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -19,9 +18,7 @@ export const usersRouter = router({
       z.object({
         username: z.string().min(3).max(32).regex(/^[a-zA-Z0-9_]+$/),
         displayName: z.string().min(1).max(80),
-        avatar: z.string().url().max(2048)
-          .refine(url => url.startsWith(R2_PUBLIC_URL), "Avatar must be hosted on our CDN")
-          .optional(),
+        avatar: r2UrlSchema.optional(),
         isPublic: z.boolean().optional().default(true),
       }),
     )
@@ -36,7 +33,7 @@ export const usersRouter = router({
     .input(
       z.object({
         query: z.string().min(1).max(100),
-        limit: z.number().int().min(1).max(25).optional(),
+        limit: z.number().int().min(1).max(USER_SEARCH_MAX_LIMIT).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {

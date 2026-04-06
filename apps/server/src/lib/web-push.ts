@@ -45,9 +45,10 @@ export async function sendPushNotification(
       }
     );
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle subscription expiration
-    if (error.statusCode === 410 || error.statusCode === 404) {
+    const webPushErr = error as { statusCode?: number };
+    if (webPushErr.statusCode === 410 || webPushErr.statusCode === 404) {
       return { success: false, expired: true };
     }
     logger.error({ error }, "Push notification failed");

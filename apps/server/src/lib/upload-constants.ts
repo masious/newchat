@@ -1,3 +1,11 @@
+import { z } from "zod";
+import { R2_PUBLIC_URL } from "./r2";
+
+export const r2UrlSchema = z.string().url().max(2048).refine(
+  (url) => url.startsWith(R2_PUBLIC_URL),
+  { message: "URL must point to the upload storage" },
+);
+
 export const ALLOWED_CONTENT_TYPES = new Set([
   "image/jpeg",
   "image/png",

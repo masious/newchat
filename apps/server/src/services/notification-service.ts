@@ -29,7 +29,7 @@ export async function notifyUserOfMessage(db: Database, payload: NotificationPay
     return;
   }
 
-  const promises: Promise<any>[] = [];
+  const promises: Promise<unknown>[] = [];
 
   if (user.notificationChannel === "web" || user.notificationChannel === "both") {
     promises.push(sendWebPushNotifications(db, payload));
