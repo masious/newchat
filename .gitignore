@@ -9,3 +9,4 @@ drizzle/meta
 volumes/*
 certs/
 apps/web/certificates/
+.env.sentry-build-plugin
