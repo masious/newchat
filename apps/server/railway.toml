@@ -1,0 +1,5 @@
+[deploy]
+startCommand = "bun run src/index.ts"
+preDeployCommand = "bun run db:migrate"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
