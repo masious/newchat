@@ -34,7 +34,7 @@ export const notificationChannelEnum = pgEnum("notification_channel", [
 export const users = pgTable("users", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   telegramId: varchar("telegram_id", { length: 64 }).notNull().unique(),
-  username: varchar("username", { length: 255 }),
+  username: varchar("username", { length: 255 }).unique(),
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }),
   avatarUrl: text("avatar_url"),

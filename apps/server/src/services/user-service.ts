@@ -1,5 +1,5 @@
 import type { Database } from "@newchat/db";
-import { NotFoundError, ForbiddenError } from "../errors";
+import { NotFoundError, ForbiddenError, BadRequestError } from "../errors";
 import {
   findUserById,
   updateUser as updateUserQuery,
@@ -26,12 +26,20 @@ export async function update(
     isPublic?: boolean;
   },
 ) {
-  const updated = await updateUserQuery(db, userId, {
-    username: input.username,
-    firstName: input.displayName,
-    avatarUrl: input.avatar ?? null,
-    isPublic: input.isPublic ?? true,
-  });
+  let updated;
+  try {
+    updated = await updateUserQuery(db, userId, {
+      username: input.username,
+      firstName: input.displayName,
+      avatarUrl: input.avatar ?? null,
+      isPublic: input.isPublic ?? true,
+    });
+  } catch (err: any) {
+    if (err?.code === "23505" && err?.constraint?.includes("username")) {
+      throw new BadRequestError("Username is already taken");
+    }
+    throw err;
+  }
   if (!updated) {
     throw new NotFoundError("User not found");
   }

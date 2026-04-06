@@ -208,6 +208,7 @@ export function EditProfileDialog({
   );
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
   const pushNotifications = usePushNotifications();
@@ -220,6 +221,7 @@ export function EditProfileDialog({
     setNotificationChannel(user?.notificationChannel ?? "both");
     setAvatarPreview(user?.avatarUrl ?? undefined);
     setAvatarFile(null);
+    setUsernameError(null);
     setError(null);
     setIsUploading(false);
   }, [
@@ -233,11 +235,16 @@ export function EditProfileDialog({
 
   const updateProfile = trpc.users.update.useMutation({
     onSuccess: async () => {
-      await refreshUser();
+      // await refreshUser();
       await utils.users.me.invalidate();
     },
     onError: (err) => {
-      setError(err.message ?? "Failed to update profile");
+      const msg = err.message ?? "Failed to update profile";
+      if (msg.toLowerCase().includes("username")) {
+        setUsernameError(msg);
+      } else {
+        setError(msg);
+      }
     },
   });
 
@@ -267,6 +274,18 @@ export function EditProfileDialog({
     e.preventDefault();
     if (!user) return;
     setError(null);
+    setUsernameError(null);
+
+    // Client-side username validation
+    const trimmed = username.trim();
+    if (trimmed.length < 3 || trimmed.length > 32) {
+      setUsernameError("Username must be between 3 and 32 characters");
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(trimmed)) {
+      setUsernameError("Username can only contain letters, numbers, and underscores");
+      return;
+    }
 
     let avatarUrl = avatarPreview;
     if (avatarFile) {
@@ -420,7 +439,7 @@ export function EditProfileDialog({
                             }
                           />
                         </Field.Root>
-                        <Field.Root className="flex flex-col text-sm">
+                        <Field.Root className="flex flex-col text-sm" invalid={!!usernameError}>
                           <Field.Label className="text-slate-600 dark:text-slate-400">
                             Username
                           </Field.Label>
@@ -430,11 +449,19 @@ export function EditProfileDialog({
                                 type="text"
                                 required
                                 value={username}
-                                onChange={(event) => setUsername(event.target.value)}
-                                className="mt-1 rounded-lg border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                                onChange={(event) => {
+                                  setUsername(event.target.value);
+                                  setUsernameError(null);
+                                }}
+                                className="mt-1 rounded-lg border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 aria-invalid:border-red-500"
                               />
                             }
                           />
+                          {usernameError && (
+                            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                              {usernameError}
+                            </p>
+                          )}
                         </Field.Root>
                       </div>
                     </div>

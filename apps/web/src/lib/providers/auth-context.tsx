@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
-    if (meQuery.isLoading || meQuery.isFetching) {
+    if (meQuery.isLoading) {
       return {
         status: "loading",
         isAuthenticated: false,
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout,
       refreshUser,
     };
-  }, [hydrated, token, meQuery.data?.user, meQuery.isFetching, meQuery.isLoading, login, logout, refreshUser]);
+  }, [hydrated, token, meQuery.data?.user, meQuery.isLoading, login, logout, refreshUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
