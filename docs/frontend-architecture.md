@@ -153,7 +153,16 @@ components/
 │   └── user-result-list.tsx                 # User search results
 ├── users/
 │   ├── profile-dialog.tsx                   # View profile modal (read-only)
-│   └── edit-profile-dialog.tsx              # Edit profile modal (form)
+│   └── edit-profile-dialog/                 # Edit profile modal (form)
+│       ├── index.tsx                        # Orchestrator: dialog shell + compose sections
+│       ├── components/
+│       │   ├── ProfileSection.tsx           # Avatar picker, display name, username
+│       │   ├── SettingsSection.tsx          # Public profile switch, dark mode, mute
+│       │   ├── NotificationSection.tsx      # Notification channel radio group
+│       │   └── DialogFooter.tsx             # Cancel + Save buttons
+│       ├── hooks/
+│       │   └── useEditProfileForm.ts        # Form state, validation, submit, upload
+│       └── types.ts                         # NotificationChannel type
 └── ui/
     ├── skeleton.tsx                          # Loading placeholder
     ├── icon-tooltip.tsx                      # Hover tooltip
@@ -164,7 +173,7 @@ components/
 
 ### Patterns
 
-**Feature folders**: Each feature (chat-panel, message-input, conversation-sidebar) is self-contained with its own `index.tsx`, `components/`, `hooks/`, and `types.ts`. This keeps related code together and makes it easy to find things.
+**Feature folders**: Each feature (chat-panel, message-input, conversation-sidebar, edit-profile-dialog) is self-contained with its own `index.tsx`, `components/`, `hooks/`, and `types.ts`. This keeps related code together and makes it easy to find things.
 
 **Smart/dumb split**: The `index.tsx` of each feature folder is the "smart" component — it fetches data, manages state, and passes it down. The `components/` folder contains presentational components that receive props and render UI.
 
