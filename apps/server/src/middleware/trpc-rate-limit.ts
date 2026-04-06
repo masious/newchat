@@ -18,6 +18,7 @@ export const PROCEDURE_RATE_LIMITS: Record<string, ProcedureRateLimit> = {
   "messages.typing": { limit: 20, windowSec: 60 },
   "users.search": { limit: 20, windowSec: 60 },
   "uploads.getPresignedUrl": { limit: 20, windowSec: 60 },
+  "users.fetchTelegramAvatar": { limit: 5, windowSec: 60 },
   "conversations.create": { limit: 10, windowSec: 60 },
   "sse.createTicket": { limit: 10, windowSec: 60 },
 };

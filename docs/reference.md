@@ -27,7 +27,7 @@ Source: `packages/db/src/schema.ts`
 
 | Table                  | PK                             | Key Columns                                                          |
 |------------------------|--------------------------------|----------------------------------------------------------------------|
-| `users`                | `id` (identity)                | telegramId (unique), username, firstName, lastName, avatarUrl, isPublic, notificationChannel |
+| `users`                | `id` (identity)                | telegramId (unique), username, firstName, lastName, avatarUrl, hasCompletedOnboarding, notificationChannel |
 | `auth_tokens`          | `id` (identity)                | token (unique), status (enum), telegramId, userId (FK→users, cascade) |
 | `conversations`        | `id` (identity)                | type (enum: dm/group), name                                          |
 | `conversation_members` | `(conversation_id, user_id)`   | joinedAt; both FKs cascade on delete                                 |
@@ -67,14 +67,14 @@ When a conversation is deleted:
 
 ### User Search
 
-`users.search` uses `ILIKE '%term%'` on `username`, `first_name`, and `last_name` filtered to `is_public = true`. B-tree indexes cannot accelerate `ILIKE` with a leading wildcard. If search becomes a bottleneck at scale, add `pg_trgm` GIN indexes on these columns.
+`users.search` uses `ILIKE '%term%'` on `username`, `first_name`, and `last_name`. B-tree indexes cannot accelerate `ILIKE` with a leading wildcard. If search becomes a bottleneck at scale, add `pg_trgm` GIN indexes on these columns.
 
 ## tRPC Router Groups
 
 | Router          | Procedures                                              | Auth     |
 |-----------------|---------------------------------------------------------|----------|
 | `auth`          | createToken, pollToken, exchange                        | public   |
-| `users`         | me, update, search, profile, presence, updateNotificationPreferences | protected |
+| `users`         | me, update, search, profile, presence, updateNotificationPreferences, fetchTelegramAvatar | protected |
 | `conversations` | list, create, members                                   | protected |
 | `messages`      | list, send, markRead, typing                            | protected |
 | `uploads`       | getPresignedUrl                                         | protected |
@@ -96,6 +96,7 @@ Per-procedure limits configured in `apps/server/src/middleware/trpc-rate-limit.t
 | `uploads.getPresignedUrl`| 20/min  | 60s    | userId   |
 | `conversations.create`   | 10/min  | 60s    | userId   |
 | `sse.createTicket`       | 10/min  | 60s    | userId   |
+| `users.fetchTelegramAvatar` | 5/min | 60s  | userId   |
 
 ## Configuration Constants
 

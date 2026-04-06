@@ -7,7 +7,7 @@ All server errors use `TRPCError` with standard codes. The tRPC layer maps these
 | Code                   | HTTP | Used For                                                        |
 |------------------------|------|-----------------------------------------------------------------|
 | `UNAUTHORIZED` (401)   | 401  | Missing/invalid JWT, expired auth token                         |
-| `FORBIDDEN` (403)      | 403  | Not a conversation member, viewing private profile              |
+| `FORBIDDEN` (403)      | 403  | Not a conversation member                                       |
 | `BAD_REQUEST` (400)    | 400  | Invalid input, DM not exactly 2 members, missing group name, disallowed content type |
 | `NOT_FOUND` (404)      | 404  | User not found (me, update, profile)                            |
 | `TOO_MANY_REQUESTS` (429) | 429 | Rate limit exceeded                                          |
@@ -18,9 +18,8 @@ All server errors use `TRPCError` with standard codes. The tRPC layer maps these
 **UNAUTHORIZED** — `apps/server/src/trpc/init.ts`
 - `enforceUser` middleware: no token provided, or `verifyToken()` returns null
 
-**FORBIDDEN** — `apps/server/src/trpc/routers/helpers.ts`, `users.ts`
+**FORBIDDEN** — `apps/server/src/trpc/routers/helpers.ts`
 - `ensureConversationMember()`: user is not in the conversation (no message, just code)
-- `users.profile`: accessing a private user's profile (`isPublic === false` and not self)
 
 **BAD_REQUEST** — multiple routers
 - `conversations.create`: DM without exactly 2 members, group missing name, group with <2 members

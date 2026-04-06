@@ -1,5 +1,5 @@
 import type { Database } from "@newchat/db";
-import { NotFoundError, ForbiddenError, BadRequestError } from "../errors";
+import { NotFoundError, BadRequestError } from "../errors";
 import {
   findUserById,
   updateUser as updateUserQuery,
@@ -7,6 +7,7 @@ import {
   updateNotificationChannel,
 } from "../data/user-queries";
 import { getPresenceStatus } from "../lib/presence";
+import { uploadTelegramAvatarToR2 } from "../lib/telegram-avatar";
 
 export async function getMe(db: Database, userId: number) {
   const user = await findUserById(db, userId);
@@ -23,7 +24,7 @@ export async function update(
     username: string;
     displayName: string;
     avatar?: string;
-    isPublic?: boolean;
+    completeOnboarding?: boolean;
   },
 ) {
   let updated;
@@ -32,7 +33,7 @@ export async function update(
       username: input.username,
       firstName: input.displayName,
       avatarUrl: input.avatar ?? null,
-      isPublic: input.isPublic ?? true,
+      ...(input.completeOnboarding && { hasCompletedOnboarding: true }),
     });
   } catch (err: unknown) {
     const dbErr = err as { code?: string; constraint?: string };
@@ -76,12 +77,22 @@ export async function getProfile(
   if (!user) {
     throw new NotFoundError("User not found");
   }
-  if (!user.isPublic && user.id !== input.requesterId) {
-    throw new ForbiddenError("Profile is private");
-  }
 
   const presence = await getPresenceStatus(user.id);
   return { user: { ...user, presence } };
+}
+
+export async function fetchTelegramAvatar(db: Database, userId: number) {
+  const user = await findUserById(db, userId);
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+  if (!user.telegramId) {
+    throw new BadRequestError("User has no Telegram ID");
+  }
+
+  const avatarUrl = await uploadTelegramAvatarToR2(user.telegramId);
+  return { avatarUrl };
 }
 
 export async function getPresenceBatch(userIds: number[]) {

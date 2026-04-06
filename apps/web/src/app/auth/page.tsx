@@ -75,7 +75,7 @@ function AuthPageContent() {
             const exchanged = await exchangeToken.mutateAsync({ token: tokenInfo.token });
             login(exchanged.token);
             const next = searchParams.get("next");
-            router.replace(next ?? "/onboarding");
+            router.replace(next ?? "/chat");
           } catch (exchangeErr) {
             console.error("Token exchange failed:", exchangeErr);
             setExchangeError(true);
@@ -109,7 +109,7 @@ function AuthPageContent() {
       const exchanged = await exchangeToken.mutateAsync({ token: tokenInfo.token });
       login(exchanged.token);
       const next = searchParams.get("next");
-      router.replace(next ?? "/onboarding");
+      router.replace(next ?? "/chat");
     } catch (err) {
       console.error("Token exchange retry failed:", err);
       setExchangeError(true);

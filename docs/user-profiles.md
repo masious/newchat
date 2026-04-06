@@ -4,16 +4,16 @@
 
 ```sql
 users {
-  id                   integer PRIMARY KEY (generated always as identity)
-  telegram_id          varchar(64) NOT NULL UNIQUE
-  username             varchar(255)            -- alphanumeric handle, nullable
-  first_name           varchar(255) NOT NULL   -- display name
-  last_name            varchar(255)            -- optional surname
-  avatar_url           text                    -- R2 CDN URL, nullable
-  is_public            boolean NOT NULL DEFAULT true
-  notification_channel notification_channel NOT NULL DEFAULT 'both'
-  created_at           timestamp NOT NULL
-  updated_at           timestamp NOT NULL
+  id                       integer PRIMARY KEY (generated always as identity)
+  telegram_id              varchar(64) NOT NULL UNIQUE
+  username                 varchar(255)            -- alphanumeric handle, nullable
+  first_name               varchar(255) NOT NULL   -- display name
+  last_name                varchar(255)            -- optional surname
+  avatar_url               text                    -- R2 CDN URL, nullable
+  has_completed_onboarding boolean NOT NULL DEFAULT false
+  notification_channel     notification_channel NOT NULL DEFAULT 'both'
+  created_at               timestamp NOT NULL
+  updated_at               timestamp NOT NULL
 }
 ```
 
@@ -38,26 +38,44 @@ Updates the current user's profile fields.
 
 ```
 users.update({
-  username:    string (3-32 chars, /^[a-zA-Z0-9_]+$/)
-  displayName: string (1-80 chars)
-  avatar?:     string (URL, must start with R2_PUBLIC_URL)
-  isPublic?:   boolean (default: true)
+  username:           string (3-32 chars, /^[a-zA-Z0-9_]+$/)
+  displayName:        string (1-80 chars)
+  avatar?:            string (URL, must start with R2_PUBLIC_URL)
+  completeOnboarding?: boolean
 })
 ```
 
-**Field mapping**: `displayName` → `firstName` column, `avatar` → `avatarUrl` column.
+**Field mapping**: `displayName` → `firstName` column, `avatar` → `avatarUrl` column. When `completeOnboarding` is `true`, sets `hasCompletedOnboarding = true` (one-way flag).
 
 **Avatar validation**: URL must be hosted on the configured R2 CDN (`R2_PUBLIC_URL` env var). Rejects external URLs via Zod `.refine()`.
 
 ```
-  → UPDATE users SET username, firstName, avatarUrl, isPublic, updatedAt WHERE id = ctx.userId
+  → UPDATE users SET username, firstName, avatarUrl, [hasCompletedOnboarding], updatedAt WHERE id = ctx.userId
   → { user }
   Throws: NOT_FOUND if user doesn't exist
 ```
 
+### users.fetchTelegramAvatar
+
+Fetches the authenticated user's Telegram profile photo and uploads it to R2. Returns the R2 public URL, or `null` if the user has no Telegram avatar.
+
+```
+users.fetchTelegramAvatar()
+  → Telegram Bot API: getUserProfilePhotos(telegramId, limit=1)
+  → Telegram Bot API: getFile(fileId)
+  → Download photo, upload to R2 at deterministic key: avatars/telegram/{telegramId}/photo.jpg
+  → { avatarUrl: string | null }
+```
+
+**R2 key convention**: `avatars/telegram/{telegramId}/photo.jpg` — deterministic so repeated calls overwrite the same file.
+
+**Rate limited**: 5 calls per 60 seconds per user.
+
+Used by the onboarding page to pre-populate the avatar preview from the user's Telegram profile photo.
+
 ### users.search
 
-Searches for users by username, first name, or last name. **Only returns public users.**
+Searches for users by username, first name, or last name.
 
 ```
 users.search({
@@ -69,12 +87,12 @@ users.search({
 **Search logic**:
 1. Escape SQL wildcards (`%`, `_`, `\`) in query to prevent LIKE injection
 2. Build pattern: `%{escaped}%`
-3. Query: `WHERE isPublic = true AND (username ILIKE ? OR firstName ILIKE ? OR lastName ILIKE ?)`
+3. Query: `WHERE username ILIKE ? OR firstName ILIKE ? OR lastName ILIKE ?`
 4. Case-insensitive matching via PostgreSQL `ILIKE`
 5. Each result enriched with real-time presence from Redis
 
 ```
-  → { users: [{ id, username, firstName, lastName, avatarUrl, isPublic, presence }] }
+  → { users: [{ id, username, firstName, lastName, avatarUrl, presence }] }
 ```
 
 ### users.profile
@@ -88,10 +106,7 @@ users.profile({ userId: number })
   → { user: { ...columns, presence: { status, lastSeen } } }
 
   Throws: NOT_FOUND if user doesn't exist
-  Throws: FORBIDDEN if user.isPublic === false AND userId !== ctx.userId
 ```
-
-**Privacy rule**: Private profiles are only viewable by the user themselves.
 
 ### users.presence
 
@@ -116,16 +131,17 @@ users.updateNotificationPreferences({ channel: "web" | "telegram" | "both" | "no
 
 ---
 
-## isPublic Flag
+## Onboarding
 
-Controls user discoverability. Defaults to `true` for all new users.
+New users must complete onboarding before accessing the app. The `hasCompletedOnboarding` flag on the users table tracks this.
 
-| Context             | isPublic = true          | isPublic = false              |
-|---------------------|--------------------------|-------------------------------|
-| `users.search`      | Appears in results       | Excluded from results         |
-| `users.profile`     | Any authenticated user can view | Only self can view (FORBIDDEN for others) |
-| `users.update`      | User can toggle off      | User can toggle on            |
-| UI (ProfileDialog)  | "This user is discoverable" | "Private profile"          |
+**Flow**:
+1. User logs in via Telegram → JWT issued → auth page redirects to `/chat`
+2. AuthGuard checks `user.hasCompletedOnboarding` — if `false`, redirects to `/onboarding`
+3. Onboarding page pre-populates username and display name from Telegram data, fetches Telegram avatar via `users.fetchTelegramAvatar`
+4. User must set a username (required) and display name (required), can optionally upload an avatar, and choose to enable web notifications
+5. On submit, `users.update` is called with `completeOnboarding: true` → sets `hasCompletedOnboarding = true`
+6. Subsequent logins skip onboarding (AuthGuard sees `hasCompletedOnboarding === true`)
 
 ## Avatar URL & Telegram Sync
 
@@ -139,11 +155,24 @@ INSERT INTO users (telegramId, firstName, lastName, username)
 ```
 
 **Synced fields**: `firstName`, `lastName`, `username` (from Telegram profile).
-**Not synced**: `avatarUrl` — Telegram profile photos are **not** automatically fetched.
+**Not synced on login**: `avatarUrl` — fetched on demand during onboarding via `users.fetchTelegramAvatar`.
+
+### Telegram avatar fetch flow
+
+During onboarding, the web client calls `users.fetchTelegramAvatar`:
+
+```
+1. Server calls Telegram Bot API: getUserProfilePhotos(telegramId, limit=1)
+2. Gets largest photo version, calls getFile(fileId)
+3. Downloads photo from Telegram servers
+4. Uploads to R2 at: avatars/telegram/{telegramId}/photo.jpg
+5. Returns R2 public URL to client as avatar preview
+6. User can accept or replace with a custom upload
+```
 
 ### Avatar upload flow
 
-Users upload avatars manually through the EditProfileDialog:
+Users upload avatars through the onboarding page or EditProfileDialog:
 
 ```
 1. User selects image file in UI
@@ -177,14 +206,13 @@ See [presence-and-typing.md](presence-and-typing.md) for the full presence lifec
 
 ### ProfileDialog (`apps/web/src/components/users/profile-dialog.tsx`)
 
-View another user's profile. Queries `users.profile` when opened. Displays avatar, name, username, presence status, and public/private indicator. Includes "Send message" action to create a DM.
+View another user's profile. Queries `users.profile` when opened. Displays avatar, name, username, and presence status. Includes "Send message" action to create a DM.
 
 ### EditProfileDialog
 
 Edit own profile. Integrates:
 - Avatar upload with preview
 - Display name and username fields
-- isPublic toggle ("Allow other people to find and message you")
 - Notification channel radio group (web, telegram, both, none)
 - Dark mode and sound toggles
 

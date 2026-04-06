@@ -13,7 +13,6 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
 
   const [username, setUsername] = useState(user?.username ?? "");
   const [displayName, setDisplayName] = useState(user?.firstName ?? "");
-  const [isPublic, setIsPublic] = useState(user?.isPublic ?? true);
   const [notificationChannel, setNotificationChannel] =
     useState<NotificationChannel>(user?.notificationChannel ?? "both");
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(
@@ -30,7 +29,6 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
     if (!open) return;
     setUsername(user?.username ?? "");
     setDisplayName(user?.firstName ?? "");
-    setIsPublic(user?.isPublic ?? true);
     setNotificationChannel(user?.notificationChannel ?? "both");
     setAvatarPreview(user?.avatarUrl ?? undefined);
     setAvatarFile(null);
@@ -41,7 +39,6 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
     open,
     user?.avatarUrl,
     user?.firstName,
-    user?.isPublic,
     user?.notificationChannel,
     user?.username,
   ]);
@@ -119,7 +116,6 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
       username,
       displayName,
       avatar: avatarUrl,
-      isPublic,
     });
 
     await updateNotificationPrefs.mutateAsync({
@@ -163,8 +159,6 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
     setUsername,
     displayName,
     setDisplayName,
-    isPublic,
-    setIsPublic,
     notificationChannel,
     setNotificationChannel,
     avatarPreview,

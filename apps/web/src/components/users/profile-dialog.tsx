@@ -108,16 +108,6 @@ export function ProfileDialog({
                     </p>
                     <p>{presenceText}</p>
                   </div>
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-slate-100">
-                      About
-                    </p>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      {user.isPublic
-                        ? "This user is discoverable."
-                        : "Private profile"}
-                    </p>
-                  </div>
                 </div>
               </div>
             )}

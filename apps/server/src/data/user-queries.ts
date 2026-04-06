@@ -22,7 +22,7 @@ export async function updateUser(
     username: string;
     firstName: string;
     avatarUrl: string | null;
-    isPublic: boolean;
+    hasCompletedOnboarding?: boolean;
   },
 ) {
   const [updated] = await db
@@ -49,12 +49,10 @@ export async function searchUsers(
       firstName: users.firstName,
       lastName: users.lastName,
       avatarUrl: users.avatarUrl,
-      isPublic: users.isPublic,
     })
     .from(users)
     .where(
       and(
-        eq(users.isPublic, true),
         ...(input.excludeUserId ? [ne(users.id, input.excludeUserId)] : []),
         or(
           ilike(users.username, term),

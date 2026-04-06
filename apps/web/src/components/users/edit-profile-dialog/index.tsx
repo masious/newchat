@@ -87,8 +87,6 @@ export function EditProfileDialog({
                     />
 
                     <SettingsSection
-                      isPublic={form.isPublic}
-                      onIsPublicChange={form.setIsPublic}
                       isDark={isDark}
                       onToggleDarkMode={onToggleDarkMode}
                       muted={muted}

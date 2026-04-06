@@ -193,7 +193,6 @@ export async function getConversationMembers(
       firstName: users.firstName,
       lastName: users.lastName,
       avatarUrl: users.avatarUrl,
-      isPublic: users.isPublic,
     })
     .from(conversationMembers)
     .innerJoin(users, eq(users.id, conversationMembers.userId))

@@ -49,6 +49,21 @@ export async function getPresignedUploadUrl(
   return getSignedUrl(getClient(), command, { expiresIn: 300 });
 }
 
+export async function uploadBuffer(
+  key: string,
+  body: Buffer,
+  contentType: string,
+): Promise<void> {
+  const command = new PutObjectCommand({
+    Bucket: R2_BUCKET_NAME,
+    Key: key,
+    Body: body,
+    ContentType: contentType,
+    ContentDisposition: "inline",
+  });
+  await getClient().send(command);
+}
+
 export function getPublicUrl(key: string): string {
   return `${R2_PUBLIC_URL.replace(/\/$/, "")}/${key}`;
 }

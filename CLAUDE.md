@@ -69,7 +69,7 @@ See **[docs/](docs/README.md)** for comprehensive documentation. Consult before 
 - [presence-and-typing.md](docs/presence-and-typing.md) — Presence lifecycle, typing indicators
 - [file-uploads.md](docs/file-uploads.md) — Presigned URLs, R2, attachment schema
 - [push-notifications.md](docs/push-notifications.md) — Web Push & Telegram delivery, notification channel, subscription flow
-- [user-profiles.md](docs/user-profiles.md) — users.me/update/search/profile, isPublic flag, avatar upload, presence
+- [user-profiles.md](docs/user-profiles.md) — users.me/update/search/profile, onboarding, avatar upload, presence
 - [error-handling.md](docs/error-handling.md) — tRPC error codes, ensureConversationMember, client error handling
 - [input-validation.md](docs/input-validation.md) — Zod schemas, message/username/attachment constraints, sanitization
 - [reference.md](docs/reference.md) — Redis keys, DB schema, tRPC routers, constants

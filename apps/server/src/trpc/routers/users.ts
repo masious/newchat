@@ -19,12 +19,20 @@ export const usersRouter = router({
         username: z.string().min(3).max(32).regex(/^[a-zA-Z0-9_]+$/),
         displayName: z.string().min(1).max(80),
         avatar: r2UrlSchema.optional(),
-        isPublic: z.boolean().optional().default(true),
+        completeOnboarding: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
         return await userService.update(ctx.db, ctx.userId!, input);
+      } catch (err) {
+        throw mapDomainError(err);
+      }
+    }),
+  fetchTelegramAvatar: protectedProcedure
+    .query(async ({ ctx }) => {
+      try {
+        return await userService.fetchTelegramAvatar(ctx.db, ctx.userId!);
       } catch (err) {
         throw mapDomainError(err);
       }

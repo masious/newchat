@@ -89,9 +89,40 @@ Per-procedure limits configured in `apps/server/src/middleware/trpc-rate-limit.t
 | `uploads.getPresignedUrl`| 20/min  | 60s     | userId   |
 | `conversations.create`   | 10/min  | 60s     | userId   |
 | `sse.createTicket`       | 10/min  | 60s     | userId   |
+| `users.fetchTelegramAvatar` | 5/min | 60s    | userId   |
 | *(all others)*           | 60/min  | 60s     | userId   |
 
 The `/health` endpoint has its own Hono-level rate limit middleware (60/min by IP), separate from the tRPC pipeline.
+
+## Onboarding Flow
+
+After initial login, new users are required to complete onboarding before accessing the app.
+
+```
+Auth page → exchanges JWT → redirects to /chat
+  → AuthGuard checks user.hasCompletedOnboarding
+  → If false: redirect to /onboarding
+  → If true: proceed to /chat
+```
+
+**AuthGuard** (`apps/web/src/components/auth-guard.tsx`):
+- Checks `user.hasCompletedOnboarding` after authentication is confirmed
+- If `false` and not already on `/onboarding`: redirects to `/onboarding`
+- If `true` and on `/onboarding`: redirects to `/chat`
+- `/onboarding` is treated as a special route (requires auth but bypasses onboarding check)
+
+**Onboarding page** (`apps/web/src/app/onboarding/page.tsx`):
+- Pre-populates username and display name from Telegram data
+- Fetches Telegram avatar via `users.fetchTelegramAvatar` (uploads to R2 on demand)
+- Requires username (3-32 chars) and display name (1-80 chars)
+- Asks about web notification permission
+- On submit: calls `users.update({ ..., completeOnboarding: true })` → sets `hasCompletedOnboarding = true`
+- Redirects to `/chat`
+
+**`hasCompletedOnboarding` flag**:
+- Column on `users` table, default `false`
+- Set to `true` via `users.update` with `completeOnboarding: true`
+- One-way flag: once set to `true`, never reverted
 
 ## Auth Data Shapes
 

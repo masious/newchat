@@ -38,7 +38,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }),
   avatarUrl: text("avatar_url"),
-  isPublic: boolean("is_public").default(true).notNull(),
+  hasCompletedOnboarding: boolean("has_completed_onboarding").default(false).notNull(),
   notificationChannel: notificationChannelEnum("notification_channel").default("both").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

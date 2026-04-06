@@ -26,7 +26,7 @@ async function seed() {
 
   // Insert users with original IDs
   await db.execute(sql`
-    INSERT INTO users (id, telegram_id, username, first_name, last_name, avatar_url, is_public, notification_channel, created_at, updated_at)
+    INSERT INTO users (id, telegram_id, username, first_name, last_name, avatar_url, has_completed_onboarding, notification_channel, created_at, updated_at)
     OVERRIDING SYSTEM VALUE
     VALUES
       (15, '6673741438', 'm2bonabi', 'first masoud', NULL, 'https://masious.ir/uploads/15/PcO4Ne7_cl7H/nicki.jpeg', true, 'web', '2026-04-04T13:28:26.569Z', '2026-04-05T18:35:16.141Z'),
