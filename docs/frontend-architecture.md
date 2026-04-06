@@ -181,7 +181,7 @@ components/
 
 **Imperative handles**: `MessageInput` uses `forwardRef` + `useImperativeHandle` to expose `addFiles()` to its parent (ChatPanel). This lets drag-and-drop on the panel add files to the input without prop drilling.
 
-**Error boundaries**: `FeatureBoundary` (`components/ui/feature-boundary.tsx`) is a React class component that wraps each feature. It catches render errors and reports to Sentry with a `feature_boundary` tag. Three fallback modes: `"card"` (error card with retry), `"inline"` (single-line bar), `"hidden"` (minimal placeholder). Used around ChatPanel, ConversationSidebar, MessageInput, MessageBubble, RealtimeProvider, NewChatDialog, ProfileDialog, and EditProfileDialog.
+**Error boundaries**: `FeatureBoundary` (`components/ui/feature-boundary.tsx`) is a React class component that wraps each feature. It catches render errors and logs them to the console. Three fallback modes: `"card"` (error card with retry), `"inline"` (single-line bar), `"hidden"` (minimal placeholder). Used around ChatPanel, ConversationSidebar, MessageInput, MessageBubble, RealtimeProvider, NewChatDialog, ProfileDialog, and EditProfileDialog.
 
 ## Data Fetching Patterns
 
@@ -433,7 +433,7 @@ The message list uses `react-virtualized` with `CellMeasurer` for dynamic row he
 | `lib/upload.ts` | Presigned URL fetch + R2 PUT with progress tracking + AbortSignal |
 | `lib/upload-store.ts` | Module-level upload state per conversation (cross-conversation persistence) |
 | `lib/safe-local-storage.ts` | Try/catch localStorage wrapper with in-memory fallback |
-| `components/ui/feature-boundary.tsx` | React error boundary with Sentry integration |
+| `components/ui/feature-boundary.tsx` | React error boundary with console logging |
 | `components/ui/offline-banner.tsx` | SSE disconnected banner with manual reconnect |
 | `components/auth-guard.tsx` | Route protection logic |
 | `components/chat/chat-panel/hooks/useVirtualizedMessages.ts` | Infinite query + scroll virtualization |

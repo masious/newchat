@@ -187,9 +187,8 @@ When `messages.send` fails after optimistic insertion:
 **File**: `apps/web/src/components/ui/feature-boundary.tsx`
 
 React class component wrapping each major feature. On render error:
-1. Catches the error in `componentDidCatch`
-2. Reports to Sentry with `feature_boundary` tag and component name
-3. Renders a fallback based on mode:
+1. Catches the error in `componentDidCatch` and logs to console
+2. Renders a fallback based on mode:
    - `"card"` — centered error card with "Something went wrong" + "Try again" button (resets error state)
    - `"inline"` — single-line bar with warning icon + refresh button
    - `"hidden"` — renders a minimal `<div>` placeholder (prevents virtualized list height issues)
@@ -232,15 +231,3 @@ A `useRef(false)` guard prevents double `createToken.mutate()` calls in React St
 
 
 
-**File**: `apps/web/src/lib/providers/trpc-provider.tsx`
-
-A custom tRPC link captures all errors to Sentry:
-
-```
-Every tRPC error → Sentry.captureException(err, {
-  tags: { trpc_procedure, trpc_type },
-  contexts: { procedure, type, input, code, httpStatus }
-})
-```
-
-This fires for all procedures (queries and mutations) without any component-level setup.

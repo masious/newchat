@@ -1,7 +1,6 @@
 "use client";
 
 import { Component, type ReactNode } from "react";
-import * as Sentry from "@sentry/nextjs";
 import { TriangleAlert, RefreshCw } from "lucide-react";
 
 type Props = {
@@ -22,12 +21,7 @@ export class FeatureBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    Sentry.captureException(error, {
-      tags: { feature_boundary: this.props.name },
-      contexts: {
-        react: { componentStack: info.componentStack },
-      },
-    });
+    console.error(`[FeatureBoundary:${this.props.name}]`, error, info.componentStack);
   }
 
   reset = () => {
