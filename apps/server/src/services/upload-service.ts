@@ -19,8 +19,8 @@ export async function getPresignedUrl(
   const safeFilename = input.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
   const key = `uploads/${userId}/${nanoid(12)}/${safeFilename}`;
 
-  const uploadUrl = await getPresignedUploadUrl(key, input.contentType, input.size);
+  const { url: uploadUrl, contentDisposition } = await getPresignedUploadUrl(key, input.contentType);
   const publicUrl = getPublicUrl(key);
 
-  return { uploadUrl, publicUrl, key };
+  return { uploadUrl, publicUrl, key, contentDisposition };
 }

@@ -37,16 +37,16 @@ function getClient(): S3Client {
 export async function getPresignedUploadUrl(
   key: string,
   contentType: string,
-  size: number,
-): Promise<string> {
+): Promise<{ url: string; contentDisposition: string }> {
+  const contentDisposition = contentType.startsWith("image/") ? "inline" : "attachment";
   const command = new PutObjectCommand({
     Bucket: R2_BUCKET_NAME,
     Key: key,
     ContentType: contentType,
-    ContentLength: size,
-    ContentDisposition: contentType.startsWith("image/") ? "inline" : "attachment",
+    ContentDisposition: contentDisposition,
   });
-  return getSignedUrl(getClient(), command, { expiresIn: 300 });
+  const url = await getSignedUrl(getClient(), command, { expiresIn: 300 });
+  return { url, contentDisposition };
 }
 
 export async function uploadBuffer(

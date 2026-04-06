@@ -55,12 +55,15 @@ export async function uploadFile(
     }),
   ]);
 
-  const { uploadUrl, publicUrl } = presignedData;
+  const { uploadUrl, publicUrl, contentDisposition } = presignedData;
 
   const response = await fetch(uploadUrl, {
     method: "PUT",
     body: file,
-    headers: { "Content-Type": contentType },
+    headers: {
+      "Content-Type": contentType,
+      "Content-Disposition": contentDisposition,
+    },
   });
 
   if (!response.ok) {
@@ -93,7 +96,7 @@ export async function uploadFileWithProgress(
     }),
   ]);
 
-  const { uploadUrl, publicUrl } = presignedData;
+  const { uploadUrl, publicUrl, contentDisposition } = presignedData;
 
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -105,6 +108,7 @@ export async function uploadFileWithProgress(
 
     xhr.open("PUT", uploadUrl);
     xhr.setRequestHeader("Content-Type", contentType);
+    xhr.setRequestHeader("Content-Disposition", contentDisposition);
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
         onProgress(Math.round((e.loaded / e.total) * 100));
