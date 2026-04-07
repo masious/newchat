@@ -28,6 +28,8 @@ export function ConversationSidebar({
   onViewProfile,
   currentUser,
   onEditProfile,
+  onOpenSettings,
+  onLogout,
 }: {
   conversations: ConversationSummary[];
   selectedId: number | null;
@@ -49,6 +51,8 @@ export function ConversationSidebar({
     avatarUrl?: string | null;
   } | null;
   onEditProfile?: () => void;
+  onOpenSettings?: () => void;
+  onLogout?: () => void;
 }) {
   const filtered = useMemo(() => {
     if (!filter) return conversations;
@@ -69,6 +73,8 @@ export function ConversationSidebar({
         onOpenNewChat={onOpenNewChat}
         currentUser={currentUser}
         onEditProfile={onEditProfile}
+        onOpenSettings={onOpenSettings}
+        onLogout={onLogout}
       />
       <SearchInput value={filter} onChange={onFilterChange} />
       {showUserResults && (

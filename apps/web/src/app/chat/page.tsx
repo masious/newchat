@@ -9,6 +9,7 @@ import { NewChatDialog } from "@/components/chat/new-chat-dialog";
 import { ChatPanel } from "@/components/chat/chat-panel";
 import { ProfileDialog } from "@/components/users/profile-dialog";
 import { EditProfileDialog } from "@/components/users/edit-profile-dialog";
+import { SettingsDialog } from "@/components/users/settings-dialog";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/lib/providers/auth-context";
 import { getConversationName } from "@/lib/formatting";
@@ -23,11 +24,12 @@ const emptyArray: never[] = [];
 export default function ChatPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [filter, setFilter] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [profileUser, setProfileUser] = useState<SearchUser | null>(null);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { muted, toggleMute } = useNotificationSound();
   const { isDark, toggle: toggleDarkMode } = useDarkMode();
@@ -111,6 +113,8 @@ export default function ChatPage() {
             onViewProfile={(result) => setProfileUser(result)}
             currentUser={user}
             onEditProfile={() => setEditProfileOpen(true)}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onLogout={logout}
           />
         </FeatureBoundary>
       </div>
@@ -149,6 +153,13 @@ export default function ChatPage() {
                       setEditProfileOpen(true);
                     }, 200);
                   }}
+                  onOpenSettings={() => {
+                    setSidebarOpen(false);
+                    setTimeout(() => {
+                      setSettingsOpen(true);
+                    }, 200);
+                  }}
+                  onLogout={logout}
                 />
               </FeatureBoundary>
             </Drawer.Popup>
@@ -215,6 +226,12 @@ export default function ChatPage() {
         <EditProfileDialog
           open={editProfileOpen}
           onClose={() => setEditProfileOpen(false)}
+        />
+      </FeatureBoundary>
+      <FeatureBoundary name="SettingsDialog" fallback="hidden">
+        <SettingsDialog
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
           isDark={isDark}
           onToggleDarkMode={toggleDarkMode}
           muted={muted}

@@ -14,7 +14,7 @@ export function SettingsSection({
   return (
     <fieldset className="mt-6">
       <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-        Settings
+        Appearance
       </legend>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {onToggleDarkMode && (

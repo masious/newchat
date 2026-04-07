@@ -145,7 +145,7 @@ components/
 │   │       ├── ConversationListItem.tsx     # Single conversation row
 │   │       ├── SearchInput.tsx              # Filter input
 │   │       ├── CurrentUserCard.tsx          # Bottom card with avatar + settings
-│   │       ├── SidebarHeader.tsx            # Logo + new chat button
+│   │       ├── SidebarHeader.tsx            # User menu popover + new chat button
 │   │       └── EmptyState.tsx
 │   ├── new-chat-dialog.tsx                  # Create DM or group
 │   ├── user-search-combobox.tsx             # Combobox for user search (single/multi-select)
@@ -153,16 +153,22 @@ components/
 │   └── user-result-list.tsx                 # User search results
 ├── users/
 │   ├── profile-dialog.tsx                   # View profile modal (read-only)
-│   └── edit-profile-dialog/                 # Edit profile modal (form)
-│       ├── index.tsx                        # Orchestrator: dialog shell + compose sections
+│   ├── edit-profile-dialog/                 # Edit profile modal (avatar, name, username)
+│   │   ├── index.tsx                        # Dialog shell + profile section
+│   │   ├── components/
+│   │   │   ├── ProfileSection.tsx           # Centered avatar with hover overlay, name, username
+│   │   │   └── DialogFooter.tsx             # Cancel + Save buttons
+│   │   ├── hooks/
+│   │   │   └── useEditProfileForm.ts        # Profile state, validation, avatar upload
+│   │   └── types.ts                         # NotificationChannel type
+│   └── settings-dialog/                     # Settings modal (preferences + notifications)
+│       ├── index.tsx                        # Dialog shell with settings + notification sections
 │       ├── components/
-│       │   ├── ProfileSection.tsx           # Avatar picker, display name, username
-│       │   ├── SettingsSection.tsx          # Public profile switch, dark mode, mute
-│       │   ├── NotificationSection.tsx      # Notification channel radio group
+│       │   ├── SettingsSection.tsx           # Dark mode, notification sound toggles
+│       │   ├── NotificationSection.tsx       # Telegram + browser notification toggles
 │       │   └── DialogFooter.tsx             # Cancel + Save buttons
-│       ├── hooks/
-│       │   └── useEditProfileForm.ts        # Form state, validation, submit, upload
-│       └── types.ts                         # NotificationChannel type
+│       └── hooks/
+│           └── useSettingsForm.ts           # Notification preferences state + mutation
 └── ui/
     ├── skeleton.tsx                          # Loading placeholder
     ├── icon-tooltip.tsx                      # Hover tooltip

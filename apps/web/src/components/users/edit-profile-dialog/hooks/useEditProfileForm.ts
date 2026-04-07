@@ -4,18 +4,13 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/lib/providers/auth-context";
 import { uploadFile } from "@/lib/upload";
-import { usePushNotifications } from "@/lib/hooks/use-push-notifications";
 
 export function useEditProfileForm(open: boolean, onClose: () => void) {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
   const utils = trpc.useUtils();
 
   const [username, setUsername] = useState(user?.username ?? "");
   const [displayName, setDisplayName] = useState(user?.firstName ?? "");
-  const initTelegram = user?.notificationChannel === "telegram" || user?.notificationChannel === "both";
-  const initWeb = user?.notificationChannel === "web" || user?.notificationChannel === "both";
-  const [enableTelegram, setEnableTelegram] = useState(initTelegram ?? true);
-  const [enableWeb, setEnableWeb] = useState(initWeb ?? false);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(
     user?.avatarUrl ?? undefined,
   );
@@ -24,26 +19,16 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const pushNotifications = usePushNotifications();
-
   useEffect(() => {
     if (!open) return;
     setUsername(user?.username ?? "");
     setDisplayName(user?.firstName ?? "");
-    setEnableTelegram(user?.notificationChannel === "telegram" || user?.notificationChannel === "both");
-    setEnableWeb(user?.notificationChannel === "web" || user?.notificationChannel === "both");
     setAvatarPreview(user?.avatarUrl ?? undefined);
     setAvatarFile(null);
     setUsernameError(null);
     setError(null);
     setIsUploading(false);
-  }, [
-    open,
-    user?.avatarUrl,
-    user?.firstName,
-    user?.notificationChannel,
-    user?.username,
-  ]);
+  }, [open, user?.avatarUrl, user?.firstName, user?.username]);
 
   const updateProfile = trpc.users.update.useMutation({
     onSuccess: async () => {
@@ -58,17 +43,6 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
       }
     },
   });
-
-  const updateNotificationPrefs =
-    trpc.users.updateNotificationPreferences.useMutation({
-      onSuccess: async () => {
-        await refreshUser();
-        await utils.users.me.invalidate();
-      },
-      onError: (err) => {
-        setError(err.message ?? "Failed to update notification preferences");
-      },
-    });
 
   const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -120,33 +94,6 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
       avatar: avatarUrl,
     });
 
-    // Derive channel from toggles
-    let channel: "both" | "web" | "telegram" | "none";
-    if (enableWeb && enableTelegram) channel = "both";
-    else if (enableWeb) channel = "web";
-    else if (enableTelegram) channel = "telegram";
-    else channel = "none";
-
-    await updateNotificationPrefs.mutateAsync({ channel });
-
-    if (enableWeb) {
-      if (pushNotifications.isSupported) {
-        try {
-          await pushNotifications.requestPermission();
-        } catch (err) {
-          console.error("Failed to setup push notifications:", err);
-        }
-      }
-    } else {
-      if (pushNotifications.isSubscribed) {
-        try {
-          await pushNotifications.unsubscribe();
-        } catch (err) {
-          console.error("Failed to unsubscribe from push:", err);
-        }
-      }
-    }
-
     onClose();
   };
 
@@ -163,10 +110,6 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
     setUsername,
     displayName,
     setDisplayName,
-    enableTelegram,
-    setEnableTelegram,
-    enableWeb,
-    setEnableWeb,
     avatarPreview,
     handleAvatarChange,
     handleSubmit,
