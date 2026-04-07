@@ -1,9 +1,9 @@
 "use client";
 
 import { Fragment, useMemo } from "react";
-import Image from "next/image";
 import { Combobox } from "@base-ui/react/combobox";
 import { Check, X } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import { userDisplayName } from "@/lib/formatting";
 import type { SearchUser } from "@/lib/trpc-types";
 import { useComboboxSearch } from "./use-combobox-search";
@@ -63,21 +63,7 @@ export function UserSearchCombobox(props: UserSearchComboboxProps) {
                 <Combobox.ItemIndicator className="w-4 shrink-0 text-indigo-600 dark:text-indigo-400">
                   <Check className="h-4 w-4" />
                 </Combobox.ItemIndicator>
-                <div className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-                  {user.avatarUrl ? (
-                    <Image
-                      src={user.avatarUrl}
-                      alt=""
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
-                  ) : (
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                      {user.firstName.slice(0, 1)}
-                    </span>
-                  )}
-                </div>
+                <Avatar avatarUrl={user.avatarUrl} name={user.firstName} size="xs" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {userDisplayName(user)}

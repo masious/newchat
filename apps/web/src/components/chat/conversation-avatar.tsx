@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 import type { ConversationSummary } from "@/lib/trpc-types";
 
-export function Avatar({
+function Avatar({
   avatarUrl,
   name,
   size = "h-10 w-10",

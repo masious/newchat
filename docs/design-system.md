@@ -287,22 +287,36 @@ These are the canonical patterns. When building new components, follow these sha
 
 ### Avatars
 
+Use the shared `Avatar` component (`apps/web/src/components/ui/avatar.tsx`). Do not render avatars inline.
+
 ```tsx
-// Standard (conversations, headers)
-<div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-  <img src={url} alt={name} className="h-full w-full object-cover" />
-</div>
+import { Avatar } from "@/components/ui/avatar";
 
-// Fallback (no image)
-<div className="h-10 w-10 flex shrink-0 items-center justify-center rounded-full bg-slate-100 font-semibold text-slate-500 dark:bg-slate-700 dark:text-slate-400 text-sm">
-  {name.slice(0, 1)}
-</div>
+// Standard (conversations, headers, member lists)
+<Avatar avatarUrl={user.avatarUrl} name={user.firstName} />
 
-// Small variant (group stacking)
-// Use h-7 w-7 and text-xs
+// Small (group stacking, search combobox)
+<Avatar avatarUrl={user.avatarUrl} name={user.firstName} size="xs" />
+
+// With presence indicator (online/offline dot overlay)
+<Avatar avatarUrl={user.avatarUrl} name={user.firstName} status="online" />
+
+// Large with custom fallback (upload variants)
+<Avatar avatarUrl={preview ?? null} name="Avatar" size="2xl" fallback="No image" className="border border-slate-200 dark:border-slate-600" />
 ```
 
-Sizes: `h-10 w-10` (standard), `h-7 w-7` (small, group stacking). Don't use other sizes.
+**Size variants (CVA):**
+
+| Name | Dimensions | Fallback text |
+|------|-----------|---------------|
+| `xs` | `h-7 w-7` | `text-xs` |
+| `sm` | `h-9 w-9` | `text-sm` |
+| `md` | `h-10 w-10` | `text-sm` (default) |
+| `lg` | `h-20 w-20` | `text-lg` |
+| `xl` | `h-24 w-24` | `text-lg` |
+| `2xl` | `h-30 w-30` | `text-lg` |
+
+**Props:** `avatarUrl`, `name`, `size?`, `status?` (`"online"` | `"offline"`), `fallback?` (ReactNode), `className?`.
 
 ### Buttons
 

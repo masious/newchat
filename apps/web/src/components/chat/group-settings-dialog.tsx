@@ -4,43 +4,16 @@ import { useState } from "react";
 import { BaseDialog } from "@/components/ui/base-dialog";
 import { X, Loader2, Plus } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
-import { cn } from "@/lib/cn";
 import { TextInput } from "@/components/ui/text-input";
 import { FormField } from "@/components/ui/form-field";
+import { Avatar } from "@/components/ui/avatar";
 import { trpc } from "@/lib/trpc";
 import { useDebouncedCallback } from "@/lib/hooks";
-import { Avatar } from "@/components/chat/conversation-avatar";
 import { addToast } from "@/lib/providers/toast-context";
 import { userDisplayName } from "@/lib/formatting";
 import { UserSearchCombobox } from "./user-search-combobox";
-import type { SearchUser, PresenceSummary } from "@/lib/trpc-types";
+import type { SearchUser } from "@/lib/trpc-types";
 import { FeatureBoundary } from "@/components/ui/feature-boundary";
-
-function MemberAvatar({
-  user,
-  presence,
-}: {
-  user: { firstName: string; avatarUrl: string | null };
-  presence?: PresenceSummary;
-}) {
-  const isOnline = presence?.status === "online";
-  return (
-    <div className="relative shrink-0">
-      <Avatar
-        avatarUrl={user.avatarUrl}
-        name={user.firstName}
-        size="h-10 w-10"
-        textSize="text-sm"
-      />
-      <span
-        className={cn(
-          "absolute bottom-0 right-0 h-3 w-3 rounded-full ring-2 ring-white dark:ring-slate-800",
-          isOnline ? "bg-emerald-500" : "bg-slate-400",
-        )}
-      />
-    </div>
-  );
-}
 
 export function GroupSettingsDialog({
   conversationId,
@@ -214,7 +187,11 @@ export function GroupSettingsDialog({
                               key={member.id}
                               className="group flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50 dark:hover:bg-slate-700"
                             >
-                              <MemberAvatar user={member} presence={presence} />
+                              <Avatar
+                                avatarUrl={member.avatarUrl}
+                                name={member.firstName}
+                                status={presence?.status === "online" ? "online" : "offline"}
+                              />
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                                   {userDisplayName(member)}

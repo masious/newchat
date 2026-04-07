@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus, UserPen, Settings, LogOut } from "lucide-react";
 import { Popover } from "@base-ui/react/popover";
 import { IconButton } from "@/components/ui/icon-button";
+import { Avatar } from "@/components/ui/avatar";
 import { userDisplayName } from "@/lib/formatting";
 
 export function SidebarHeader({
@@ -31,20 +32,7 @@ export function SidebarHeader({
       {currentUser ? (
         <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
           <Popover.Trigger className="flex flex-1 items-center gap-2.5 rounded-lg p-1 -m-1 transition hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer">
-            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-              {currentUser.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={currentUser.avatarUrl}
-                  alt={displayName!}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-slate-500 dark:text-slate-400">
-                  {currentUser.firstName.slice(0, 1)}
-                </div>
-              )}
-            </div>
+            <Avatar avatarUrl={currentUser.avatarUrl ?? null} name={currentUser.firstName} size="sm" />
             <div className="min-w-0 text-left">
               <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {displayName}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import type { SearchUser, ProfileUser, PresenceSummary } from "@/lib/trpc-types";
 import { BaseDialog } from "@/components/ui/base-dialog";
+import { Avatar } from "@/components/ui/avatar";
 import { trpc } from "@/lib/trpc";
 import { formatPresence, userDisplayName } from "@/lib/formatting";
 
@@ -71,20 +72,7 @@ export function ProfileDialog({
 
       {user && (
         <div className="mt-6 flex gap-6">
-          <div className="h-24 w-24 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-            {user.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.avatarUrl}
-                alt={displayName}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-400">
-                {user.firstName.slice(0, 1)}
-              </div>
-            )}
-          </div>
+          <Avatar avatarUrl={user.avatarUrl} name={user.firstName} size="xl" />
           <div className="flex-1 space-y-3 text-sm text-slate-600 dark:text-slate-400">
             <div>
               <p className="font-semibold text-slate-900 dark:text-slate-100">

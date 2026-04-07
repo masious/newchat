@@ -1,6 +1,6 @@
 import { ChangeEvent } from "react";
 import { Camera } from "lucide-react";
-import Image from "next/image";
+import { Avatar } from "@/components/ui/avatar";
 import { TextInput } from "@/components/ui/text-input";
 import { FormField } from "@/components/ui/form-field";
 
@@ -25,21 +25,13 @@ export function ProfileSection({
     <fieldset className="mt-6">
       <div className="flex flex-col items-center">
         <label className="group relative cursor-pointer">
-          <div className="h-30 w-30 overflow-hidden rounded-full border border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-slate-700">
-            {avatarPreview ? (
-              <Image
-                width={120}
-                height={120}
-                src={avatarPreview}
-                alt="Avatar preview"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-400">
-                No image
-              </div>
-            )}
-          </div>
+          <Avatar
+            avatarUrl={avatarPreview ?? null}
+            name="Avatar"
+            size="2xl"
+            fallback="No image"
+            className="border border-slate-200 dark:border-slate-600"
+          />
           <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition group-hover:opacity-100">
             <Camera className="h-8 w-8 text-white" />
           </div>
