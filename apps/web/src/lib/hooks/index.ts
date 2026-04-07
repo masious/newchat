@@ -1,3 +1,4 @@
+export { useDebouncedCallback } from "./use-debounced-callback";
 export { useSSE } from "./use-sse";
 export { useDarkMode } from "./use-dark-mode";
 export { useNotificationSound } from "./use-notification-sound";

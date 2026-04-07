@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { Field } from "@base-ui/react/field";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Plus } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { trpc } from "@/lib/trpc";
+import { useDebouncedCallback } from "@/lib/hooks";
 import { Avatar } from "@/components/chat/conversation-avatar";
 import { addToast } from "@/lib/providers/toast-context";
 import { userDisplayName } from "@/lib/formatting";
@@ -23,7 +24,12 @@ function MemberAvatar({
   const isOnline = presence?.status === "online";
   return (
     <div className="relative shrink-0">
-      <Avatar avatarUrl={user.avatarUrl} name={user.firstName} size="h-10 w-10" textSize="text-sm" />
+      <Avatar
+        avatarUrl={user.avatarUrl}
+        name={user.firstName}
+        size="h-10 w-10"
+        textSize="text-sm"
+      />
       <span
         className={cn(
           "absolute bottom-0 right-0 h-3 w-3 rounded-full ring-2 ring-white dark:ring-slate-800",
@@ -53,6 +59,7 @@ export function GroupSettingsDialog({
 
   const [nameInput, setNameInput] = useState(conversationName);
   const [nameError, setNameError] = useState<string | null>(null);
+  const [showAddMember, setShowAddMember] = useState(false);
 
   const membersQuery = trpc.conversations.members.useQuery(
     { conversationId },
@@ -100,19 +107,26 @@ export function GroupSettingsDialog({
     },
   });
 
-  const handleSaveName = () => {
-    const trimmed = nameInput.trim();
+  const debouncedSaveName = useDebouncedCallback((value: string) => {
+    const trimmed = value.trim();
     if (!trimmed) {
       setNameError("Name cannot be empty");
       return;
     }
     if (trimmed === conversationName) return;
     updateName.mutate({ conversationId, name: trimmed });
+  }, 500);
+
+  const handleNameChange = (value: string) => {
+    setNameInput(value);
+    setNameError(null);
+    debouncedSaveName(value);
   };
 
   const handleAddMember = (user: SearchUser | null) => {
     if (!user) return;
     addMember.mutate({ conversationId, memberUserId: user.id });
+    setShowAddMember(false);
   };
 
   const handleRemoveMember = (userId: number) => {
@@ -150,28 +164,20 @@ export function GroupSettingsDialog({
                     <Field.Label className="text-slate-600 dark:text-slate-400">
                       Group name
                     </Field.Label>
-                    <div className="mt-1 flex gap-2">
+                    <div className="relative mt-1">
                       <Field.Control
                         render={
                           <input
                             type="text"
                             value={nameInput}
-                            onChange={(e) => setNameInput(e.target.value)}
-                            className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                            onChange={(e) => handleNameChange(e.target.value)}
+                            className="w-full rounded-lg border border-slate-200 px-3 py-2 pr-8 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
                           />
                         }
                       />
-                      <button
-                        type="button"
-                        onClick={handleSaveName}
-                        disabled={
-                          updateName.isPending ||
-                          nameInput.trim() === conversationName
-                        }
-                        className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                      >
-                        {updateName.isPending ? "Saving…" : "Save"}
-                      </button>
+                      {updateName.isPending && (
+                        <Loader2 className="absolute top-1/2 right-2.5 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />
+                      )}
                     </div>
                     {nameError && (
                       <p className="mt-1 text-xs text-red-600">{nameError}</p>
@@ -189,17 +195,17 @@ export function GroupSettingsDialog({
                         </span>
                       )}
                     </h3>
+                    {isOwner && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAddMember((v) => !v)}
+                        className="rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                        title="Add member"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
-
-                  {isOwner && (
-                    <div className="mt-2">
-                      <UserSearchCombobox
-                        value={null}
-                        onValueChange={handleAddMember}
-                        placeholder="Add a member…"
-                      />
-                    </div>
-                  )}
 
                   {membersQuery.isLoading ? (
                     <div className="flex items-center gap-2 py-4 text-sm text-slate-500">
@@ -207,52 +213,64 @@ export function GroupSettingsDialog({
                       Loading members…
                     </div>
                   ) : (
-                    <ul className="mt-2 max-h-64 flex flex-col gap-1 overflow-y-auto">
-                      {membersQuery.data?.members.map((member) => {
-                        const presence = presenceMap.get(member.id);
-                        const isSelf = member.id === currentUserId;
-                        const isCreator = member.id === createdBy;
-                        return (
-                          <li
-                            key={member.id}
-                            className="group flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50 dark:hover:bg-slate-700"
-                          >
-                            <MemberAvatar user={member} presence={presence} />
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                {userDisplayName(member)}
-                                {isSelf && (
-                                  <span className="ml-1 text-xs font-normal text-slate-400">
-                                    (you)
-                                  </span>
-                                )}
-                                {isCreator && (
-                                  <span className="ml-1 text-xs font-normal text-indigo-500">
-                                    Owner
-                                  </span>
-                                )}
-                              </p>
-                              <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                                {member.username
-                                  ? `@${member.username}`
-                                  : "No username"}
-                              </p>
-                            </div>
-                            {isOwner && !isSelf && (
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveMember(member.id)}
-                                disabled={removeMember.isPending}
-                                className="rounded p-1 text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50 group-hover:opacity-100 dark:hover:bg-red-900/30"
-                                title="Remove member"
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
+                    <>
+                      {showAddMember && (
+                        <div className="mt-2">
+                          <UserSearchCombobox
+                            value={null}
+                            onValueChange={handleAddMember}
+                            placeholder="Search for a user…"
+                          />
+                        </div>
+                      )}
+
+                      <ul className="mt-2 max-h-64 flex flex-col gap-1 overflow-y-auto">
+                        {membersQuery.data?.members.map((member) => {
+                          const presence = presenceMap.get(member.id);
+                          const isSelf = member.id === currentUserId;
+                          const isCreator = member.id === createdBy;
+                          return (
+                            <li
+                              key={member.id}
+                              className="group flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50 dark:hover:bg-slate-700"
+                            >
+                              <MemberAvatar user={member} presence={presence} />
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                  {userDisplayName(member)}
+                                  {isSelf && (
+                                    <span className="ml-1 text-xs font-normal text-slate-400">
+                                      (you)
+                                    </span>
+                                  )}
+                                  {isCreator && (
+                                    <span className="ml-1 text-xs font-normal text-indigo-500">
+                                      Owner
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                                  {member.username
+                                    ? `@${member.username}`
+                                    : "No username"}
+                                </p>
+                              </div>
+                              {isOwner && !isSelf && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveMember(member.id)}
+                                  disabled={removeMember.isPending}
+                                  className="rounded p-1 text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50 group-hover:opacity-100 dark:hover:bg-red-900/30"
+                                  title="Remove member"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </>
                   )}
                 </div>
               </div>
