@@ -8,22 +8,37 @@ Both systems share the same architecture: server publishes to a Redis channel, S
 
 ### How Presence is Stored
 
+**Redis (real-time, ephemeral):**
 ```
 Redis key: presence:{userId}
 Value: JSON { status: "online"|"offline", lastSeen: "ISO8601" }
 TTL: 300 seconds (5 minutes)
 ```
 
+**PostgreSQL (durable):**
+```
+users.last_seen_at — nullable timestamp, updated on connect and disconnect
+```
+
+Redis is the real-time source of truth. The DB column provides a durable fallback when the Redis key has expired (user offline >5 min), so the client can still display "last seen 3 hours ago" instead of nothing.
+
 Defined in `apps/server/src/lib/presence.ts`.
 
 ### Presence Lifecycle
 
 ```
-SSE connected    -> markOnline(userId)  -> SET key + PUBLISH presence:updates
-Every 60 seconds -> setPresenceStatus() -> SET key (refresh TTL)
-SSE disconnected -> markOffline(userId) -> SET key + PUBLISH presence:updates
-Key expires      -> (user is implicitly offline — getPresenceStatus returns offline)
+SSE connected    -> markOnline(db, userId)  -> SET key + PUBLISH presence:updates + UPDATE users.last_seen_at
+Every 60 seconds -> setPresenceStatus()     -> SET key (refresh TTL only, no DB write)
+SSE disconnected -> markOffline(db, userId) -> SET key + PUBLISH presence:updates + UPDATE users.last_seen_at
+Key expires      -> (user is implicitly offline)
 ```
+
+### Read Waterfall
+
+`getPresenceStatus(db, userId)` checks in order:
+1. **Redis key exists** → return parsed value (no DB hit)
+2. **Redis key missing** → query `users.last_seen_at` from DB → return `{ status: "offline", lastSeen: dbTimestamp }`
+3. **DB `lastSeenAt` is null** → return `{ status: "offline", lastSeen: epoch }` (never connected)
 
 ### Querying Presence
 

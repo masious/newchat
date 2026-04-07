@@ -1,5 +1,8 @@
+import type { Database } from "@newchat/db";
 import { redisPublisher } from "./redis";
 import { PRESENCE_TTL_SEC } from "./constants";
+import { updateLastSeen, getLastSeenAt } from "../data/user-queries";
+import { logger } from "./logger";
 
 export type PresenceStatus = {
   status: "online" | "offline";
@@ -21,22 +24,28 @@ export async function setPresenceStatus(
   );
 }
 
-export async function markOnline(userId: number) {
+export async function markOnline(db: Database, userId: number) {
   const state: PresenceStatus = {
     status: "online",
     lastSeen: new Date().toISOString(),
   };
   await setPresenceStatus(userId, state);
   await publishPresenceEvent(userId, state);
+  updateLastSeen(db, userId).catch((err) => {
+    logger.error({ err, userId }, "Failed to persist lastSeen to DB");
+  });
 }
 
-export async function markOffline(userId: number) {
+export async function markOffline(db: Database, userId: number) {
   const state: PresenceStatus = {
     status: "offline",
     lastSeen: new Date().toISOString(),
   };
   await setPresenceStatus(userId, state);
   await publishPresenceEvent(userId, state);
+  updateLastSeen(db, userId).catch((err) => {
+    logger.error({ err, userId }, "Failed to persist lastSeen to DB");
+  });
 }
 
 export async function publishPresenceEvent(
@@ -50,16 +59,22 @@ export async function publishPresenceEvent(
 }
 
 export async function getPresenceStatus(
+  db: Database,
   userId: number,
 ): Promise<PresenceStatus> {
   const raw = await redisPublisher.get(presenceKey(userId));
-  if (!raw) {
-    return { status: "offline", lastSeen: new Date(0).toISOString() };
+  if (raw) {
+    try {
+      return JSON.parse(raw) as PresenceStatus;
+    } catch {
+      // Fall through to DB
+    }
   }
-  try {
-    const parsed = JSON.parse(raw) as PresenceStatus;
-    return parsed;
-  } catch {
-    return { status: "offline", lastSeen: new Date(0).toISOString() };
+
+  const lastSeenAt = await getLastSeenAt(db, userId);
+  if (lastSeenAt) {
+    return { status: "offline", lastSeen: lastSeenAt.toISOString() };
   }
+
+  return { status: "offline", lastSeen: new Date(0).toISOString() };
 }

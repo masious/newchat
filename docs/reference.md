@@ -27,7 +27,7 @@ Source: `packages/db/src/schema.ts`
 
 | Table                  | PK                             | Key Columns                                                          |
 |------------------------|--------------------------------|----------------------------------------------------------------------|
-| `users`                | `id` (identity)                | telegramId (unique), username, firstName, lastName, avatarUrl, hasCompletedOnboarding, notificationChannel |
+| `users`                | `id` (identity)                | telegramId (unique), username, firstName, lastName, avatarUrl, hasCompletedOnboarding, notificationChannel, lastSeenAt |
 | `auth_tokens`          | `id` (identity)                | token (unique), status (enum), telegramId, userId (FK→users, cascade) |
 | `conversations`        | `id` (identity)                | type (enum: dm/group), name                                          |
 | `conversation_members` | `(conversation_id, user_id)`   | joinedAt; both FKs cascade on delete                                 |

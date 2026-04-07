@@ -42,6 +42,7 @@ export const users = pgTable("users", {
   notificationChannel: notificationChannelEnum("notification_channel").default("both").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  lastSeenAt: timestamp("last_seen_at"),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({

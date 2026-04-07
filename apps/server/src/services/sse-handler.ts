@@ -147,6 +147,7 @@ function handleMessage(
 // ── CLOSED ──────────────────────────────────────────────────────
 
 function createCleanup(
+  db: Database,
   userId: number,
   sseKey: string,
   keepalive: ReturnType<typeof setInterval>,
@@ -163,7 +164,7 @@ function createCleanup(
     decrementConcurrency(redisPublisher, sseKey).catch((err) => {
       logger.error({ err }, "Failed to decrement SSE connection count");
     });
-    markOffline(userId).catch((err) => {
+    markOffline(db, userId).catch((err) => {
       logger.error({ err }, "Failed to mark offline");
     });
   };
@@ -179,7 +180,7 @@ export function createSSEHandler(db: Database) {
     const { userId, sseKey } = auth;
 
     return streamSSE(c, async (stream) => {
-      await markOnline(userId);
+      await markOnline(db, userId);
 
       const { subscriber, conversationChannels, membershipChannel, initialChannels } =
         await subscribe(db, userId);
@@ -208,7 +209,7 @@ export function createSSEHandler(db: Database) {
         }
       }, SSE_KEEPALIVE_MS);
 
-      const cleanup = createCleanup(userId, sseKey, keepalive, presenceHeartbeat, subscriber);
+      const cleanup = createCleanup(db, userId, sseKey, keepalive, presenceHeartbeat, subscriber);
 
       subscriber.on("message", async (channel, message) => {
         try {

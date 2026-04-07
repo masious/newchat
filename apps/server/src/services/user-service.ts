@@ -62,7 +62,7 @@ export async function search(
   const enriched = await Promise.all(
     rows.map(async (user) => ({
       ...user,
-      presence: await getPresenceStatus(user.id),
+      presence: await getPresenceStatus(db, user.id),
     })),
   );
 
@@ -78,7 +78,7 @@ export async function getProfile(
     throw new NotFoundError("User not found");
   }
 
-  const presence = await getPresenceStatus(user.id);
+  const presence = await getPresenceStatus(db, user.id);
   return { user: { ...user, presence } };
 }
 
@@ -95,11 +95,11 @@ export async function fetchTelegramAvatar(db: Database, userId: number) {
   return { avatarUrl };
 }
 
-export async function getPresenceBatch(userIds: number[]) {
+export async function getPresenceBatch(db: Database, userIds: number[]) {
   const entries = await Promise.all(
     userIds.map(async (id) => ({
       userId: id,
-      presence: await getPresenceStatus(id),
+      presence: await getPresenceStatus(db, id),
     })),
   );
   return { entries };

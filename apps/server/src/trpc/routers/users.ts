@@ -68,9 +68,9 @@ export const usersRouter = router({
     }),
   presence: protectedProcedure
     .input(z.object({ userIds: z.array(z.number().int().positive()).max(100) }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       try {
-        return await userService.getPresenceBatch(input.userIds);
+        return await userService.getPresenceBatch(ctx.db, input.userIds);
       } catch (err) {
         throw mapDomainError(err);
       }

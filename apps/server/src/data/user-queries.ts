@@ -7,6 +7,7 @@ import {
   ilike,
   inArray,
   or,
+  sql,
 } from "@newchat/db";
 
 export async function findUserById(db: Database, userId: number) {
@@ -86,4 +87,22 @@ export async function updateNotificationChannel(
     .where(eq(users.id, userId))
     .returning();
   return updated ?? null;
+}
+
+export async function updateLastSeen(db: Database, userId: number) {
+  await db
+    .update(users)
+    .set({ lastSeenAt: sql`now()` })
+    .where(eq(users.id, userId));
+}
+
+export async function getLastSeenAt(
+  db: Database,
+  userId: number,
+): Promise<Date | null> {
+  const row = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { lastSeenAt: true },
+  });
+  return row?.lastSeenAt ?? null;
 }
