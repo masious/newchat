@@ -19,20 +19,22 @@ export function EmojiButton({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="top" align="start" sideOffset={12}>
-          <Popover.Popup className="z-50 w-80 rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
-            <EmojiPicker
-              className="border-none"
-              emojisPerRow={9}
-              emojiSize={32}
-              onEmojiSelect={onEmojiSelect}
-            >
-              <EmojiPicker.Header>
-                <EmojiPicker.Input placeholder="Search emoji..." autoFocus />
-              </EmojiPicker.Header>
-              <EmojiPicker.Group>
-                <EmojiPicker.List containerHeight={350} />
-              </EmojiPicker.Group>
-            </EmojiPicker>
+          <Popover.Popup className="floating-popup z-50 w-80 rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+            <div className="floating-content">
+              <EmojiPicker
+                className="border-none"
+                emojisPerRow={9}
+                emojiSize={32}
+                onEmojiSelect={onEmojiSelect}
+              >
+                <EmojiPicker.Header>
+                  <EmojiPicker.Input placeholder="Search emoji..." autoFocus />
+                </EmojiPicker.Header>
+                <EmojiPicker.Group>
+                  <EmojiPicker.List containerHeight={350} />
+                </EmojiPicker.Group>
+              </EmojiPicker>
+            </div>
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>

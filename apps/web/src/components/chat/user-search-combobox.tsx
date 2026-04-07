@@ -44,39 +44,41 @@ export function UserSearchCombobox(props: UserSearchComboboxProps) {
     <Combobox.Portal>
       <Combobox.Positioner sideOffset={4} className="z-70 outline-none">
         <Combobox.Popup
-          className="box-border max-h-60 w-(--anchor-width) overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+          className="floating-popup box-border max-h-60 w-(--anchor-width) overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800"
           aria-busy={isPending || undefined}
         >
-          <Combobox.Status className="flex items-center gap-2 px-3 py-2 text-xs text-slate-500 empty:hidden dark:text-slate-400">
-            {getStatus()}
-          </Combobox.Status>
-          <Combobox.Empty className="px-3 py-2 text-xs text-slate-500 empty:hidden dark:text-slate-400">
-            {getEmptyMessage()}
-          </Combobox.Empty>
-          <Combobox.List>
-            {(user: SearchUser) => (
-              <Combobox.Item
-                key={user.id}
-                value={user}
-                className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm text-slate-700 outline-none data-highlighted:bg-slate-100 dark:text-slate-300 dark:data-highlighted:bg-slate-700"
-              >
-                <Combobox.ItemIndicator className="w-4 shrink-0 text-indigo-600 dark:text-indigo-400">
-                  <Check className="h-4 w-4" />
-                </Combobox.ItemIndicator>
-                <Avatar avatarUrl={user.avatarUrl} name={user.firstName} size="xs" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    {userDisplayName(user)}
-                  </p>
-                  {user.username && (
-                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                      @{user.username}
+          <div className="floating-content">
+            <Combobox.Status className="flex items-center gap-2 px-3 py-2 text-xs text-slate-500 empty:hidden dark:text-slate-400">
+              {getStatus()}
+            </Combobox.Status>
+            <Combobox.Empty className="px-3 py-2 text-xs text-slate-500 empty:hidden dark:text-slate-400">
+              {getEmptyMessage()}
+            </Combobox.Empty>
+            <Combobox.List>
+              {(user: SearchUser) => (
+                <Combobox.Item
+                  key={user.id}
+                  value={user}
+                  className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm text-slate-700 outline-none data-highlighted:bg-slate-100 dark:text-slate-300 dark:data-highlighted:bg-slate-700"
+                >
+                  <Combobox.ItemIndicator className="w-4 shrink-0 text-indigo-600 dark:text-indigo-400">
+                    <Check className="h-4 w-4" />
+                  </Combobox.ItemIndicator>
+                  <Avatar avatarUrl={user.avatarUrl} name={user.firstName} size="xs" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {userDisplayName(user)}
                     </p>
-                  )}
-                </div>
-              </Combobox.Item>
-            )}
-          </Combobox.List>
+                    {user.username && (
+                      <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                        @{user.username}
+                      </p>
+                    )}
+                  </div>
+                </Combobox.Item>
+              )}
+            </Combobox.List>
+          </div>
         </Combobox.Popup>
       </Combobox.Positioner>
     </Combobox.Portal>

@@ -250,6 +250,12 @@ All custom animations are defined in `globals.css`. Use these instead of inventi
 | Toast enter | `toast-enter` | 200ms (slide from right) | Toast notifications appearing |
 | Fade in up | `animate-fade-in-up` | 300ms | Landing page message sequence |
 | Skeleton pulse | `animate-pulse` | (Tailwind default) | Loading placeholders |
+| Floating popup | `floating-popup` | 150ms (scale + fade) | Popovers, context menus, combobox dropdowns |
+| Floating content | `floating-content` | 150ms (staggered slide + fade) | Inner content of floating surfaces |
+| Tooltip | `tooltip-popup` | 100ms (scale + fade) | Tooltip popups |
+| Dialog backdrop | `dialog-backdrop` | 200ms (fade) | Dialog overlay |
+| Dialog popup | `dialog-popup` | 200ms (scale + fade) | Dialog panel |
+| Dialog content | `dialog-content` | 150ms (staggered slide + fade) | Inner content of dialogs |
 
 ### Staggered Delays
 
@@ -275,11 +281,71 @@ For interactive state changes (hover, focus), use Tailwind's `transition` or `tr
 
 Don't add `transition-all` to everything — only transition the properties that actually change.
 
+### Floating Surface Transitions
+
+All floating surfaces (popovers, context menus, combobox dropdowns) use a two-layer enter/exit animation powered by Base UI's `data-starting-style` / `data-ending-style` attributes. Classes are defined in `globals.css`.
+
+**Layer 1 — Container (`floating-popup`):** The popup scales (Y-axis) and fades. Uses `--transform-origin` from Base UI's Positioner, which auto-adapts when the popup flips due to viewport collision.
+
+**Layer 2 — Content (`floating-content`):** A wrapper `<div>` inside the popup slides horizontally and fades with a staggered delay. Content enters 150ms after the container scales in, but exits immediately on close.
+
+```tsx
+<Popover.Positioner side="bottom" align="start" sideOffset={8}>
+  <Popover.Popup className="floating-popup rounded-lg border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+    <div className="floating-content">
+      {/* Menu items */}
+    </div>
+  </Popover.Popup>
+</Popover.Positioner>
+```
+
+**Tooltips** use `tooltip-popup` — a lighter, faster variant (100ms, subtle uniform scale, no content wrapper):
+
+```tsx
+<Tooltip.Positioner sideOffset={6}>
+  <Tooltip.Popup className="tooltip-popup rounded-md bg-slate-900 px-2.5 py-1.5 text-xs text-white shadow-lg dark:bg-slate-700">
+    {label}
+  </Tooltip.Popup>
+</Tooltip.Positioner>
+```
+
+### Dialog Transitions
+
+Dialogs use a three-layer enter/exit animation. Classes are defined in `globals.css` and applied automatically by `BaseDialog`.
+
+**Backdrop (`dialog-backdrop`):** Fades in/out over 200ms.
+
+**Popup (`dialog-popup`):** Scales uniformly from center (0.95 → 1) and fades over 200ms. Slower than floating surfaces because dialogs are larger and more prominent.
+
+**Content (`dialog-content`):** Inner content slides up and fades with a staggered delay (enters 150ms after popup, exits immediately).
+
+| | Floating surfaces | Dialogs |
+|---|---|---|
+| Scale | `scale: 1 0.4` (Y-only) | `scale: 0.95` (uniform) |
+| Origin | `var(--transform-origin)` (adaptive) | Center (implicit) |
+| Content slide | Horizontal (`-1rem 0`) | Vertical (`0 0.5rem`) |
+| Duration | 150ms | 200ms |
+| Backdrop | None | Fades in/out |
+
+These transitions are built into `BaseDialog` — no additional classes needed when using it.
+
+### Conversation Switch Transition
+
+When the user switches conversations, the chat panel plays a two-phase directional slide:
+
+1. **Exit (`animate-conversation-exit`):** Current messages slide right (`translateX(2rem)`) and fade out over 150ms with `ease-in`. `pointer-events: none` prevents interaction with stale content.
+2. **Enter (`animate-conversation-enter`):** New messages slide in from the left (`translateX(-2rem)` → `0`) and fade in over 150ms with `ease-out`.
+
+The transition is managed by `useConversationTransition` in `page.tsx`, which decouples the **selected** conversation (what the user clicked) from the **displayed** conversation (what's rendered). The wrapper div around `ChatPanel` receives the animation classes while the panel inside remounts via React `key`.
+
+First load (no previous conversation) skips the animation entirely.
+
 ### Rules
 
 1. **Don't create new keyframe animations** without adding them to `globals.css` and documenting them here.
 2. **Don't use `animate-bounce`, `animate-spin`, or other Tailwind built-ins** (except `animate-pulse` for skeletons).
 3. **Keep durations short.** Nothing in the app should animate longer than 400ms except infinite loops (typing, pending).
+4. **Every floating surface must use the standard transition classes.** Popovers, context menus, and combobox dropdowns use `floating-popup` + `floating-content`. Tooltips use `tooltip-popup`. Dialogs use `BaseDialog` which applies `dialog-backdrop`, `dialog-popup`, and `dialog-content` automatically.
 
 ## Component Patterns
 
@@ -447,16 +513,18 @@ Use the shared `BaseDialog` component (`components/ui/base-dialog.tsx`) for all 
 </BaseDialog>
 ```
 
-Standardized values: `rounded-2xl`, `p-6`, `shadow-xl`, `bg-white dark:bg-slate-800`, backdrop `z-50 bg-black/40`, title `text-xl font-bold`, subtitle `text-xs font-semibold uppercase`. All dialogs are wrapped in `ScrollArea` for safe scrolling on small viewports.
+Standardized values: `rounded-2xl`, `p-6`, `shadow-xl`, `bg-white dark:bg-slate-800`, backdrop `z-50 bg-black/40`, title `text-xl font-bold`, subtitle `text-xs font-semibold uppercase`. All dialogs are wrapped in `ScrollArea` for safe scrolling on small viewports. Enter/exit transitions (`dialog-backdrop`, `dialog-popup`, `dialog-content`) are built-in — no additional classes needed.
 
 ### Context Menus
 
 ```tsx
-<ContextMenu.Popup className="min-w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-  <ContextMenu.Item className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">
-    <Icon className="h-4 w-4" />
-    Action
-  </ContextMenu.Item>
+<ContextMenu.Popup className="floating-popup min-w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+  <div className="floating-content">
+    <ContextMenu.Item className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">
+      <Icon className="h-4 w-4" />
+      Action
+    </ContextMenu.Item>
+  </div>
 </ContextMenu.Popup>
 ```
 
@@ -656,4 +724,5 @@ Before shipping any new component or page, verify:
 - [ ] Icons are from Lucide React at standard sizes (h-4/h-5/h-6)
 - [ ] Inputs use the standard focus pattern: `focus:border-indigo-500 focus:outline-none`
 - [ ] No new animations without adding to `globals.css`
+- [ ] Floating surfaces use `floating-popup` + `floating-content` (or `tooltip-popup` for tooltips)
 - [ ] Spacing uses even multiples where possible (`gap-2`, `gap-4`, `gap-6`)

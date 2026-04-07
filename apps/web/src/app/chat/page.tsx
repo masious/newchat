@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { SearchUser } from "@/lib/trpc-types";
 import { Drawer } from "@base-ui/react/drawer";
@@ -18,8 +18,41 @@ import { useDarkMode } from "@/lib/hooks/use-dark-mode";
 import { MessagesSquare } from "lucide-react";
 import { FeatureBoundary } from "@/components/ui/feature-boundary";
 import { OfflineBanner } from "@/components/ui/offline-banner";
+import { cn } from "@/lib/cn";
 
 const emptyArray: never[] = [];
+
+function useConversationTransition(selectedId: number | null) {
+  const [displayedId, setDisplayedId] = useState<number | null>(null);
+  const [phase, setPhase] = useState<"idle" | "exiting" | "entering">("idle");
+  const selectedIdRef = useRef(selectedId);
+  selectedIdRef.current = selectedId;
+
+  useEffect(() => {
+    if (selectedId === displayedId) return;
+    if (displayedId != null && selectedId != null) {
+      setPhase("exiting");
+    } else {
+      setDisplayedId(selectedId);
+    }
+  }, [selectedId, displayedId]);
+
+  useEffect(() => {
+    if (phase === "exiting") {
+      const t = setTimeout(() => {
+        setDisplayedId(selectedIdRef.current);
+        setPhase("entering");
+      }, 150);
+      return () => clearTimeout(t);
+    }
+    if (phase === "entering") {
+      const t = setTimeout(() => setPhase("idle"), 150);
+      return () => clearTimeout(t);
+    }
+  }, [phase]);
+
+  return { displayedId, phase };
+}
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
@@ -45,17 +78,27 @@ export default function ChatPage() {
     }
     return conversations[0];
   }, [conversations, selectedId]);
-  const isTyping = Boolean(selectedConversation?.isTyping);
 
-  const typingUserId = selectedConversation?.typingUserId;
+  const { displayedId, phase } = useConversationTransition(
+    selectedConversation?.id ?? null,
+  );
+
+  const displayedConversation = useMemo(() => {
+    if (!displayedId) return selectedConversation;
+    return conversations.find((c) => c.id === displayedId) ?? selectedConversation;
+  }, [conversations, displayedId, selectedConversation]);
+
+  const isTyping = Boolean(displayedConversation?.isTyping);
+
+  const typingUserId = displayedConversation?.typingUserId;
 
   const typingUserName = useMemo(() => {
-    if (!selectedConversation || !typingUserId) return null;
-    const member = selectedConversation.members.find(
+    if (!displayedConversation || !typingUserId) return null;
+    const member = displayedConversation.members.find(
       (m) => m.id === typingUserId,
     );
     return member ? member.firstName : null;
-  }, [selectedConversation, typingUserId]);
+  }, [displayedConversation, typingUserId]);
 
   useEffect(() => {
     if (isTyping && typingUserName) {
@@ -166,23 +209,27 @@ export default function ChatPage() {
           </Drawer.Viewport>
         </Drawer.Portal>
       </Drawer.Root>
-      <div className="flex min-w-0 flex-1 flex-col">
-        {selectedConversation ? (
+      <div className={cn(
+        "flex min-w-0 flex-1 flex-col",
+        phase === "exiting" && "animate-conversation-exit",
+        phase === "entering" && "animate-conversation-enter",
+      )}>
+        {displayedConversation ? (
           <FeatureBoundary name="ChatPanel">
             <ChatPanel
-              key={selectedConversation.id}
-              conversationId={selectedConversation.id}
-              conversation={selectedConversation}
+              key={displayedConversation.id}
+              conversationId={displayedConversation.id}
+              conversation={displayedConversation}
               typingUserName={typingUserName}
               conversationName={getConversationName(
-                selectedConversation,
+                displayedConversation,
                 user?.id ?? 0,
               )}
               isTyping={isTyping}
               onOpenSidebar={() => setSidebarOpen(true)}
               otherMemberId={
-                selectedConversation.type === "dm"
-                  ? selectedConversation.members.find((m) => m.id !== user?.id)
+                displayedConversation.type === "dm"
+                  ? displayedConversation.members.find((m) => m.id !== user?.id)
                       ?.id
                   : undefined
               }

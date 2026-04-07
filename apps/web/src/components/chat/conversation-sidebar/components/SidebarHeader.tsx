@@ -46,8 +46,8 @@ export function SidebarHeader({
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner side="bottom" align="start" sideOffset={8}>
-              <Popover.Popup className="z-50 min-w-56 origin-top rounded-lg border border-slate-200 bg-white p-1 shadow-lg transition-[scale,opacity] duration-150 ease-out data-starting-style:scale-y-40 data-starting-style:opacity-40 data-ending-style:scale-y-40 data-ending-style:opacity-40 dark:border-slate-700 dark:bg-slate-800">
-                <div className="transition-[opacity,translate] duration-150 delay-150 ease-out in-data-starting-style:opacity-0 in-data-starting-style:-translate-x-4 in-data-ending-style:opacity-0 in-data-ending-style:-translate-x-4 in-data-ending-style:delay-0">
+              <Popover.Popup className="floating-popup z-50 min-w-56 rounded-lg border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+                <div className="floating-content">
                   <button
                     type="button"
                     onClick={() => {

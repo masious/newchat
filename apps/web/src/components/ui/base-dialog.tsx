@@ -4,8 +4,8 @@ import { cn } from "@/lib/cn";
 import { SectionLabel } from "@/components/ui/section-label";
 
 const sizeClasses = {
-  md: "max-w-md",
-  lg: "max-w-lg",
+  md: "min-w-md max-w-md",
+  lg: "min-w-lg max-w-lg",
 } as const;
 
 type BaseDialogProps = {
@@ -32,7 +32,7 @@ export function BaseDialog({
       <Dialog.Portal>
         <Dialog.Backdrop
           className={cn(
-            "fixed inset-0 bg-black/40",
+            "dialog-backdrop fixed inset-0 bg-black/40",
             stacked ? "z-60" : "z-50",
           )}
         />
@@ -50,26 +50,28 @@ export function BaseDialog({
               <ScrollArea.Content className="flex min-h-full items-center justify-center">
                 <Dialog.Popup
                   className={cn(
-                    "w-full rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-800",
+                    "dialog-popup w-full rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-800",
                     sizeClasses[size],
                   )}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="min-w-0 flex-1">
-                      <Dialog.Title className="truncate text-xl font-bold text-slate-900 dark:text-slate-100">
-                        {title}
-                      </Dialog.Title>
-                      {subtitle && (
-                        <SectionLabel as={Dialog.Description}>
-                          {subtitle}
-                        </SectionLabel>
-                      )}
+                  <div className="dialog-content">
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0 flex-1">
+                        <Dialog.Title className="truncate text-xl font-bold text-slate-900 dark:text-slate-100">
+                          {title}
+                        </Dialog.Title>
+                        {subtitle && (
+                          <SectionLabel as={Dialog.Description}>
+                            {subtitle}
+                          </SectionLabel>
+                        )}
+                      </div>
+                      <Dialog.Close className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                        Close
+                      </Dialog.Close>
                     </div>
-                    <Dialog.Close className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-                      Close
-                    </Dialog.Close>
+                    {children}
                   </div>
-                  {children}
                 </Dialog.Popup>
               </ScrollArea.Content>
             </ScrollArea.Viewport>
