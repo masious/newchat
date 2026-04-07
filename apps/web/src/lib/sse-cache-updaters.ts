@@ -231,6 +231,58 @@ export function handleMembership(
   });
 }
 
+export function handleConversationUpdated(
+  utils: SSEUtils,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  detail: Record<string, any>,
+) {
+  const conversationId = detail.conversationId as number;
+  const name = detail.name as string;
+  utils.conversations.list.setData(undefined, (data) => {
+    if (!data) return data;
+    return {
+      conversations: data.conversations.map((c) =>
+        c.id === conversationId ? { ...c, name } : c,
+      ),
+    };
+  });
+}
+
+export function handleMemberAdded(
+  utils: SSEUtils,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  detail: Record<string, any>,
+) {
+  const conversationId = detail.conversationId as number;
+  utils.conversations.members
+    .invalidate({ conversationId })
+    .catch(() => {});
+  utils.conversations.list.invalidate().catch(() => {});
+}
+
+export function handleMemberRemoved(
+  utils: SSEUtils,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  detail: Record<string, any>,
+  currentUserId?: number,
+) {
+  const conversationId = detail.conversationId as number;
+  if (detail.userId === currentUserId) {
+    utils.conversations.list.setData(undefined, (data) => {
+      if (!data) return data;
+      return {
+        conversations: data.conversations.filter(
+          (c) => c.id !== conversationId,
+        ),
+      };
+    });
+  } else {
+    utils.conversations.members
+      .invalidate({ conversationId })
+      .catch(() => {});
+  }
+}
+
 export function handlePresence(
   utils: SSEUtils,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

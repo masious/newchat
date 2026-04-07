@@ -41,4 +41,55 @@ export const conversationsRouter = router({
         throw mapDomainError(err);
       }
     }),
+  updateName: protectedProcedure
+    .input(
+      z.object({
+        conversationId: z.number().int().positive(),
+        name: z.string().min(1).max(255),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await conversationService.updateName(ctx.db, {
+          ...input,
+          userId: ctx.userId!,
+        });
+      } catch (err) {
+        throw mapDomainError(err);
+      }
+    }),
+  addMember: protectedProcedure
+    .input(
+      z.object({
+        conversationId: z.number().int().positive(),
+        memberUserId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await conversationService.addMember(ctx.db, {
+          ...input,
+          userId: ctx.userId!,
+        });
+      } catch (err) {
+        throw mapDomainError(err);
+      }
+    }),
+  removeMember: protectedProcedure
+    .input(
+      z.object({
+        conversationId: z.number().int().positive(),
+        memberUserId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await conversationService.removeMember(ctx.db, {
+          ...input,
+          userId: ctx.userId!,
+        });
+      } catch (err) {
+        throw mapDomainError(err);
+      }
+    }),
 });

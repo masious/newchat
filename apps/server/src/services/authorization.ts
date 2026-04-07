@@ -27,6 +27,25 @@ export async function ensureConversationMember(
   return membership.conversation;
 }
 
+export async function ensureGroupOwner(
+  db: Database,
+  conversationId: number,
+  userId: number,
+) {
+  const conversation = await ensureConversationMember(
+    db,
+    conversationId,
+    userId,
+  );
+  if (conversation.type !== "group") {
+    throw new ForbiddenError("Not a group conversation");
+  }
+  if (conversation.createdBy !== null && conversation.createdBy !== userId) {
+    throw new ForbiddenError("Not the group owner");
+  }
+  return conversation;
+}
+
 export async function ensureUsersExist(db: Database, memberIds: number[]) {
   if (!memberIds.length) return;
   const rows = await findUsersByIds(db, memberIds);

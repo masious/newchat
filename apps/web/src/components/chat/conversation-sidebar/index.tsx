@@ -82,7 +82,7 @@ export function ConversationSidebar({
       )}
       <ScrollArea.Root className="flex-1">
         <ScrollArea.Viewport className="h-full overscroll-contain">
-          <ScrollArea.Content>
+          <ScrollArea.Content className="min-w-full!">
             {isLoading && <LoadingSkeleton />}
             {!isLoading && filtered.length === 0 && (
               <EmptyState onOpenNewChat={onOpenNewChat} />

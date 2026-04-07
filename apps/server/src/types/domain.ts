@@ -28,6 +28,7 @@ export type ConversationSummary = {
   id: number;
   type: "dm" | "group";
   name: string | null;
+  createdBy: number | null;
   createdAt: Date;
   lastMessage: MessageWithSender | null;
   unreadCount: number;

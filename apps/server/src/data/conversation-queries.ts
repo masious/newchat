@@ -9,6 +9,7 @@ import {
   users,
   sql,
   eq,
+  and,
   asc,
 } from "@newchat/db";
 import type { ConversationSummary } from "../types/domain";
@@ -17,6 +18,7 @@ type ConversationRow = {
   id: number;
   type: "dm" | "group";
   name: string | null;
+  created_by: number | null;
   created_at: Date;
   last_message_id: number | null;
   last_message_content: string | null;
@@ -50,6 +52,7 @@ function mapConversationRow(row: ConversationRow): ConversationSummary {
     id: row.id,
     type: row.type,
     name: row.name,
+    createdBy: row.created_by,
     createdAt: row.created_at,
     lastMessage,
     isTyping: false,
@@ -73,6 +76,7 @@ export async function fetchConversationSummaries(
       c.id,
       c.type,
       c.name,
+      c.created_by,
       c.created_at,
       last_msg.id AS last_message_id,
       last_msg.content AS last_message_content,
@@ -159,6 +163,7 @@ export async function createConversationWithMembers(
   input: {
     type: "dm" | "group";
     name: string | null;
+    createdBy: number | null;
     memberIds: number[];
   },
 ) {
@@ -168,6 +173,7 @@ export async function createConversationWithMembers(
       .values({
         type: input.type,
         name: input.name,
+        createdBy: input.createdBy,
       })
       .returning({ id: conversations.id });
 
@@ -209,4 +215,38 @@ export async function getConversationMemberUserIds(
     .from(conversationMembers)
     .where(eq(conversationMembers.conversationId, conversationId));
   return rows.map((r) => r.userId);
+}
+
+export async function updateConversationName(
+  db: Database,
+  conversationId: number,
+  name: string,
+) {
+  await db
+    .update(conversations)
+    .set({ name })
+    .where(eq(conversations.id, conversationId));
+}
+
+export async function addConversationMember(
+  db: Database,
+  conversationId: number,
+  userId: number,
+) {
+  await db.insert(conversationMembers).values({ conversationId, userId });
+}
+
+export async function removeConversationMember(
+  db: Database,
+  conversationId: number,
+  userId: number,
+) {
+  await db
+    .delete(conversationMembers)
+    .where(
+      and(
+        eq(conversationMembers.conversationId, conversationId),
+        eq(conversationMembers.userId, userId),
+      ),
+    );
 }

@@ -81,13 +81,23 @@ export const conversations = pgTable("conversations", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   type: conversationTypeEnum("type").notNull(),
   name: varchar("name", { length: 255 }),
+  createdBy: integer("created_by").references(() => users.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const conversationsRelations = relations(conversations, ({ many }) => ({
-  members: many(conversationMembers),
-  messages: many(messages),
-}));
+export const conversationsRelations = relations(
+  conversations,
+  ({ one, many }) => ({
+    creator: one(users, {
+      fields: [conversations.createdBy],
+      references: [users.id],
+    }),
+    members: many(conversationMembers),
+    messages: many(messages),
+  }),
+);
 
 // Conversation Members
 export const conversationMembers = pgTable(

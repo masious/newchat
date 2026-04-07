@@ -1,14 +1,25 @@
 import type { Database } from "@newchat/db";
 import { BadRequestError } from "../errors";
-import { ensureConversationMember, ensureUsersExist } from "./authorization";
+import {
+  ensureConversationMember,
+  ensureGroupOwner,
+  ensureUsersExist,
+} from "./authorization";
 import {
   fetchConversationSummaries,
   fetchConversationSummary,
   findExistingDm,
   createConversationWithMembers,
   getConversationMembers,
+  getConversationMemberUserIds,
+  updateConversationName,
+  addConversationMember,
+  removeConversationMember,
 } from "../data/conversation-queries";
-import { publishMembershipChange } from "./realtime-events";
+import {
+  publishMembershipChange,
+  publishConversationEvent,
+} from "./realtime-events";
 
 export async function list(db: Database, input: { userId: number }) {
   const conversations = await fetchConversationSummaries(db, input.userId);
@@ -58,6 +69,7 @@ export async function create(
   const conversationId = await createConversationWithMembers(db, {
     type: input.type,
     name: input.type === "group" ? input.name ?? null : null,
+    createdBy: input.type === "group" ? input.creatorId : null,
     memberIds,
   });
 
@@ -93,4 +105,89 @@ export async function getMembers(
   await ensureConversationMember(db, input.conversationId, input.userId);
   const members = await getConversationMembers(db, input.conversationId);
   return { members };
+}
+
+export async function updateName(
+  db: Database,
+  input: { conversationId: number; userId: number; name: string },
+) {
+  await ensureGroupOwner(db, input.conversationId, input.userId);
+  await updateConversationName(db, input.conversationId, input.name);
+  await publishConversationEvent(input.conversationId, {
+    type: "conversation_updated",
+    conversationId: input.conversationId,
+    name: input.name,
+  });
+  return { success: true };
+}
+
+export async function addMember(
+  db: Database,
+  input: { conversationId: number; userId: number; memberUserId: number },
+) {
+  await ensureGroupOwner(db, input.conversationId, input.userId);
+  await ensureUsersExist(db, [input.memberUserId]);
+
+  const existingMemberIds = await getConversationMemberUserIds(
+    db,
+    input.conversationId,
+  );
+  if (existingMemberIds.includes(input.memberUserId)) {
+    throw new BadRequestError("User is already a member of this conversation");
+  }
+
+  await addConversationMember(db, input.conversationId, input.memberUserId);
+
+  const summary = await fetchConversationSummary(
+    db,
+    input.memberUserId,
+    input.conversationId,
+  );
+  if (summary) {
+    await publishMembershipChange(input.memberUserId, {
+      type: "join",
+      conversationId: input.conversationId,
+      conversation: summary,
+    });
+  }
+
+  await publishConversationEvent(input.conversationId, {
+    type: "member_added",
+    conversationId: input.conversationId,
+    userId: input.memberUserId,
+  });
+
+  return { success: true };
+}
+
+export async function removeMember(
+  db: Database,
+  input: { conversationId: number; userId: number; memberUserId: number },
+) {
+  const conversation = await ensureGroupOwner(
+    db,
+    input.conversationId,
+    input.userId,
+  );
+  if (
+    conversation.createdBy !== null &&
+    input.memberUserId === conversation.createdBy
+  ) {
+    throw new BadRequestError("Cannot remove the group owner");
+  }
+
+  await removeConversationMember(db, input.conversationId, input.memberUserId);
+
+  await publishConversationEvent(input.conversationId, {
+    type: "member_removed",
+    conversationId: input.conversationId,
+    userId: input.memberUserId,
+  });
+
+  await publishMembershipChange(input.memberUserId, {
+    type: "leave",
+    conversationId: input.conversationId,
+  });
+
+  return { success: true };
 }

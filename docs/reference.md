@@ -15,7 +15,7 @@ Quick-lookup tables for Redis keys, database schema, tRPC routers, and configura
 
 | Channel Pattern                     | Example                    | Published Events                       |
 |-------------------------------------|----------------------------|----------------------------------------|
-| `conversation:{conversationId}`     | `conversation:7`           | new_message, typing, message_read      |
+| `conversation:{conversationId}`     | `conversation:7`           | new_message, typing, message_read, conversation_updated, member_added, member_removed |
 | `user:{userId}:membership`          | `user:42:membership`       | join, leave                            |
 | `presence:updates`                  | `presence:updates`         | { userId, status, lastSeen }           |
 
@@ -29,7 +29,7 @@ Source: `packages/db/src/schema.ts`
 |------------------------|--------------------------------|----------------------------------------------------------------------|
 | `users`                | `id` (identity)                | telegramId (unique), username, firstName, lastName, avatarUrl, hasCompletedOnboarding, notificationChannel, lastSeenAt |
 | `auth_tokens`          | `id` (identity)                | token (unique), status (enum), telegramId, userId (FK→users, cascade) |
-| `conversations`        | `id` (identity)                | type (enum: dm/group), name                                          |
+| `conversations`        | `id` (identity)                | type (enum: dm/group), name, createdBy (FK→users, set null, nullable) |
 | `conversation_members` | `(conversation_id, user_id)`   | joinedAt; both FKs cascade on delete                                 |
 | `messages`             | `id` (identity)                | conversationId (FK, cascade), senderId (FK, set null, nullable), content, attachments (JSONB) |
 | `read_receipts`        | `(message_id, user_id)`        | readAt; both FKs cascade on delete                                   |
@@ -58,6 +58,7 @@ When a user is deleted, the cascade chain is:
 - `auth_tokens` → deleted (cascade)
 - `conversation_members` → deleted (cascade)
 - `messages.sender_id` → set to NULL (message preserved, sender cleared)
+- `conversations.created_by` → set to NULL (group becomes ownerless, any member can manage)
 - `read_receipts` → deleted (cascade)
 - `push_subscriptions` → deleted (cascade)
 
@@ -75,7 +76,7 @@ When a conversation is deleted:
 |-----------------|---------------------------------------------------------|----------|
 | `auth`          | createToken, pollToken, exchange                        | public   |
 | `users`         | me, update, search, profile, presence, updateNotificationPreferences, fetchTelegramAvatar | protected |
-| `conversations` | list, create, members                                   | protected |
+| `conversations` | list, create, members, updateName, addMember, removeMember | protected |
 | `messages`      | list, send, markRead, typing                            | protected |
 | `uploads`       | getPresignedUrl                                         | protected |
 | `push`          | (push notification subscriptions)                       | protected |
@@ -95,6 +96,9 @@ Per-procedure limits configured in `apps/server/src/middleware/trpc-rate-limit.t
 | `users.search`           | 20/min  | 60s    | userId   |
 | `uploads.getPresignedUrl`| 20/min  | 60s    | userId   |
 | `conversations.create`   | 10/min  | 60s    | userId   |
+| `conversations.updateName` | 10/min | 60s   | userId   |
+| `conversations.addMember`  | 15/min | 60s   | userId   |
+| `conversations.removeMember` | 15/min | 60s | userId   |
 | `sse.createTicket`       | 10/min  | 60s    | userId   |
 | `users.fetchTelegramAvatar` | 5/min | 60s  | userId   |
 

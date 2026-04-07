@@ -7,6 +7,9 @@ import {
   handleNewMessage,
   handleTyping,
   handleMessageRead,
+  handleConversationUpdated,
+  handleMemberAdded,
+  handleMemberRemoved,
   handleMembership,
   handlePresence,
 } from "../sse-cache-updaters";
@@ -48,6 +51,12 @@ export function useSSE() {
           handleTyping(utils, detail, user?.id, typingTimers.current);
         } else if (detail.type === "message_read") {
           handleMessageRead(utils, detail, user?.id);
+        } else if (detail.type === "conversation_updated") {
+          handleConversationUpdated(utils, detail);
+        } else if (detail.type === "member_added") {
+          handleMemberAdded(utils, detail);
+        } else if (detail.type === "member_removed") {
+          handleMemberRemoved(utils, detail, user?.id);
         }
       } catch (error) {
         console.error("Failed to process SSE conversation event", error);

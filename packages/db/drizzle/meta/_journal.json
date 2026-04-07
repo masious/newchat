@@ -29,6 +29,13 @@
       "when": 1775568742967,
       "tag": "0003_new_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775571727473,
+      "tag": "0004_parallel_shatterstar",
+      "breakpoints": true
     }
   ]
 }

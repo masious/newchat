@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { formatRelativeTime } from "@/lib/formatting";
-import { Menu } from "lucide-react";
+import { Menu, Users } from "lucide-react";
 import { IconTooltip } from "@/components/ui/icon-tooltip";
 import type { ConversationSummary } from "@/lib/trpc-types";
 import { ConversationAvatar } from "@/components/chat/conversation-avatar";
+import { GroupSettingsDialog } from "@/components/chat/group-settings-dialog";
 
 function formatPresenceSubtitle(presence: { status: string; lastSeen: string }): string | null {
   if (presence.status === "online") return "online";
@@ -30,6 +32,8 @@ export function ChatHeader({
   onOpenSidebar?: () => void;
   otherMemberId?: number;
 }) {
+  const [groupSettingsOpen, setGroupSettingsOpen] = useState(false);
+
   const presenceQuery = trpc.users.presence.useQuery(
     { userIds: [otherMemberId!] },
     { enabled: Boolean(otherMemberId), refetchInterval: 60_000 },
@@ -65,8 +69,8 @@ export function ChatHeader({
           avatarSize="h-8 w-8"
           avatarTextSize="text-xs"
         />
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+        <div className="flex-1 overflow-hidden">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 truncate">
             {conversationName}
           </h2>
           {subtitle && (
@@ -75,6 +79,26 @@ export function ChatHeader({
             </p>
           )}
         </div>
+        {conversation.type === "group" && (
+          <>
+            <IconTooltip label="Group info">
+              <button
+                onClick={() => setGroupSettingsOpen(true)}
+                className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
+              >
+                <Users className="h-5 w-5" />
+              </button>
+            </IconTooltip>
+            <GroupSettingsDialog
+              conversationId={conversation.id}
+              createdBy={conversation.createdBy}
+              currentUserId={currentUserId}
+              conversationName={conversationName}
+              open={groupSettingsOpen}
+              onOpenChange={setGroupSettingsOpen}
+            />
+          </>
+        )}
       </div>
     </header>
   );
