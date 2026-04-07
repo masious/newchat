@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Progress } from "@base-ui/react/progress";
 import { isImageType } from "@/lib/upload";
 import { FileText, X } from "lucide-react";
+import { IconButton } from "@/components/ui/icon-button";
 import type { UploadEntryWithId } from "../hooks/useFileAttachments";
 
 export function PendingAttachments({
@@ -36,13 +37,14 @@ export function PendingAttachments({
               {entry.status === "error" && (
                 <span className="text-red-500 text-[10px]">Failed</span>
               )}
-              <button
+              <IconButton
                 type="button"
+                size="xs"
                 onClick={() => onRemove(entry.id)}
-                className="ml-1 text-slate-400 hover:text-slate-600"
+                className="ml-1"
               >
                 <X className="h-3.5 w-3.5" />
-              </button>
+              </IconButton>
             </div>
             {showProgress && entry.progress > 0 && (
               <Progress.Root value={entry.progress} className="w-full">

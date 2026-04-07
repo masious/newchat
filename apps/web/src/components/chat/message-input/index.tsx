@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { SendHorizontal } from "lucide-react";
+import { IconButton } from "@/components/ui/icon-button";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/lib/providers/auth-context";
 import { addToast } from "@/lib/providers/toast-context";
@@ -217,12 +218,9 @@ export function MessageInput({
             }}
           />
         </div>
-        <button
-          type="submit"
-          className="flex items-center justify-center rounded-full bg-indigo-600 p-2 text-white transition-opacity hover:opacity-90 active:opacity-80 md:hidden"
-        >
+        <IconButton type="submit" variant="primary" size="lg" className="md:hidden">
           <SendHorizontal size={20} />
-        </button>
+        </IconButton>
       </div>
     </form>
   );

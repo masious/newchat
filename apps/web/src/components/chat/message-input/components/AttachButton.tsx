@@ -1,6 +1,6 @@
 import { ChangeEvent, RefObject } from "react";
 import { Paperclip } from "lucide-react";
-import { IconTooltip } from "@/components/ui/icon-tooltip";
+import { IconButton } from "@/components/ui/icon-button";
 
 export function AttachButton({
   fileInputRef,
@@ -11,15 +11,13 @@ export function AttachButton({
 }) {
   return (
     <>
-      <IconTooltip label="Attach file">
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="flex items-center size-9 justify-center text-slate-500 dark:text-slate-400"
-        >
-          <Paperclip className="h-5 w-5" />
-        </button>
-      </IconTooltip>
+      <IconButton
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        label="Attach file"
+      >
+        <Paperclip className="h-5 w-5" />
+      </IconButton>
       <input
         ref={fileInputRef}
         type="file"

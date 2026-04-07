@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { Field } from "@base-ui/react/field";
 import { X, Loader2, Plus } from "lucide-react";
+import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/cn";
 import { trpc } from "@/lib/trpc";
 import { useDebouncedCallback } from "@/lib/hooks";
@@ -196,14 +197,14 @@ export function GroupSettingsDialog({
                       )}
                     </h3>
                     {isOwner && (
-                      <button
+                      <IconButton
                         type="button"
                         onClick={() => setShowAddMember((v) => !v)}
-                        className="rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                        size="sm"
                         title="Add member"
                       >
                         <Plus className="h-4 w-4" />
-                      </button>
+                      </IconButton>
                     )}
                   </div>
 
@@ -256,15 +257,17 @@ export function GroupSettingsDialog({
                                 </p>
                               </div>
                               {isOwner && !isSelf && (
-                                <button
+                                <IconButton
                                   type="button"
+                                  variant="danger"
+                                  size="sm"
                                   onClick={() => handleRemoveMember(member.id)}
                                   disabled={removeMember.isPending}
-                                  className="rounded p-1 text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50 group-hover:opacity-100 dark:hover:bg-red-900/30"
+                                  className="opacity-0 group-hover:opacity-100"
                                   title="Remove member"
                                 >
                                   <X className="h-4 w-4" />
-                                </button>
+                                </IconButton>
                               )}
                             </li>
                           );

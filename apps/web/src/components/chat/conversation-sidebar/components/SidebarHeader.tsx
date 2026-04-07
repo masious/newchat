@@ -1,5 +1,5 @@
 import { Plus, Pencil } from "lucide-react";
-import { IconTooltip } from "@/components/ui/icon-tooltip";
+import { IconButton } from "@/components/ui/icon-button";
 import { userDisplayName } from "@/lib/formatting";
 
 export function SidebarHeader({
@@ -52,23 +52,13 @@ export function SidebarHeader({
         <div />
       )}
       {onEditProfile && (
-        <IconTooltip label="Edit profile">
-          <button
-            onClick={onEditProfile}
-            className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-        </IconTooltip>
+        <IconButton onClick={onEditProfile} size="lg" label="Edit profile">
+          <Pencil className="h-4 w-4" />
+        </IconButton>
       )}
-      <IconTooltip label="New chat">
-        <button
-          onClick={onOpenNewChat}
-          className="rounded-full bg-indigo-600 p-2 text-white hover:bg-indigo-500"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
-      </IconTooltip>
+      <IconButton onClick={onOpenNewChat} variant="primary" size="lg" label="New chat">
+        <Plus className="h-4 w-4" />
+      </IconButton>
     </div>
   );
 }

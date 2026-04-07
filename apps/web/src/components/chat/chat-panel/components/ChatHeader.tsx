@@ -2,7 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { formatRelativeTime } from "@/lib/formatting";
 import { Menu, Users } from "lucide-react";
-import { IconTooltip } from "@/components/ui/icon-tooltip";
+import { IconButton } from "@/components/ui/icon-button";
 import type { ConversationSummary } from "@/lib/trpc-types";
 import { ConversationAvatar } from "@/components/chat/conversation-avatar";
 import { GroupSettingsDialog } from "@/components/chat/group-settings-dialog";
@@ -52,14 +52,9 @@ export function ChatHeader({
   return (
     <header className="border-b border-slate-200 px-6 py-4 dark:border-slate-700">
       <div className="flex items-center gap-3">
-        <IconTooltip label="Open sidebar">
-          <button
-            onClick={onOpenSidebar}
-            className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 md:hidden dark:text-slate-400 dark:hover:bg-slate-700"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-        </IconTooltip>
+        <IconButton onClick={onOpenSidebar} size="sm" label="Open sidebar" className="md:hidden">
+          <Menu className="h-6 w-6" />
+        </IconButton>
         <ConversationAvatar
           conversation={conversation}
           currentUserId={currentUserId}
@@ -81,14 +76,9 @@ export function ChatHeader({
         </div>
         {conversation.type === "group" && (
           <>
-            <IconTooltip label="Group info">
-              <button
-                onClick={() => setGroupSettingsOpen(true)}
-                className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
-              >
-                <Users className="h-5 w-5" />
-              </button>
-            </IconTooltip>
+            <IconButton onClick={() => setGroupSettingsOpen(true)} size="sm" label="Group info">
+              <Users className="h-5 w-5" />
+            </IconButton>
             <GroupSettingsDialog
               conversationId={conversation.id}
               createdBy={conversation.createdBy}

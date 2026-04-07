@@ -165,7 +165,7 @@ font-family: system-ui, -apple-system, sans-serif;
 
 | Radius | Usage |
 |---|---|
-| `rounded-full` | Avatars, pills, unread badges, toggle buttons |
+| `rounded-full` | Avatars, pills, unread badges, toggle buttons, icon buttons |
 | `rounded-2xl` | Message bubbles, dialog popups |
 | `rounded-lg` | Inputs, cards, context menus, containers, buttons |
 | `rounded-md` | Menu items (inside context menus) |
@@ -317,10 +317,26 @@ Sizes: `h-10 w-10` (standard), `h-7 w-7` (small, group stacking). Don't use othe
   Cancel
 </button>
 
-// Icon button
-<button className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700">
-  <Icon className="h-5 w-5" />
-</button>
+// Icon button — use the IconButton component (apps/web/src/components/ui/icon-button.tsx)
+import { IconButton } from "@/components/ui/icon-button";
+
+// Ghost (default) — secondary actions
+<IconButton label="Edit" onClick={handleEdit}>
+  <Pencil className="h-5 w-5" />
+</IconButton>
+
+// Primary — primary actions (new chat, send)
+<IconButton variant="primary" size="lg" label="New chat" onClick={handleNew}>
+  <Plus className="h-4 w-4" />
+</IconButton>
+
+// Danger — destructive actions (remove member)
+<IconButton variant="danger" size="sm" title="Remove" onClick={handleRemove}>
+  <X className="h-4 w-4" />
+</IconButton>
+
+// Sizes: xs (p-0.5), sm (p-1), md (p-1.5, default), lg (p-2)
+// All icon buttons use rounded-full. Pass className for one-offs.
 
 // Pill toggle
 <button className="rounded-full px-3 py-1 text-sm font-semibold bg-slate-100 dark:bg-slate-700 data-pressed:bg-indigo-600 data-pressed:text-white">
@@ -417,7 +433,7 @@ All icons come from **Lucide React** (`lucide-react`). Don't use other icon libr
 
 1. **Icon color comes from the parent's `text-*` class.** Don't set color on the icon itself.
 2. **Use `strokeWidth={2}` (default) for all icons.** Don't thin or thicken strokes.
-3. **Wrap icon-only buttons in `IconTooltip`** to provide an accessible label.
+3. **Use `IconButton` for icon-only buttons** with a `label` prop to get an accessible tooltip automatically. Use `title` attribute as fallback when a tooltip isn't appropriate.
 
 ## Anti-Patterns
 
