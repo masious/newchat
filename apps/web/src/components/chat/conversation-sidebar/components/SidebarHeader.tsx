@@ -58,63 +58,65 @@ export function SidebarHeader({
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner side="bottom" align="start" sideOffset={8}>
-              <Popover.Popup className="z-50 min-w-56 rounded-lg border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onEditProfile?.();
-                  }}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition hover:bg-slate-50 dark:hover:bg-slate-700"
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
-                    <UserPen className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      Edit Profile
+              <Popover.Popup className="z-50 min-w-56 origin-top rounded-lg border border-slate-200 bg-white p-1 shadow-lg transition-[scale,opacity] duration-150 ease-out data-starting-style:scale-y-40 data-starting-style:opacity-40 data-ending-style:scale-y-40 data-ending-style:opacity-40 dark:border-slate-700 dark:bg-slate-800">
+                <div className="transition-[opacity,translate] duration-150 delay-150 ease-out in-data-starting-style:opacity-0 in-data-starting-style:-translate-x-4 in-data-ending-style:opacity-0 in-data-ending-style:-translate-x-4 in-data-ending-style:delay-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onEditProfile?.();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-700"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
+                      <UserPen className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Edit Profile
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Photo, name, username
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onOpenSettings?.();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-700"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
+                      <Settings className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Settings
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Theme, sounds, notifications
+                      </p>
+                    </div>
+                  </button>
+                  <div className="my-1 border-t border-slate-200 dark:border-slate-700" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onLogout?.();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-red-50 dark:hover:bg-red-900/30"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-red-600 dark:bg-slate-700 dark:text-red-400">
+                      <LogOut className="h-4 w-4" />
+                    </div>
+                    <p className="text-sm font-semibold text-red-600 dark:text-red-400">
+                      Log out
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Photo, name, username
-                    </p>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onOpenSettings?.();
-                  }}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition hover:bg-slate-50 dark:hover:bg-slate-700"
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
-                    <Settings className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      Settings
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Theme, sounds, notifications
-                    </p>
-                  </div>
-                </button>
-                <div className="my-1 border-t border-slate-200 dark:border-slate-700" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onLogout?.();
-                  }}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition hover:bg-red-50 dark:hover:bg-red-900/30"
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-red-600 dark:bg-slate-700 dark:text-red-400">
-                    <LogOut className="h-4 w-4" />
-                  </div>
-                  <p className="text-sm font-semibold text-red-600 dark:text-red-400">
-                    Log out
-                  </p>
-                </button>
+                  </button>
+                </div>
               </Popover.Popup>
             </Popover.Positioner>
           </Popover.Portal>
