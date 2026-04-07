@@ -54,10 +54,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setTokenState(newToken);
   }, []);
 
-  const logout = useCallback(() => {
+  const { mutateAsync: unsubscribeEndpoint } =
+    trpc.push.unsubscribeEndpoint.useMutation();
+
+  const logout = useCallback(async () => {
+    // Best-effort push notification cleanup before clearing auth
+    try {
+      if ("serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        const subscription =
+          await registration?.pushManager?.getSubscription();
+        if (subscription) {
+          const endpoint = subscription.endpoint;
+          await subscription.unsubscribe();
+          unsubscribeEndpoint({ endpoint }).catch(() => {});
+        }
+      }
+    } catch {
+      // Push cleanup is best-effort, never block logout
+    }
     setAuthToken(null);
     setTokenState(null);
-  }, []);
+  }, [unsubscribeEndpoint]);
 
   const refreshUser = useCallback(async () => {
     await meQuery.refetch();
