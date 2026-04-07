@@ -12,6 +12,7 @@ import { useDebouncedCallback } from "@/lib/hooks";
 import { addToast } from "@/lib/providers/toast-context";
 import { userDisplayName } from "@/lib/formatting";
 import { UserSearchCombobox } from "./user-search-combobox";
+import { SectionLabel } from "@/components/ui/section-label";
 import type { SearchUser } from "@/lib/trpc-types";
 import { FeatureBoundary } from "@/components/ui/feature-boundary";
 
@@ -140,14 +141,14 @@ export function GroupSettingsDialog({
 
                 <div>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+                    <SectionLabel as="h3">
                       Members
                       {membersQuery.data && (
                         <span className="ml-1">
                           ({membersQuery.data.members.length})
                         </span>
                       )}
-                    </h3>
+                    </SectionLabel>
                     {isOwner && (
                       <IconButton
                         type="button"

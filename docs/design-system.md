@@ -382,6 +382,31 @@ Built-in styles: `w-full rounded-lg border border-slate-200 px-3 py-2 text-sm fo
 
 Don't vary the border color, radius, or focus behavior. Use `className` only for layout concerns like spacing (`mt-1`) or width adjustments (`pr-8`).
 
+### Section Labels
+
+Use the shared `SectionLabel` component (`components/ui/section-label.tsx`) for uppercase section headers. It supports a polymorphic `as` prop to render as any HTML element or component.
+
+```tsx
+import { SectionLabel } from "@/components/ui/section-label";
+
+// Default (renders as <span>)
+<SectionLabel>Members</SectionLabel>
+
+// As a <legend> inside a <fieldset>
+<SectionLabel as="legend">Notifications</SectionLabel>
+
+// As a heading
+<SectionLabel as="h3">Members <span className="ml-1">({count})</span></SectionLabel>
+
+// As a Base UI component with extra layout classes
+<SectionLabel as={Collapsible.Trigger} className="flex items-center gap-1">
+  People
+  <ChevronDown className="h-3 w-3" />
+</SectionLabel>
+```
+
+Canonical style: `text-xs font-semibold uppercase text-slate-500 dark:text-slate-400`. Pass `className` for layout concerns only (flex, spacing). Do not override the typography or color tokens.
+
 ### Dialogs
 
 Use the shared `BaseDialog` component (`components/ui/base-dialog.tsx`) for all dialogs. It standardizes the wrapper structure (Backdrop, Viewport, ScrollArea, Popup, Header, Close button).

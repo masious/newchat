@@ -1,4 +1,5 @@
 import { Sun, Moon, VolumeX, Volume2 } from "lucide-react";
+import { SectionLabel } from "@/components/ui/section-label";
 
 export function SettingsSection({
   isDark,
@@ -13,9 +14,9 @@ export function SettingsSection({
 }) {
   return (
     <fieldset className="mt-6">
-      <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+      <SectionLabel as="legend">
         Appearance
-      </legend>
+      </SectionLabel>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {onToggleDarkMode && (
           <button

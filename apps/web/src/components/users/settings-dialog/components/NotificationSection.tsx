@@ -1,5 +1,6 @@
 import { Switch } from "@base-ui/react/switch";
 import { Bell, Send } from "lucide-react";
+import { SectionLabel } from "@/components/ui/section-label";
 
 export function NotificationSection({
   telegramEnabled,
@@ -14,9 +15,9 @@ export function NotificationSection({
 }) {
   return (
     <fieldset className="mt-6">
-      <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+      <SectionLabel as="legend">
         Notifications
-      </legend>
+      </SectionLabel>
       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
         Choose how you want to receive message notifications
       </p>

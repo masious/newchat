@@ -3,6 +3,7 @@ import { userDisplayName } from "@/lib/formatting";
 import { Avatar } from "@/components/ui/avatar";
 import { Collapsible } from "@base-ui/react/collapsible";
 import { Search, ChevronDown } from "lucide-react";
+import { SectionLabel } from "@/components/ui/section-label";
 import type { SearchUser, PresenceSummary } from "@/lib/trpc-types";
 
 export function UserResultList({
@@ -21,10 +22,10 @@ export function UserResultList({
   return (
     <Collapsible.Root defaultOpen className="border-y border-slate-100 px-4 py-3 dark:border-slate-700">
       <div className="flex items-center justify-between">
-        <Collapsible.Trigger className="flex items-center gap-1 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+        <SectionLabel as={Collapsible.Trigger} className="flex items-center gap-1">
           People
           <ChevronDown className="h-3 w-3 transition-transform in-data-panel-open:rotate-180" />
-        </Collapsible.Trigger>
+        </SectionLabel>
         {isLoading && <span className="text-xs text-slate-400">Searching…</span>}
       </div>
       <Collapsible.Panel>

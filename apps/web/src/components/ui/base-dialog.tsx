@@ -1,6 +1,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { ScrollArea } from "@base-ui/react";
 import { cn } from "@/lib/cn";
+import { SectionLabel } from "@/components/ui/section-label";
 
 const sizeClasses = {
   md: "max-w-md",
@@ -59,9 +60,9 @@ export function BaseDialog({
                         {title}
                       </Dialog.Title>
                       {subtitle && (
-                        <Dialog.Description className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+                        <SectionLabel as={Dialog.Description}>
                           {subtitle}
-                        </Dialog.Description>
+                        </SectionLabel>
                       )}
                     </div>
                     <Dialog.Close className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
