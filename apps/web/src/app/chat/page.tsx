@@ -125,10 +125,10 @@ export default function ChatPage() {
         swipeDirection="left"
       >
         <Drawer.Portal>
-          <Drawer.Backdrop className="fixed inset-0 bg-black/40 md:hidden" />
+          <Drawer.Backdrop className="fixed inset-0 bg-black/40 md:hidden transition-opacity duration-450 data-starting-style:opacity-0 data-ending-style:opacity-0" />
           <Drawer.Viewport className="[--viewport-padding:0px] supports-[-webkit-touch-callout:none]:[--viewport-padding:0.625rem] fixed inset-0 flex items-stretch justify-start p-(--viewport-padding)">
             <Drawer.Popup
-              className="fixed top-0 bottom-0 left-0 z-50 w-80 outline-none md:hidden [--bleed:3rem] touch-auto transform-[translateX(var(--drawer-swipe-movement-x))] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-ending-style:transform-[translateX(calc(-100%+var(--bleed)-var(--viewport-padding)-2px))] data-starting-style:transform-[translateX(calc(-100%+var(--bleed)-var(--viewport-padding)-2px))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)]"
+              className="fixed top-0 bottom-0 left-0 z-50 w-80 outline-none md:hidden touch-auto transform-[translateX(var(--drawer-swipe-movement-x))] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-ending-style:transform-[translateX(calc(-100%-var(--viewport-padding)-2px))] data-starting-style:transform-[translateX(calc(-100%-var(--viewport-padding)-2px))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)]"
               aria-describedby={undefined}
             >
               <Drawer.Title className="sr-only">Conversations</Drawer.Title>
