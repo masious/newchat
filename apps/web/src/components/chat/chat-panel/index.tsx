@@ -20,7 +20,7 @@ import { useAuth } from "@/lib/providers/auth-context";
 import { trpc } from "@/lib/trpc";
 import { addToast } from "@/lib/providers/toast-context";
 import { registerOptimisticMessage, markOptimisticFailed } from "@/lib/optimistic-messages";
-import { isOptimisticMessage, type OptimisticMessage } from "@/lib/trpc-types";
+import { isOptimisticMessage, type OptimisticMessage, type ConversationSummary } from "@/lib/trpc-types";
 import { MessageBubble } from "../message-bubble";
 import { MessageInput, type MessageInputHandle } from "../message-input";
 import type { Attachment } from "../message-bubble/components/AttachmentPreview";
@@ -45,6 +45,7 @@ const AT_BOTTOM_THRESHOLD = 50;
 
 export function ChatPanel({
   conversationId,
+  conversation,
   conversationName,
   isTyping,
   typingUserName,
@@ -52,6 +53,7 @@ export function ChatPanel({
   otherMemberId,
 }: {
   conversationId: number;
+  conversation: ConversationSummary;
   conversationName: string;
   isTyping?: boolean;
   typingUserName: string | null;
@@ -355,6 +357,8 @@ export function ChatPanel({
 
   const headerContent = (
     <ChatHeader
+      conversation={conversation}
+      currentUserId={user?.id ?? 0}
       conversationName={conversationName}
       isTyping={isTyping}
       typingUserName={typingUserName}

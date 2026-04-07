@@ -2,6 +2,8 @@ import { trpc } from "@/lib/trpc";
 import { formatRelativeTime } from "@/lib/formatting";
 import { Menu } from "lucide-react";
 import { IconTooltip } from "@/components/ui/icon-tooltip";
+import type { ConversationSummary } from "@/lib/trpc-types";
+import { ConversationAvatar } from "@/components/chat/conversation-avatar";
 
 function formatPresenceSubtitle(presence: { status: string; lastSeen: string }): string | null {
   if (presence.status === "online") return "online";
@@ -12,12 +14,16 @@ function formatPresenceSubtitle(presence: { status: string; lastSeen: string }):
 }
 
 export function ChatHeader({
+  conversation,
+  currentUserId,
   conversationName,
   isTyping,
   typingUserName,
   onOpenSidebar,
   otherMemberId,
 }: {
+  conversation: ConversationSummary;
+  currentUserId: number;
   conversationName: string;
   isTyping?: boolean;
   typingUserName: string | null;
@@ -50,6 +56,15 @@ export function ChatHeader({
             <Menu className="h-6 w-6" />
           </button>
         </IconTooltip>
+        <ConversationAvatar
+          conversation={conversation}
+          currentUserId={currentUserId}
+          dmAvatarSize="h-11 w-11"
+          dmTextSize="text-base"
+          containerSize="h-11 w-11"
+          avatarSize="h-8 w-8"
+          avatarTextSize="text-xs"
+        />
         <div>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             {conversationName}

@@ -161,6 +161,7 @@ export default function ChatPage() {
             <ChatPanel
               key={selectedConversation.id}
               conversationId={selectedConversation.id}
+              conversation={selectedConversation}
               typingUserName={typingUserName}
               conversationName={getConversationName(
                 selectedConversation,
