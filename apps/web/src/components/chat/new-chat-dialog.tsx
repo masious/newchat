@@ -8,6 +8,7 @@ import { Field } from "@base-ui/react/field";
 import { trpc } from "@/lib/trpc";
 import { BaseDialog } from "@/components/ui/base-dialog";
 import type { SearchUser } from "@/lib/trpc-types";
+import { TextInput } from "@/components/ui/text-input";
 import { UserSearchCombobox } from "./user-search-combobox";
 
 export function NewChatDialog({
@@ -131,11 +132,11 @@ export function NewChatDialog({
               </Field.Label>
               <Field.Control
                 render={
-                  <input
+                  <TextInput
                     type="text"
                     value={name}
                     onChange={(event) => setName(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                    className="mt-1"
                   />
                 }
               />

@@ -6,6 +6,7 @@ import { BaseDialog } from "@/components/ui/base-dialog";
 import { X, Loader2, Plus } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/cn";
+import { TextInput } from "@/components/ui/text-input";
 import { trpc } from "@/lib/trpc";
 import { useDebouncedCallback } from "@/lib/hooks";
 import { Avatar } from "@/components/chat/conversation-avatar";
@@ -156,11 +157,11 @@ export function GroupSettingsDialog({
                     <div className="relative mt-1">
                       <Field.Control
                         render={
-                          <input
+                          <TextInput
                             type="text"
                             value={nameInput}
                             onChange={(e) => handleNameChange(e.target.value)}
-                            className="w-full rounded-lg border border-slate-200 px-3 py-2 pr-8 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+                            className="pr-8"
                           />
                         }
                       />

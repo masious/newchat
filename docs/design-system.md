@@ -351,14 +351,22 @@ import { IconButton } from "@/components/ui/icon-button";
 
 ### Inputs
 
+Use the shared `TextInput` component (`components/ui/text-input.tsx`) for all text inputs. It applies the canonical styles and supports `className` overrides via `cn()` (twMerge).
+
 ```tsx
-<input
-  type="text"
-  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder:text-slate-500"
+import { TextInput } from "@/components/ui/text-input";
+
+<TextInput
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  placeholder="Enter name…"
+  className="mt-1"  // spacing overrides only
 />
 ```
 
-Every text input follows this exact pattern. Don't vary the border color, radius, or focus behavior.
+Built-in styles: `w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder:text-slate-500 aria-invalid:border-red-500`.
+
+Don't vary the border color, radius, or focus behavior. Use `className` only for layout concerns like spacing (`mt-1`) or width adjustments (`pr-8`).
 
 ### Dialogs
 

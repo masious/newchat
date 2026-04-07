@@ -1,4 +1,5 @@
 import { Field } from "@base-ui/react/field";
+import { TextInput } from "@/components/ui/text-input";
 
 interface ProfileFieldsProps {
   username: string;
@@ -23,12 +24,12 @@ export function ProfileFields({
         </Field.Label>
         <Field.Control
           render={
-            <input
+            <TextInput
               type="text"
               required
               value={username}
               onChange={(e) => onUsernameChange(e.target.value)}
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+              className="mt-1"
               placeholder="username"
             />
           }
@@ -50,12 +51,12 @@ export function ProfileFields({
         </Field.Label>
         <Field.Control
           render={
-            <input
+            <TextInput
               type="text"
               required
               value={displayName}
               onChange={(e) => onDisplayNameChange(e.target.value)}
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+              className="mt-1"
               placeholder="Alex Example"
             />
           }
