@@ -19,7 +19,7 @@ export function EmojiButton({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="top" align="start" sideOffset={12}>
-          <Popover.Popup className="floating-popup z-50 w-80 rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+          <Popover.Popup className="floating-popup z-50 rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
             <div className="floating-content">
               <EmojiPicker
                 className="border-none"

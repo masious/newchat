@@ -211,8 +211,8 @@ export default function ChatPage() {
       </Drawer.Root>
       <div className={cn(
         "flex min-w-0 flex-1 flex-col",
-        phase === "exiting" && "animate-conversation-exit",
-        phase === "entering" && "animate-conversation-enter",
+        phase === "exiting" && "animate-content-exit-right",
+        phase === "entering" && "animate-content-enter-from-left",
       )}>
         {displayedConversation ? (
           <FeatureBoundary name="ChatPanel">

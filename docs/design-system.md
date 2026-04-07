@@ -329,16 +329,22 @@ Dialogs use a three-layer enter/exit animation. Classes are defined in `globals.
 
 These transitions are built into `BaseDialog` — no additional classes needed when using it.
 
-### Conversation Switch Transition
+### Directional Content Slide Transitions
 
-When the user switches conversations, the chat panel plays a two-phase directional slide:
+Four generic keyframe animations for sliding content in/out horizontally with a fade. Defined in `globals.css`:
 
-1. **Exit (`animate-conversation-exit`):** Current messages slide right (`translateX(2rem)`) and fade out over 150ms with `ease-in`. `pointer-events: none` prevents interaction with stale content.
-2. **Enter (`animate-conversation-enter`):** New messages slide in from the left (`translateX(-2rem)` → `0`) and fade in over 150ms with `ease-out`.
+| Class | Keyframe | Direction | Use |
+|---|---|---|---|
+| `animate-content-exit-right` | `content-exit-right` | 0 → +2rem | Exit to the right |
+| `animate-content-enter-from-left` | `content-enter-from-left` | -2rem → 0 | Enter from the left |
+| `animate-content-exit-left` | `content-exit-left` | 0 → -2rem | Exit to the left |
+| `animate-content-enter-from-right` | `content-enter-from-right` | +2rem → 0 | Enter from the right |
 
-The transition is managed by `useConversationTransition` in `page.tsx`, which decouples the **selected** conversation (what the user clicked) from the **displayed** conversation (what's rendered). The wrapper div around `ChatPanel` receives the animation classes while the panel inside remounts via React `key`.
+All use 150ms duration. Exit classes use `ease-in` + `pointer-events: none`; enter classes use `ease-out`.
 
-First load (no previous conversation) skips the animation entirely.
+**Conversation switching** (`page.tsx`): Uses `useConversationTransition` to decouple the selected conversation from the displayed one. Exits right, enters from left. First load skips animation.
+
+**Dialog tab switching** (`new-chat-dialog.tsx`): Uses `useTabTransition` with direction tracking. DM → Group exits left / enters from right; Group → DM exits right / enters from left.
 
 ### Rules
 

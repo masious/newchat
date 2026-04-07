@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { Toggle } from "@base-ui/react/toggle";
@@ -12,6 +12,37 @@ import { FormField } from "@/components/ui/form-field";
 import { UserSearchCombobox } from "./user-search-combobox";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
+
+function useTabTransition(selected: string) {
+  const [displayed, setDisplayed] = useState(selected);
+  const [phase, setPhase] = useState<"idle" | "exiting" | "entering">("idle");
+  const [direction, setDirection] = useState<"left" | "right">("left");
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
+
+  useEffect(() => {
+    if (selected === displayed) return;
+    setDirection(selected === "group" ? "left" : "right");
+    setPhase("exiting");
+  }, [selected, displayed]);
+
+  useEffect(() => {
+    if (phase === "exiting") {
+      const t = setTimeout(() => {
+        setDisplayed(selectedRef.current);
+        setPhase("entering");
+      }, 150);
+      return () => clearTimeout(t);
+    }
+    if (phase === "entering") {
+      const t = setTimeout(() => setPhase("idle"), 150);
+      return () => clearTimeout(t);
+    }
+  }, [phase]);
+
+  return { displayed, phase, direction };
+}
 
 export function NewChatDialog({
   open,
@@ -22,6 +53,7 @@ export function NewChatDialog({
 }) {
   const router = useRouter();
   const [type, setType] = useState<"dm" | "group">("dm");
+  const { displayed: displayedType, phase, direction } = useTabTransition(type);
   const [selectedUser, setSelectedUser] = useState<SearchUser | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<SearchUser[]>([]);
   const [name, setName] = useState("");
@@ -127,44 +159,55 @@ export function NewChatDialog({
               Group
             </Toggle>
           </ToggleGroup>
-          {type === "group" && (
-            <FormField label="Group name">
-              <TextInput
-                type="text"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </FormField>
-          )}
-          <FormField label={type === "dm" ? "Search teammate" : "Add members"}>
-            {type === "dm" ? (
-              <UserSearchCombobox
-                value={selectedUser}
-                onValueChange={setSelectedUser}
-                placeholder="Search by name or username…"
-              />
-            ) : (
-              <UserSearchCombobox
-                multiple
-                value={selectedUsers}
-                onValueChange={setSelectedUsers}
-                placeholder="Search teammates…"
-              />
+          <div
+            className={cn(
+              phase === "exiting" && direction === "left" && "animate-content-exit-left",
+              phase === "exiting" && direction === "right" && "animate-content-exit-right",
+              phase === "entering" && direction === "left" && "animate-content-enter-from-right",
+              phase === "entering" && direction === "right" && "animate-content-enter-from-left",
             )}
-          </FormField>
-          {existingDmId && (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              You already have a conversation with this person.
-            </p>
-          )}
-          <ErrorMessage>{error}</ErrorMessage>
-          <Button type="submit" disabled={createConversation.isPending} className="w-full">
-            {createConversation.isPending
-              ? "Creating…"
-              : existingDmId
-                ? "Go to conversation"
-                : "Create"}
-          </Button>
+          >
+            <div className="space-y-4">
+              {displayedType === "group" && (
+                <FormField label="Group name">
+                  <TextInput
+                    type="text"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                </FormField>
+              )}
+              <FormField label={displayedType === "dm" ? "Search teammate" : "Add members"}>
+                {displayedType === "dm" ? (
+                  <UserSearchCombobox
+                    value={selectedUser}
+                    onValueChange={setSelectedUser}
+                    placeholder="Search by name or username…"
+                  />
+                ) : (
+                  <UserSearchCombobox
+                    multiple
+                    value={selectedUsers}
+                    onValueChange={setSelectedUsers}
+                    placeholder="Search teammates…"
+                  />
+                )}
+              </FormField>
+              {existingDmId && (
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  You already have a conversation with this person.
+                </p>
+              )}
+              <ErrorMessage>{error}</ErrorMessage>
+              <Button type="submit" disabled={createConversation.isPending} className="w-full">
+                {createConversation.isPending
+                  ? "Creating…"
+                  : existingDmId
+                    ? "Go to conversation"
+                    : "Create"}
+              </Button>
+            </div>
+          </div>
         </div>
       </form>
     </BaseDialog>

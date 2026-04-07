@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@source "../node_modules/@ferrucc-io/emoji-picker";
+@source "../../node_modules/@ferrucc-io/emoji-picker";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -70,24 +70,43 @@
   animation: pending-pulse 1.5s ease-in-out infinite;
 }
 
-/* Conversation switch transitions */
-@keyframes conversation-exit {
+/* Directional content slide transitions */
+@keyframes content-exit-right {
   from { opacity: 1; transform: translateX(0); }
   to { opacity: 0; transform: translateX(2rem); }
 }
 
-@keyframes conversation-enter {
+@keyframes content-enter-from-left {
   from { opacity: 0; transform: translateX(-2rem); }
   to { opacity: 1; transform: translateX(0); }
 }
 
-.animate-conversation-exit {
-  animation: conversation-exit 150ms ease-in forwards;
+@keyframes content-exit-left {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-2rem); }
+}
+
+@keyframes content-enter-from-right {
+  from { opacity: 0; transform: translateX(2rem); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-content-exit-right {
+  animation: content-exit-right 150ms ease-in forwards;
   pointer-events: none;
 }
 
-.animate-conversation-enter {
-  animation: conversation-enter 150ms ease-out forwards;
+.animate-content-enter-from-left {
+  animation: content-enter-from-left 150ms ease-out forwards;
+}
+
+.animate-content-exit-left {
+  animation: content-exit-left 150ms ease-in forwards;
+  pointer-events: none;
+}
+
+.animate-content-enter-from-right {
+  animation: content-enter-from-right 150ms ease-out forwards;
 }
 
 /* Floating surface transitions (popovers, context menus, combobox dropdowns) */
