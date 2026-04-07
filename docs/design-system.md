@@ -320,17 +320,43 @@ import { Avatar } from "@/components/ui/avatar";
 
 ### Buttons
 
+Use the shared `Button` component (`components/ui/button.tsx`) for all text buttons. It uses CVA for variant and size management.
+
 ```tsx
-// Primary action
-<button className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white disabled:opacity-50">
-  Create
-</button>
+import { Button } from "@/components/ui/button";
 
-// Secondary / ghost
-<button className="rounded-lg px-3 py-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-  Cancel
-</button>
+// Primary (default) — main actions
+<Button onClick={handleCreate} disabled={isPending}>Create</Button>
 
+// Secondary — cancel, dismiss
+<Button variant="secondary">Cancel</Button>
+
+// Danger — destructive actions
+<Button variant="danger">Delete</Button>
+
+// Size variants
+<Button size="sm">Small</Button>     // px-3 py-1 text-xs
+<Button size="md">Medium</Button>    // px-4 py-2 text-sm (default)
+<Button size="lg">Large</Button>     // px-6 py-2 text-sm
+
+// Full width
+<Button className="w-full">Submit</Button>
+
+// With Dialog.Close (Base UI)
+<Dialog.Close render={<Button variant="secondary" />}>Cancel</Dialog.Close>
+```
+
+**Variant styles (CVA):**
+
+| Variant | Light | Dark |
+|---------|-------|------|
+| `primary` | `bg-indigo-600 text-white hover:bg-indigo-500` | same |
+| `secondary` | `border border-slate-300 text-slate-700` | `dark:border-slate-600 dark:text-slate-400` |
+| `danger` | `text-red-600 hover:bg-red-50` | `dark:text-red-400 dark:hover:bg-red-900/30` |
+
+All buttons use `rounded-full font-semibold transition disabled:opacity-50`.
+
+```tsx
 // Icon button — use the IconButton component (apps/web/src/components/ui/icon-button.tsx)
 import { IconButton } from "@/components/ui/icon-button";
 
@@ -355,11 +381,6 @@ import { IconButton } from "@/components/ui/icon-button";
 // Pill toggle
 <button className="rounded-full px-3 py-1 text-sm font-semibold bg-slate-100 dark:bg-slate-700 data-pressed:bg-indigo-600 data-pressed:text-white">
   Option
-</button>
-
-// Destructive
-<button className="text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30">
-  Delete
 </button>
 ```
 
@@ -504,11 +525,83 @@ If you need a standalone label outside of `FormField`:
 
 ### Error Messages
 
-Field-level errors are handled by `FormField`. For standalone error text (e.g., form-level validation):
+Use the shared `ErrorMessage` component (`components/ui/error-message.tsx`) for all inline error text. It renders nothing when children is falsy, so you don't need `{error && ...}` guards.
 
 ```tsx
-<p className="text-sm text-red-600 dark:text-red-400">Error description</p>
+import { ErrorMessage } from "@/components/ui/error-message";
+
+// Standard field-level error (also used internally by FormField)
+<ErrorMessage>{error}</ErrorMessage>
+
+// Standalone error with custom spacing
+<ErrorMessage className="mt-6">{errorMessage}</ErrorMessage>
 ```
+
+Canonical style: `mt-1 text-xs text-red-600 dark:text-red-400`. Use `className` only for spacing overrides (`mt-2`, `mt-6`). Do not override the color or typography tokens.
+
+### Empty States
+
+Use the shared `EmptyState` component (`components/ui/empty-state.tsx`) for icon + heading + description + optional action layouts shown when no data is available.
+
+```tsx
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
+
+// With action button
+<EmptyState
+  icon={<MessageCircle className="h-12 w-12" strokeWidth={1} />}
+  heading="No conversations yet"
+  description="Search for people above or start a new chat."
+  action={<Button size="sm" onClick={onAction}>Start a new chat</Button>}
+/>
+
+// Without action
+<EmptyState
+  icon={<Mail className="h-12 w-12" strokeWidth={1} />}
+  heading="No messages yet"
+  description="Send the first message to start the conversation."
+  className="py-16"
+/>
+```
+
+Layout: `flex flex-col items-center justify-center text-center`. Icon color: `text-slate-300 dark:text-slate-600`. Heading: `mt-3 text-sm font-semibold text-slate-700 dark:text-slate-300`. Description: `mt-1 text-xs text-slate-500 dark:text-slate-400`. Action wrapper: `mt-4`.
+
+### Switch Options
+
+Use the shared `SwitchOption` component (`components/ui/switch-option.tsx`) for toggle switches with icon + label + description layout.
+
+```tsx
+import { SwitchOption } from "@/components/ui/switch-option";
+import { Bell } from "lucide-react";
+
+<SwitchOption
+  checked={enabled}
+  onCheckedChange={setEnabled}
+  icon={<Bell className="h-4 w-4" />}
+  label="Browser notifications"
+  description="Get notified about new messages even when the tab is in the background"
+/>
+```
+
+Wraps Base UI's `Switch.Root` + `Switch.Thumb` inside a bordered container (`rounded-lg border border-slate-200 p-3 dark:border-slate-700`). Icon color is applied by the component (`text-slate-600 dark:text-slate-400`).
+
+### Presence Indicator
+
+Use the shared `PresenceIndicator` component (`components/ui/presence-indicator.tsx`) for inline presence status (dot + label text). For avatar-overlay dots, use Avatar's `status` prop instead.
+
+```tsx
+import { PresenceIndicator } from "@/components/ui/presence-indicator";
+
+// Inline text indicator (user search results, profiles)
+<PresenceIndicator presence={user.presence} />
+// Renders: [●] Online | [●] Last seen 14:30 | [●] Offline
+
+// Avatar with presence dot overlay (use Avatar's built-in status prop)
+<Avatar avatarUrl={url} name={name} status="online" />
+```
+
+Style: `flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400`. Dot: `h-2 w-2 rounded-full` with `bg-emerald-500` (online) or `bg-slate-400` (offline).
 
 ## Icons
 

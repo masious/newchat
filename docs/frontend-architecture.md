@@ -170,13 +170,22 @@ components/
 │       └── hooks/
 │           └── useSettingsForm.ts           # Notification preferences state + mutation
 └── ui/
+    ├── avatar.tsx                            # Shared avatar with CVA size variants + optional presence dot
     ├── base-dialog.tsx                       # Shared dialog wrapper (Backdrop + ScrollArea + Popup + Header)
-    ├── icon-button.tsx                       # Icon button with ghost/primary/danger variants
-    ├── skeleton.tsx                          # Loading placeholder
-    ├── icon-tooltip.tsx                      # Hover tooltip
-    ├── toast-container.tsx                   # Toast notification display
+    ├── button.tsx                            # Shared button with CVA variant (primary/secondary/danger) + size (sm/md/lg)
+    ├── empty-state.tsx                       # Icon + heading + description + optional action layout
+    ├── error-message.tsx                     # Inline error text (renders nothing when falsy)
     ├── feature-boundary.tsx                  # React error boundary (per-feature)
-    └── offline-banner.tsx                    # SSE disconnected banner + reconnect
+    ├── form-field.tsx                        # Field.Root + Label + error/description wrapper
+    ├── icon-button.tsx                       # Icon button with ghost/primary/danger variants
+    ├── icon-tooltip.tsx                      # Hover tooltip
+    ├── offline-banner.tsx                    # SSE disconnected banner + reconnect
+    ├── presence-indicator.tsx                # Inline presence dot + label (Online/Last seen/Offline)
+    ├── section-label.tsx                     # Polymorphic uppercase section header
+    ├── skeleton.tsx                          # Loading placeholder
+    ├── switch-option.tsx                     # Toggle switch with icon + label + description
+    ├── text-input.tsx                        # Shared styled input element
+    └── toast-container.tsx                   # Toast notification display
 ```
 
 ### Patterns

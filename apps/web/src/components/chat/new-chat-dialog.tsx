@@ -10,6 +10,8 @@ import type { SearchUser } from "@/lib/trpc-types";
 import { TextInput } from "@/components/ui/text-input";
 import { FormField } from "@/components/ui/form-field";
 import { UserSearchCombobox } from "./user-search-combobox";
+import { ErrorMessage } from "@/components/ui/error-message";
+import { Button } from "@/components/ui/button";
 
 export function NewChatDialog({
   open,
@@ -155,18 +157,14 @@ export function NewChatDialog({
               You already have a conversation with this person.
             </p>
           )}
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={createConversation.isPending}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white disabled:opacity-50"
-          >
+          <ErrorMessage>{error}</ErrorMessage>
+          <Button type="submit" disabled={createConversation.isPending} className="w-full">
             {createConversation.isPending
               ? "Creating…"
               : existingDmId
                 ? "Go to conversation"
                 : "Create"}
-          </button>
+          </Button>
         </div>
       </form>
     </BaseDialog>

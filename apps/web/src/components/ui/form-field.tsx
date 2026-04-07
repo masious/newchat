@@ -1,5 +1,6 @@
 import { Field } from "@base-ui/react/field";
 import { cn } from "@/lib/cn";
+import { ErrorMessage } from "./error-message";
 
 type FormFieldProps = {
   label: React.ReactNode;
@@ -26,7 +27,7 @@ export function FormField({
       </Field.Label>
       <div className="mt-1">{children}</div>
       {error ? (
-        <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>
+        <ErrorMessage>{error}</ErrorMessage>
       ) : description ? (
         <Field.Description className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           {description}

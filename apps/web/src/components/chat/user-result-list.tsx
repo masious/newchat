@@ -1,10 +1,12 @@
-import { cn } from "@/lib/cn";
 import { userDisplayName } from "@/lib/formatting";
 import { Avatar } from "@/components/ui/avatar";
 import { Collapsible } from "@base-ui/react/collapsible";
 import { Search, ChevronDown } from "lucide-react";
 import { SectionLabel } from "@/components/ui/section-label";
-import type { SearchUser, PresenceSummary } from "@/lib/trpc-types";
+import { ErrorMessage } from "@/components/ui/error-message";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PresenceIndicator } from "@/components/ui/presence-indicator";
+import type { SearchUser } from "@/lib/trpc-types";
 
 export function UserResultList({
   results,
@@ -32,17 +34,14 @@ export function UserResultList({
         {isLoading ? (
           <p className="mt-2 text-sm text-slate-500">Searching directory…</p>
         ) : error ? (
-          <p className="mt-2 text-sm text-red-600">{error}</p>
+          <ErrorMessage className="mt-2">{error}</ErrorMessage>
         ) : results.length === 0 ? (
-          <div className="flex flex-col items-center py-4 text-center">
-            <Search className="h-8 w-8 text-slate-300 dark:text-slate-600" strokeWidth={1.5} />
-            <p className="mt-2 text-sm text-slate-500">
-              No people found for &ldquo;{filter}&rdquo;
-            </p>
-            <p className="mt-1 text-xs text-slate-400">
-              Try a different name or username.
-            </p>
-          </div>
+          <EmptyState
+            icon={<Search className="h-8 w-8" strokeWidth={1.5} />}
+            heading={`No people found for \u201c${filter}\u201d`}
+            description="Try a different name or username."
+            className="py-4"
+          />
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
             {results.map((user) => (
@@ -70,25 +69,5 @@ export function UserResultList({
         )}
       </Collapsible.Panel>
     </Collapsible.Root>
-  );
-}
-
-export function PresenceIndicator({ presence }: { presence?: PresenceSummary }) {
-  const isOnline = presence?.status === "online";
-  const label = isOnline
-    ? "Online"
-    : presence?.lastSeen
-    ? `Last seen ${new Date(presence.lastSeen).toLocaleString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`
-    : "Offline";
-  return (
-    <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-      <span
-        className={cn("h-2 w-2 rounded-full", isOnline ? "bg-emerald-500" : "bg-slate-400")}
-      />
-      <span>{label}</span>
-    </div>
   );
 }

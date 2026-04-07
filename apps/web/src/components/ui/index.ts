@@ -4,3 +4,8 @@ export { IconButton } from "./icon-button";
 export { ToastViewport } from "./toast-container";
 export { FeatureBoundary } from "./feature-boundary";
 export { OfflineBanner } from "./offline-banner";
+export { ErrorMessage } from "./error-message";
+export { Button } from "./button";
+export { EmptyState } from "./empty-state";
+export { SwitchOption } from "./switch-option";
+export { PresenceIndicator } from "./presence-indicator";

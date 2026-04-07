@@ -8,6 +8,8 @@ import { BaseDialog } from "@/components/ui/base-dialog";
 import { Avatar } from "@/components/ui/avatar";
 import { trpc } from "@/lib/trpc";
 import { formatPresence, userDisplayName } from "@/lib/formatting";
+import { ErrorMessage } from "@/components/ui/error-message";
+import { Button } from "@/components/ui/button";
 
 type DisplayUser = (SearchUser | ProfileUser) & {
   presence?: PresenceSummary;
@@ -64,11 +66,7 @@ export function ProfileDialog({
           Loading profile…
         </p>
       )}
-      {!user && errorMessage && (
-        <p className="mt-6 text-sm text-red-600 dark:text-red-400">
-          {errorMessage}
-        </p>
-      )}
+      <ErrorMessage className="mt-6">{!user && errorMessage}</ErrorMessage>
 
       {user && (
         <div className="mt-6 flex gap-6">
@@ -85,10 +83,11 @@ export function ProfileDialog({
       )}
 
       <div className="mt-6 flex justify-end gap-3">
-        <Dialog.Close className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 dark:border-slate-600 dark:text-slate-400">
+        <Dialog.Close render={<Button variant="secondary" />}>
           Cancel
         </Dialog.Close>
-        <button
+        <Button
+          size="lg"
           onClick={() =>
             user &&
             createConversation.mutate({
@@ -97,10 +96,9 @@ export function ProfileDialog({
             })
           }
           disabled={!user || createConversation.isPending}
-          className="rounded-full bg-indigo-600 px-6 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {createConversation.isPending ? "Inviting…" : "Send message"}
-        </button>
+        </Button>
       </div>
     </BaseDialog>
   );

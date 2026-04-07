@@ -12,14 +12,14 @@ Extracted UI patterns that should be consolidated into shared components. Each i
 
 ## Medium Priority
 
-- [ ] [ErrorMessage](./06-error-message.md) — Inline error text display. 8+ instances, 3 missing dark mode pairing.
-- [ ] [Button](./07-button.md) — Primary/secondary button with CVA variants. 5+ instances with border-radius and padding inconsistencies.
-- [ ] [SwitchOption](./08-switch-option.md) — Toggle switch with icon + label + description. 2 identical instances in NotificationSection.
-- [ ] [EmptyState](./09-empty-state.md) — Icon + heading + description + optional action. 3 instances across sidebar, messages, and search.
+- [x] [ErrorMessage](./06-error-message.md) — Inline error text display (`apps/web/src/components/ui/error-message.tsx`). 4 instances replaced across 4 files, 3 missing dark mode pairings fixed.
+- [x] [Button](./07-button.md) — Primary/secondary/danger button with CVA variants (`apps/web/src/components/ui/button.tsx`). 4 instances replaced across 3 files, border-radius and padding inconsistencies resolved.
+- [x] [SwitchOption](./08-switch-option.md) — Toggle switch with icon + label + description (`apps/web/src/components/ui/switch-option.tsx`). 4 duplicated switch blocks replaced across 2 files.
+- [x] [EmptyState](./09-empty-state.md) — Icon + heading + description + optional action (`apps/web/src/components/ui/empty-state.tsx`). 3 instances replaced across 3 files, missing dark mode pairings fixed.
 
 ## Low Priority
 
-- [ ] [PresenceIndicator](./10-presence-indicator.md) — Move existing local component to shared UI. Integrate presence dot with Avatar.
+- [x] [PresenceIndicator](./10-presence-indicator.md) — Moved local component to shared UI (`apps/web/src/components/ui/presence-indicator.tsx`). Import updated in user-result-list.
 
 ## Completed
 
