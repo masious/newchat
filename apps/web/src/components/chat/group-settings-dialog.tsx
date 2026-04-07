@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Field } from "@base-ui/react/field";
 import { BaseDialog } from "@/components/ui/base-dialog";
 import { X, Loader2, Plus } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/cn";
 import { TextInput } from "@/components/ui/text-input";
+import { FormField } from "@/components/ui/form-field";
 import { trpc } from "@/lib/trpc";
 import { useDebouncedCallback } from "@/lib/hooks";
 import { Avatar } from "@/components/chat/conversation-avatar";
@@ -150,29 +150,19 @@ export function GroupSettingsDialog({
       >
         <div className="mt-4 space-y-4">
                 {isOwner && (
-                  <Field.Root className="block text-sm">
-                    <Field.Label className="text-slate-600 dark:text-slate-400">
-                      Group name
-                    </Field.Label>
-                    <div className="relative mt-1">
-                      <Field.Control
-                        render={
-                          <TextInput
-                            type="text"
-                            value={nameInput}
-                            onChange={(e) => handleNameChange(e.target.value)}
-                            className="pr-8"
-                          />
-                        }
+                  <FormField label="Group name" error={nameError}>
+                    <div className="relative">
+                      <TextInput
+                        type="text"
+                        value={nameInput}
+                        onChange={(e) => handleNameChange(e.target.value)}
+                        className="pr-8"
                       />
                       {updateName.isPending && (
                         <Loader2 className="absolute top-1/2 right-2.5 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />
                       )}
                     </div>
-                    {nameError && (
-                      <p className="mt-1 text-xs text-red-600">{nameError}</p>
-                    )}
-                  </Field.Root>
+                  </FormField>
                 )}
 
                 <div>

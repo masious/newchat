@@ -1,8 +1,8 @@
 import { ChangeEvent } from "react";
-import { Field } from "@base-ui/react/field";
 import { Camera } from "lucide-react";
 import Image from "next/image";
 import { TextInput } from "@/components/ui/text-input";
+import { FormField } from "@/components/ui/form-field";
 
 export function ProfileSection({
   avatarPreview,
@@ -56,46 +56,22 @@ export function ProfileSection({
       </div>
 
       <div className="mt-6 space-y-4">
-        <Field.Root className="flex flex-col text-sm">
-          <Field.Label className="text-slate-600 dark:text-slate-400">
-            Display name
-          </Field.Label>
-          <Field.Control
-            render={
-              <TextInput
-                type="text"
-                required
-                value={displayName}
-                onChange={(e) => onDisplayNameChange(e.target.value)}
-                className="mt-1"
-              />
-            }
+        <FormField label="Display name">
+          <TextInput
+            type="text"
+            required
+            value={displayName}
+            onChange={(e) => onDisplayNameChange(e.target.value)}
           />
-        </Field.Root>
-        <Field.Root
-          className="flex flex-col text-sm"
-          invalid={!!usernameError}
-        >
-          <Field.Label className="text-slate-600 dark:text-slate-400">
-            Username
-          </Field.Label>
-          <Field.Control
-            render={
-              <TextInput
-                type="text"
-                required
-                value={username}
-                onChange={(e) => onUsernameChange(e.target.value)}
-                className="mt-1"
-              />
-            }
+        </FormField>
+        <FormField label="Username" error={usernameError}>
+          <TextInput
+            type="text"
+            required
+            value={username}
+            onChange={(e) => onUsernameChange(e.target.value)}
           />
-          {usernameError && (
-            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-              {usernameError}
-            </p>
-          )}
-        </Field.Root>
+        </FormField>
       </div>
     </fieldset>
   );

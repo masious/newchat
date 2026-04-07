@@ -6,7 +6,7 @@ Extracted UI patterns that should be consolidated into shared components. Each i
 
 - [x] [BaseDialog](./01-base-dialog.md) — Shared dialog wrapper (Backdrop + Viewport + ScrollArea + Popup + Header + Close). 5 dialogs, ~250 LOC savings.
 - [x] [TextInput](./02-text-input.md) — Shared styled input element (`apps/web/src/components/ui/text-input.tsx`). 7 inputs replaced across 5 files, border-color and text-sm inconsistencies resolved.
-- [ ] [FormField](./03-form-field.md) — Field.Root + Label + Control + error wrapper. 7 instances across 4 files. Pairs with TextInput. ~60 LOC savings.
+- [x] [FormField](./03-form-field.md) — Field.Root + Label + Control + error wrapper. 7 instances across 4 files. Pairs with TextInput. ~60 LOC savings.
 - [ ] [Inline Avatar](./04-inline-avatar.md) — Consolidate 8 inline avatar implementations onto a single Avatar component. ~120 LOC savings.
 - [ ] [SectionLabel](./05-section-label.md) — Uppercase section header label. 7 instances with a color inconsistency between `legend` and other elements.
 

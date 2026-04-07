@@ -4,11 +4,11 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { Toggle } from "@base-ui/react/toggle";
-import { Field } from "@base-ui/react/field";
 import { trpc } from "@/lib/trpc";
 import { BaseDialog } from "@/components/ui/base-dialog";
 import type { SearchUser } from "@/lib/trpc-types";
 import { TextInput } from "@/components/ui/text-input";
+import { FormField } from "@/components/ui/form-field";
 import { UserSearchCombobox } from "./user-search-combobox";
 
 export function NewChatDialog({
@@ -126,43 +126,30 @@ export function NewChatDialog({
             </Toggle>
           </ToggleGroup>
           {type === "group" && (
-            <Field.Root className="block text-sm">
-              <Field.Label className="text-slate-600 dark:text-slate-400">
-                Group name
-              </Field.Label>
-              <Field.Control
-                render={
-                  <TextInput
-                    type="text"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    className="mt-1"
-                  />
-                }
+            <FormField label="Group name">
+              <TextInput
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
               />
-            </Field.Root>
+            </FormField>
           )}
-          <Field.Root className="block text-sm">
-            <Field.Label className="text-slate-600 dark:text-slate-400">
-              {type === "dm" ? "Search teammate" : "Add members"}
-            </Field.Label>
-            <div className="mt-1">
-              {type === "dm" ? (
-                <UserSearchCombobox
-                  value={selectedUser}
-                  onValueChange={setSelectedUser}
-                  placeholder="Search by name or username…"
-                />
-              ) : (
-                <UserSearchCombobox
-                  multiple
-                  value={selectedUsers}
-                  onValueChange={setSelectedUsers}
-                  placeholder="Search teammates…"
-                />
-              )}
-            </div>
-          </Field.Root>
+          <FormField label={type === "dm" ? "Search teammate" : "Add members"}>
+            {type === "dm" ? (
+              <UserSearchCombobox
+                value={selectedUser}
+                onValueChange={setSelectedUser}
+                placeholder="Search by name or username…"
+              />
+            ) : (
+              <UserSearchCombobox
+                multiple
+                value={selectedUsers}
+                onValueChange={setSelectedUsers}
+                placeholder="Search teammates…"
+              />
+            )}
+          </FormField>
           {existingDmId && (
             <p className="text-sm text-slate-500 dark:text-slate-400">
               You already have a conversation with this person.

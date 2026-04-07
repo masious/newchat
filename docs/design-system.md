@@ -415,7 +415,47 @@ Standardized values: `rounded-2xl`, `p-6`, `shadow-xl`, `bg-white dark:bg-slate-
 
 Toasts are always `rounded-lg`, `shadow-lg`, `text-sm`, positioned `fixed bottom-4 right-4`.
 
+### Form Fields
+
+Use the shared `FormField` component (`components/ui/form-field.tsx`) for all labeled form fields. It wraps Base UI's `Field.Root`, `Field.Label`, `Field.Error`, and `Field.Description` with standardized styling.
+
+```tsx
+import { FormField } from "@/components/ui/form-field";
+import { TextInput } from "@/components/ui/text-input";
+
+// Basic field
+<FormField label="Display name">
+  <TextInput value={name} onChange={(e) => setName(e.target.value)} />
+</FormField>
+
+// Field with error
+<FormField label="Username" error={usernameError}>
+  <TextInput value={username} onChange={(e) => setUsername(e.target.value)} />
+</FormField>
+
+// Field with description (shows description unless error is present)
+<FormField label="Username" error={usernameError} description="3-32 characters, letters, numbers, and underscores.">
+  <TextInput value={username} onChange={(e) => setUsername(e.target.value)} />
+</FormField>
+
+// Non-input children (combobox, custom controls)
+<FormField label="Search teammate">
+  <UserSearchCombobox value={user} onValueChange={setUser} />
+</FormField>
+```
+
+Built-in styles:
+- Root: `flex flex-col text-sm`
+- Label: `text-slate-600 dark:text-slate-400`
+- Error: `mt-1 text-xs text-red-600 dark:text-red-400`
+- Description: `mt-1 text-xs text-slate-500 dark:text-slate-400`
+- Children wrapper: `mt-1`
+
+The `invalid` prop on `Field.Root` is automatically set from `!!error`. Use `className` on `FormField` only for layout concerns.
+
 ### Form Labels
+
+If you need a standalone label outside of `FormField`:
 
 ```tsx
 <label className="text-sm text-slate-600 dark:text-slate-400">
@@ -425,8 +465,10 @@ Toasts are always `rounded-lg`, `shadow-lg`, `text-sm`, positioned `fixed bottom
 
 ### Error Messages
 
+Field-level errors are handled by `FormField`. For standalone error text (e.g., form-level validation):
+
 ```tsx
-<p className="text-sm text-red-600">Error description</p>
+<p className="text-sm text-red-600 dark:text-red-400">Error description</p>
 ```
 
 ## Icons
