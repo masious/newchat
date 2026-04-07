@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import type { SearchUser, ProfileUser, PresenceSummary } from "@/lib/trpc-types";
+import { BaseDialog } from "@/components/ui/base-dialog";
 import { trpc } from "@/lib/trpc";
 import { formatPresence, userDisplayName } from "@/lib/formatting";
 
@@ -45,94 +46,74 @@ export function ProfileDialog({
   const errorMessage = profileQuery.error?.message;
 
   return (
-    <Dialog.Root
+    <BaseDialog
       open={open}
       onOpenChange={(isOpen) => {
         if (!isOpen) onClose();
       }}
+      title={displayName}
+      subtitle={
+        user?.username ? <>User Profile · @{user.username}</> : "User Profile"
+      }
+      size="lg"
+      stacked
     >
-      <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-60 bg-black/30" />
-        <Dialog.Viewport className="fixed inset-0 z-70 flex items-center justify-center px-4 py-8">
-          <Dialog.Popup className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-800">
-            <div className="flex items-start justify-between">
-              <div>
-                <Dialog.Description className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
-                  User Profile
-                </Dialog.Description>
-                <Dialog.Title className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  {displayName}
-                </Dialog.Title>
-                {user?.username && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    @{user.username}
-                  </p>
-                )}
-              </div>
-              <Dialog.Close className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-                Close
-              </Dialog.Close>
-            </div>
+      {!user && profileQuery.isLoading && (
+        <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">
+          Loading profile…
+        </p>
+      )}
+      {!user && errorMessage && (
+        <p className="mt-6 text-sm text-red-600 dark:text-red-400">
+          {errorMessage}
+        </p>
+      )}
 
-            {!user && profileQuery.isLoading && (
-              <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">
-                Loading profile…
-              </p>
-            )}
-            {!user && errorMessage && (
-              <p className="mt-6 text-sm text-red-600 dark:text-red-400">
-                {errorMessage}
-              </p>
-            )}
-
-            {user && (
-              <div className="mt-6 flex gap-6">
-                <div className="h-24 w-24 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-                  {user.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={user.avatarUrl}
-                      alt={displayName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-400">
-                      {user.firstName.slice(0, 1)}
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 space-y-3 text-sm text-slate-600 dark:text-slate-400">
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-slate-100">
-                      Presence
-                    </p>
-                    <p>{presenceText}</p>
-                  </div>
-                </div>
+      {user && (
+        <div className="mt-6 flex gap-6">
+          <div className="h-24 w-24 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+            {user.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.avatarUrl}
+                alt={displayName}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-400">
+                {user.firstName.slice(0, 1)}
               </div>
             )}
-
-            <div className="mt-6 flex justify-end gap-3">
-              <Dialog.Close className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 dark:border-slate-600 dark:text-slate-400">
-                Cancel
-              </Dialog.Close>
-              <button
-                onClick={() =>
-                  user &&
-                  createConversation.mutate({
-                    type: "dm",
-                    memberUserIds: [user.id],
-                  })
-                }
-                disabled={!user || createConversation.isPending}
-                className="rounded-full bg-indigo-600 px-6 py-2 text-sm font-semibold text-white disabled:opacity-50"
-              >
-                {createConversation.isPending ? "Inviting…" : "Send message"}
-              </button>
+          </div>
+          <div className="flex-1 space-y-3 text-sm text-slate-600 dark:text-slate-400">
+            <div>
+              <p className="font-semibold text-slate-900 dark:text-slate-100">
+                Presence
+              </p>
+              <p>{presenceText}</p>
             </div>
-          </Dialog.Popup>
-        </Dialog.Viewport>
-      </Dialog.Portal>
-    </Dialog.Root>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6 flex justify-end gap-3">
+        <Dialog.Close className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 dark:border-slate-600 dark:text-slate-400">
+          Cancel
+        </Dialog.Close>
+        <button
+          onClick={() =>
+            user &&
+            createConversation.mutate({
+              type: "dm",
+              memberUserIds: [user.id],
+            })
+          }
+          disabled={!user || createConversation.isPending}
+          className="rounded-full bg-indigo-600 px-6 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {createConversation.isPending ? "Inviting…" : "Send message"}
+        </button>
+      </div>
+    </BaseDialog>
   );
 }

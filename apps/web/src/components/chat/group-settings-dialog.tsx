@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog } from "@base-ui/react/dialog";
 import { Field } from "@base-ui/react/field";
+import { BaseDialog } from "@/components/ui/base-dialog";
 import { X, Loader2, Plus } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/cn";
@@ -140,26 +140,14 @@ export function GroupSettingsDialog({
 
   return (
     <FeatureBoundary name="GroupSettingsDialog" fallback="hidden">
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Portal>
-          <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40" />
-          <Dialog.Viewport className="fixed inset-0 z-60 flex items-center justify-center px-4">
-            <Dialog.Popup className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-800">
-              <div className="flex items-center justify-between">
-                <div className="overflow-hidden">
-                  <Dialog.Description className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
-                    Group settings
-                  </Dialog.Description>
-                  <Dialog.Title className="truncate text-xl font-bold text-slate-900 dark:text-slate-100">
-                    {conversationName}
-                  </Dialog.Title>
-                </div>
-                <Dialog.Close className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-                  Close
-                </Dialog.Close>
-              </div>
-
-              <div className="mt-4 space-y-4">
+      <BaseDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        title={conversationName}
+        subtitle="Group settings"
+        size="md"
+      >
+        <div className="mt-4 space-y-4">
                 {isOwner && (
                   <Field.Root className="block text-sm">
                     <Field.Label className="text-slate-600 dark:text-slate-400">
@@ -277,10 +265,7 @@ export function GroupSettingsDialog({
                   )}
                 </div>
               </div>
-            </Dialog.Popup>
-          </Dialog.Viewport>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </BaseDialog>
     </FeatureBoundary>
   );
 }

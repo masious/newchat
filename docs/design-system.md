@@ -362,21 +362,24 @@ Every text input follows this exact pattern. Don't vary the border color, radius
 
 ### Dialogs
 
+Use the shared `BaseDialog` component (`components/ui/base-dialog.tsx`) for all dialogs. It standardizes the wrapper structure (Backdrop, Viewport, ScrollArea, Popup, Header, Close button).
+
 ```tsx
-<Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40" />
-<Dialog.Popup className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-800">
-  {/* Title section */}
-  <Dialog.Title className="text-xl font-bold text-slate-900 dark:text-slate-100">
-    Title
-  </Dialog.Title>
-  {/* Content with space-y-4 */}
+<BaseDialog
+  open={open}
+  onOpenChange={onOpenChange}
+  title="Dialog title"
+  subtitle="Optional subtitle"   // renders as Dialog.Description below the title
+  size="md"                       // "md" (max-w-md) | "lg" (max-w-lg)
+  stacked                         // optional — bumps z-index for nested dialogs (z-60/z-70)
+>
   <div className="mt-4 space-y-4">
-    {/* Form fields */}
+    {/* Dialog body content */}
   </div>
-</Dialog.Popup>
+</BaseDialog>
 ```
 
-Dialogs always use: `max-w-md`, `rounded-2xl`, `p-6`, `shadow-xl`, `bg-white dark:bg-slate-800`.
+Standardized values: `rounded-2xl`, `p-6`, `shadow-xl`, `bg-white dark:bg-slate-800`, backdrop `z-50 bg-black/40`, title `text-xl font-bold`, subtitle `text-xs font-semibold uppercase`. All dialogs are wrapped in `ScrollArea` for safe scrolling on small viewports.
 
 ### Context Menus
 

@@ -170,6 +170,8 @@ components/
 │       └── hooks/
 │           └── useSettingsForm.ts           # Notification preferences state + mutation
 └── ui/
+    ├── base-dialog.tsx                       # Shared dialog wrapper (Backdrop + ScrollArea + Popup + Header)
+    ├── icon-button.tsx                       # Icon button with ghost/primary/danger variants
     ├── skeleton.tsx                          # Loading placeholder
     ├── icon-tooltip.tsx                      # Hover tooltip
     ├── toast-container.tsx                   # Toast notification display
@@ -439,6 +441,7 @@ The message list uses `react-virtualized` with `CellMeasurer` for dynamic row he
 | `lib/upload.ts` | Presigned URL fetch + R2 PUT with progress tracking + AbortSignal |
 | `lib/upload-store.ts` | Module-level upload state per conversation (cross-conversation persistence) |
 | `lib/safe-local-storage.ts` | Try/catch localStorage wrapper with in-memory fallback |
+| `components/ui/base-dialog.tsx` | Shared dialog wrapper with standardized structure |
 | `components/ui/feature-boundary.tsx` | React error boundary with console logging |
 | `components/ui/offline-banner.tsx` | SSE disconnected banner with manual reconnect |
 | `components/auth-guard.tsx` | Route protection logic |

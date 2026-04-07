@@ -4,7 +4,7 @@ Extracted UI patterns that should be consolidated into shared components. Each i
 
 ## High Priority
 
-- [ ] [BaseDialog](./01-base-dialog.md) — Shared dialog wrapper (Backdrop + Viewport + ScrollArea + Popup + Header + Close). 5 dialogs, ~250 LOC savings.
+- [x] [BaseDialog](./01-base-dialog.md) — Shared dialog wrapper (Backdrop + Viewport + ScrollArea + Popup + Header + Close). 5 dialogs, ~250 LOC savings.
 - [ ] [TextInput](./02-text-input.md) — Shared styled input element. 7 instances of the same className, with border-color inconsistencies.
 - [ ] [FormField](./03-form-field.md) — Field.Root + Label + Control + error wrapper. 7 instances across 4 files. Pairs with TextInput. ~60 LOC savings.
 - [ ] [Inline Avatar](./04-inline-avatar.md) — Consolidate 8 inline avatar implementations onto a single Avatar component. ~120 LOC savings.
