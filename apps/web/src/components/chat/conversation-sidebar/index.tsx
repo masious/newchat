@@ -86,7 +86,7 @@ export function ConversationSidebar({
           onViewProfile={onViewProfile}
         />
       )}
-      <ScrollArea.Root className="flex-1">
+      <ScrollArea.Root className="flex-1 overflow-hidden">
         <ScrollArea.Viewport className="h-full overscroll-contain">
           <ScrollArea.Content className="min-w-full!">
             {isLoading && <LoadingSkeleton />}
