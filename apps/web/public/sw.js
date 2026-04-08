@@ -19,11 +19,11 @@ self.addEventListener('push', (event) => {
       data = event.data.json();
     } catch (e) {
       console.error('Failed to parse push data:', e);
-      data = { title: 'NewChat', body: event.data.text() || 'New message' };
+      data = { title: 'Kite', body: event.data.text() || 'New message' };
     }
   }
 
-  const title = data.title || 'NewChat';
+  const title = data.title || 'Kite';
   const options = {
     body: data.body || 'New message',
     // icon: data.icon || '/icon-192.png',

@@ -28,7 +28,7 @@ bot.command("start", async (ctx) => {
       const deepLink = `https://t.me/${botUsername}?start=${generatedToken}`;
       await ctx.reply(
         [
-          "Welcome to NewChat! Use this link to confirm your login from the web app:",
+          "Welcome to Kite! Use this link to confirm your login from the web app:",
           deepLink,
           "After confirming, return to the browser to finish signing in.",
         ].join("\n"),

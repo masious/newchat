@@ -8,7 +8,7 @@ import { FeatureBoundary } from "@/components/ui/feature-boundary";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NewChat",
+  title: "Kite",
   description: "A chat application",
 };
 

@@ -1,4 +1,4 @@
-# NewChat
+# Kite
 
 A real-time chat application with Telegram-based authentication. Built as a Bun monorepo with a Next.js frontend, Hono API server, and a Telegram bot for login.
 

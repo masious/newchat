@@ -104,7 +104,7 @@ export default function ChatPage() {
     if (isTyping && typingUserName) {
       document.title = `${typingUserName} is typing...`;
     } else {
-      document.title = "NewChat";
+      document.title = "Kite";
     }
   }, [isTyping, typingUserName]);
 

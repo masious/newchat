@@ -6,7 +6,7 @@ const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
-    "mailto:notifications@newchat.app",
+    "mailto:masoudbonabi@gmail.com",
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
   );

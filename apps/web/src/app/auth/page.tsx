@@ -25,7 +25,7 @@ function AuthPageContent() {
             Telegram Login
           </p>
           <h1 className="mt-2 text-3xl font-bold text-slate-900">
-            Sign in to NewChat
+            Sign in to Kite
           </h1>
           <p className="mt-2 text-slate-500">
             We&apos;ll open Telegram so you can confirm this login. This window

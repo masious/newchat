@@ -33,8 +33,8 @@ export async function sendTelegramNotification(
   const safeContent = escapeMarkdown(content);
 
   const text = payload.conversationName
-    ? `💬 *${safeSender}* in *${escapeMarkdown(payload.conversationName)}*:\n${safeContent}\n\n[Open in NewChat](${conversationUrl})`
-    : `💬 *${safeSender}*:\n${safeContent}\n\n[Open in NewChat](${conversationUrl})`;
+    ? `💬 *${safeSender}* in *${escapeMarkdown(payload.conversationName)}*:\n${safeContent}\n\n[Open in Kite](${conversationUrl})`
+    : `💬 *${safeSender}*:\n${safeContent}\n\n[Open in Kite](${conversationUrl})`;
 
   try {
     const response = await fetch(

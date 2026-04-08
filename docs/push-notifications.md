@@ -156,8 +156,8 @@ sendTelegramNotification(telegramId, { senderName, content, conversationId, conv
   2. Truncate content to 100 chars (+ "..." if truncated)
   3. Escape Markdown special characters in senderName, conversationName, content
   4. Format message:
-     DM:    "💬 *SenderName*:\nContent\n\n[Open in NewChat](url)"
-     Group: "💬 *SenderName* in *GroupName*:\nContent\n\n[Open in NewChat](url)"
+     DM:    "💬 *SenderName*:\nContent\n\n[Open in Kite](url)"
+     Group: "💬 *SenderName* in *GroupName*:\nContent\n\n[Open in Kite](url)"
   5. POST to Telegram Bot API /sendMessage
      - parse_mode: "Markdown"
      - disable_web_page_preview: true

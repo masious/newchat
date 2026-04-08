@@ -79,7 +79,7 @@ export default function LandingPage() {
     <main className="flex min-h-dvh flex-col bg-slate-950 text-slate-100">
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4">
-        <span className="text-lg font-bold tracking-tight text-white">newchat</span>
+        <span className="text-lg font-bold tracking-tight text-white">Kite</span>
         <Link
           href="/chat"
           className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-indigo-500"
