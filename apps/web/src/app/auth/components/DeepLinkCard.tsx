@@ -1,3 +1,7 @@
+import { ExternalLink, Copy, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SectionLabel } from "@/components/ui/section-label";
+
 interface DeepLinkCardProps {
   telegramLink: string | null;
   isExpired: boolean;
@@ -14,26 +18,33 @@ export function DeepLinkCard({
   onCopy,
 }: DeepLinkCardProps) {
   return (
-    <div className="rounded-lg border border-slate-200 p-4">
-      <p className="text-xs uppercase text-slate-500">Deep link</p>
-      <p className="truncate text-base font-mono text-slate-900">
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-700/50">
+      <SectionLabel>Deep link</SectionLabel>
+      <p className="mt-1 truncate font-mono text-sm text-slate-900 dark:text-slate-100">
         {telegramLink ?? "Generating link..."}
       </p>
-      <div className="mt-3 flex gap-3">
-        <button
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+      <div className="mt-3 flex gap-2">
+        <Button
           onClick={onOpen}
           disabled={!telegramLink || isExpired}
+          className="flex items-center gap-1.5"
         >
+          <ExternalLink className="h-4 w-4" />
           Open in Telegram
-        </button>
-        <button
-          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50"
+        </Button>
+        <Button
+          variant="secondary"
           onClick={onCopy}
           disabled={!telegramLink}
+          className="flex items-center gap-1.5"
         >
+          {copied ? (
+            <Check className="h-4 w-4" />
+          ) : (
+            <Copy className="h-4 w-4" />
+          )}
           {copied ? "Copied" : "Copy link"}
-        </button>
+        </Button>
       </div>
     </div>
   );

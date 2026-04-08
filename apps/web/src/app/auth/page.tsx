@@ -1,10 +1,13 @@
 "use client";
 
 import { Suspense } from "react";
+import { Send } from "lucide-react";
 import { useAuthFlow } from "./hooks/useAuthFlow";
 import { DeepLinkCard } from "./components/DeepLinkCard";
 import { StatusBanner } from "./components/StatusBanner";
 import { ExchangeError } from "./components/ExchangeError";
+import { Button } from "@/components/ui/button";
+import { SectionLabel } from "@/components/ui/section-label";
 
 export default function AuthPage() {
   return (
@@ -18,28 +21,29 @@ function AuthPageContent() {
   const flow = useAuthFlow();
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-xl rounded-2xl bg-white p-8 shadow-lg">
-        <div className="mb-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-indigo-500">
-            Telegram Login
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-900">
+    <main className="flex min-h-dvh items-center justify-center bg-white px-4 dark:bg-slate-900">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+        <div className="flex flex-col items-center text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600">
+            <Send className="h-5 w-5 text-white" />
+          </div>
+          <SectionLabel className="mt-4">Telegram Login</SectionLabel>
+          <h1 className="mt-2 text-xl font-bold text-slate-900 dark:text-slate-100">
             Sign in to Kite
           </h1>
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             We&apos;ll open Telegram so you can confirm this login. This window
             will keep checking for your confirmation automatically.
           </p>
         </div>
 
         {flow.error && (
-          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400">
             {flow.error}
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="mt-6 space-y-4">
           <DeepLinkCard
             telegramLink={flow.telegramLink}
             isExpired={flow.pollStatus === "expired"}
@@ -59,12 +63,9 @@ function AuthPageContent() {
 
         {flow.pollStatus === "expired" && (
           <div className="mt-6 text-center">
-            <button
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white"
-              onClick={flow.handleRegenerate}
-            >
+            <Button onClick={flow.handleRegenerate}>
               Generate new link
-            </button>
+            </Button>
           </div>
         )}
       </div>
