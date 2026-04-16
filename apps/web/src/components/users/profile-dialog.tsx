@@ -91,6 +91,7 @@ export function ProfileDialog({
           onClick={() =>
             user &&
             createConversation.mutate({
+              idempotencyKey: crypto.randomUUID(),
               type: "dm",
               memberUserIds: [user.id],
             })

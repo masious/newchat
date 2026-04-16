@@ -107,6 +107,7 @@ export function ChatPanel({
 
       try {
         await sendMessage.mutateAsync({
+          idempotencyKey: message._optimisticId,
           conversationId,
           content: message.content ?? "",
           attachments: message.attachments ?? undefined,

@@ -72,6 +72,7 @@ See **[docs/](docs/README.md)** for comprehensive documentation. Consult before 
 - [user-profiles.md](docs/user-profiles.md) — users.me/update/search/profile, onboarding, avatar upload, presence
 - [error-handling.md](docs/error-handling.md) — tRPC error codes, ensureConversationMember, client error handling
 - [input-validation.md](docs/input-validation.md) — Zod schemas, message/username/attachment constraints, sanitization
+- [idempotency.md](docs/idempotency.md) — `idempotent()` handler wrapper, auth.exchange Redis cache, when to add idempotency
 - [reference.md](docs/reference.md) — Redis keys, DB schema, tRPC routers, constants
 
 ## Environment

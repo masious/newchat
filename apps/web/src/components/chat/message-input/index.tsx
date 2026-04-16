@@ -162,6 +162,7 @@ export function MessageInput({
     // Fire mutation
     try {
       await sendMessage.mutateAsync({
+        idempotencyKey: optimisticId,
         conversationId,
         content: trimmedContent,
         attachments,

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../init";
+import { idempotent } from "../../lib/idempotency";
 import { mapDomainError } from "../error-mapper";
 import * as messageService from "../../services/message-service";
 import { ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE, r2UrlSchema } from "../../lib/upload-constants";
@@ -27,6 +28,7 @@ export const messagesRouter = router({
   send: protectedProcedure
     .input(
       z.object({
+        idempotencyKey: z.string().uuid(),
         conversationId: z.number().int().positive(),
         content: z.string().max(10_000).default(""),
         attachments: z
@@ -50,16 +52,19 @@ export const messagesRouter = router({
         { message: "Message must have content or attachments" },
       ),
     )
-    .mutation(async ({ ctx, input }) => {
-      try {
-        return await messageService.send(ctx.db, {
-          ...input,
-          senderId: ctx.userId!,
-        });
-      } catch (err) {
-        throw mapDomainError(err);
-      }
-    }),
+    .mutation(
+      idempotent("messages.send", async ({ ctx, input }) => {
+        const { idempotencyKey: _idempotencyKey, ...rest } = input;
+        try {
+          return await messageService.send(ctx.db, {
+            ...rest,
+            senderId: ctx.userId,
+          });
+        } catch (err) {
+          throw mapDomainError(err);
+        }
+      }),
+    ),
   markRead: protectedProcedure
     .input(
       z.object({

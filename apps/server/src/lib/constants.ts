@@ -19,3 +19,7 @@ export const MESSAGES_DEFAULT_LIMIT = 25;
 export const MESSAGES_MAX_LIMIT = 50;
 export const USER_SEARCH_DEFAULT_LIMIT = 10;
 export const USER_SEARCH_MAX_LIMIT = 25;
+
+// Idempotency
+export const IDEMPOTENCY_TTL_SEC = 60 * 60;
+export const EXCHANGE_CACHE_TTL_SEC = 60;

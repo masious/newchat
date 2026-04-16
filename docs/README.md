@@ -26,4 +26,5 @@
 | [user-profiles.md](user-profiles.md) | users.me/update/search/profile, onboarding, avatar upload, Telegram avatar sync, presence enrichment |
 | [error-handling.md](error-handling.md) | tRPC error codes, ensureConversationMember, client-side error handling, rate limit responses |
 | [input-validation.md](input-validation.md) | Zod schemas, message/username/attachment constraints, sanitization functions |
+| [idempotency.md](idempotency.md) | `idempotent()` wrapper pattern, `auth.exchange` service-layer cache, when to use idempotency |
 | [reference.md](reference.md) | Redis keys/channels, DB schema, tRPC routers, enums, all configuration constants |

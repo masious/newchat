@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../init";
+import { idempotent } from "../../lib/idempotency";
 import { mapDomainError } from "../error-mapper";
 import * as conversationService from "../../services/conversation-service";
 
@@ -14,21 +15,25 @@ export const conversationsRouter = router({
   create: protectedProcedure
     .input(
       z.object({
+        idempotencyKey: z.string().uuid(),
         type: z.enum(["dm", "group"]),
         memberUserIds: z.array(z.number().int().positive()).max(100),
         name: z.string().min(1).max(255).optional(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      try {
-        return await conversationService.create(ctx.db, {
-          ...input,
-          creatorId: ctx.userId!,
-        });
-      } catch (err) {
-        throw mapDomainError(err);
-      }
-    }),
+    .mutation(
+      idempotent("conversations.create", async ({ ctx, input }) => {
+        const { idempotencyKey: _idempotencyKey, ...rest } = input;
+        try {
+          return await conversationService.create(ctx.db, {
+            ...rest,
+            creatorId: ctx.userId,
+          });
+        } catch (err) {
+          throw mapDomainError(err);
+        }
+      }),
+    ),
   members: protectedProcedure
     .input(z.object({ conversationId: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {

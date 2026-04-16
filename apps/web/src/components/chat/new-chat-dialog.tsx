@@ -115,6 +115,7 @@ export function NewChatDialog({
       return;
     }
     createConversation.mutate({
+      idempotencyKey: crypto.randomUUID(),
       type,
       memberUserIds: ids,
       name: type === "group" ? name.trim() : undefined,
