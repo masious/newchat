@@ -3,6 +3,7 @@ import { redisPublisher } from "./redis";
 import { PRESENCE_TTL_SEC } from "./constants";
 import { updateLastSeen, getLastSeenAt } from "../data/user-queries";
 import { logger } from "./logger";
+import { domainEvents } from "../events";
 
 export type PresenceStatus = {
   status: "online" | "offline";
@@ -30,7 +31,7 @@ export async function markOnline(db: Database, userId: number) {
     lastSeen: new Date().toISOString(),
   };
   await setPresenceStatus(userId, state);
-  await publishPresenceEvent(userId, state);
+  await domainEvents.emit("user.online", { userId, lastSeen: state.lastSeen });
   updateLastSeen(db, userId).catch((err) => {
     logger.error({ err, userId }, "Failed to persist lastSeen to DB");
   });
@@ -42,20 +43,10 @@ export async function markOffline(db: Database, userId: number) {
     lastSeen: new Date().toISOString(),
   };
   await setPresenceStatus(userId, state);
-  await publishPresenceEvent(userId, state);
+  await domainEvents.emit("user.offline", { userId, lastSeen: state.lastSeen });
   updateLastSeen(db, userId).catch((err) => {
     logger.error({ err, userId }, "Failed to persist lastSeen to DB");
   });
-}
-
-export async function publishPresenceEvent(
-  userId: number,
-  status: PresenceStatus,
-) {
-  await redisPublisher.publish(
-    PRESENCE_CHANNEL,
-    JSON.stringify({ userId, ...status }),
-  );
 }
 
 export async function getPresenceStatus(

@@ -113,39 +113,82 @@ lib/
 └── telegram-notifier.ts     # sendTelegramNotification
 ```
 
-## Event-Driven Messaging Pattern
+## Event-Driven Architecture
 
-Real-time features (messages, typing, presence, membership changes) use an event-driven pattern built on Redis pub/sub. The core principle: **separate "publish event" from "react to event"**.
+Services emit **domain events** via a typed in-process emitter. Independent handler modules subscribe and perform side effects (Redis pub/sub for SSE, push notifications, etc.). Services contain only business logic; adding new reactions to events means adding new handler files — no existing code changes.
+
+### Domain Event Emitter
+
+The emitter is a singleton `SafeEmitter` (extends [Emittery](https://github.com/sindresorhus/emittery)) at `events/emitter.ts`. It overrides `.on()` to automatically wrap every handler in a try/catch that logs failures via the structured logger. Handlers never reject the `emit()` call — errors are fire-and-forget.
+
+```
+events/
+├── emitter.ts              # SafeEmitter singleton (typed, error-safe .on())
+├── types.ts                # DomainEvents type map
+├── handlers/
+│   ├── realtime.ts         # Publishes to Redis for SSE fan-out
+│   ├── notifications.ts    # Triggers web push + Telegram notifications
+│   └── index.ts            # registerEventHandlers(db): registers all handlers
+└── index.ts                # Re-exports domainEvents + registerEventHandlers
+```
+
+`registerEventHandlers(db)` is called once on startup in `index.ts`, immediately after creating the database client.
+
+### Domain Events
+
+```typescript
+type DomainEvents = {
+  "message.sent":          { message, conversationId, senderId, conversationType, conversationName };
+  "message.read":          { conversationId, messageIds, userId };
+  "message.typing":        { conversationId, userId };
+  "conversation.created":  { conversationId, memberIds, creatorId };
+  "conversation.renamed":  { conversationId, name };
+  "member.added":          { conversationId, userId };
+  "member.removed":        { conversationId, userId };
+  "user.online":           { userId, lastSeen };
+  "user.offline":          { userId, lastSeen };
+};
+```
 
 ### Event Flow
 
 ```
-Router/Service                  Redis Pub/Sub              SSE Handler              Client
-─────────────                   ──────────────             ───────────              ──────
+Service                     In-Process Emitter         Handler                Redis / External        Client
+───────                     ──────────────────         ───────                ────────────────        ──────
 
-messages.send
+messageService.send()
   │
   ├─► INSERT message (DB)
   │
-  ├─► PUBLISH to                ──► conversation:{id}  ──► Forward as SSE ────────► Update cache
-  │   conversation:{id}             channel                 conversation_event       (messages, sidebar,
-  │                                                                                  typing clear)
-  └─► notifyUserOfMessage
-      (fire-and-forget)             No pub/sub —            N/A                      Browser notification
-      ├─► Web Push POST             direct HTTP to                                   or Telegram DM
-      └─► Telegram Bot API          external services
+  └─► emit("message.sent")
+        │
+        ├─► realtime handler ──► PUBLISH to ──────► conversation:{id} ──► SSE ──► Update cache
+        │                        Redis channel
+        │
+        └─► notifications   ──► Web Push POST ──────────────────────────────────► Browser notification
+            handler              Telegram Bot API                                 or Telegram DM
+            (fire-and-forget)
 ```
 
-### Event Types
+### Handler Modules
 
-All events published to Redis channels should conform to a typed structure. This makes the SSE handler a dumb pipe — it forwards events without interpreting them.
+**Realtime handler** (`handlers/realtime.ts`) — Subscribes to all domain events and publishes to Redis pub/sub channels so SSE-connected clients receive updates. This is the bridge between in-process events and the Redis fan-out layer.
+
+**Notifications handler** (`handlers/notifications.ts`) — Subscribes to `message.sent`. Fetches conversation member IDs, filters out the sender, and fans out `notifyUserOfMessage` calls. Runs fire-and-forget — push HTTP calls don't delay the mutation response.
+
+### Redis Channel Event Types
+
+All events published to Redis channels conform to typed structures. The SSE handler is a dumb pipe — it forwards events without interpreting them.
 
 ```typescript
 // Conversation channel events (conversation:{id})
 type ConversationEvent =
   | { type: "new_message"; conversationId: number; message: MessageWithSender }
   | { type: "typing"; conversationId: number; userId: number }
-  | { type: "message_read"; conversationId: number; messageIds: number[]; userId: number };
+  | { type: "message_read"; conversationId: number; messageIds: number[]; userId: number }
+  | { type: "conversation_updated"; conversationId: number; name: string }
+  | { type: "member_added"; conversationId: number; userId: number }
+  | { type: "member_removed"; conversationId: number; userId: number };
 
 // Membership channel events (user:{userId}:membership)
 type MembershipEvent =
@@ -160,19 +203,9 @@ type PresenceEvent = {
 };
 ```
 
-### Decoupling via Events
+### Adding New Side Effects
 
-The "send message" service publishes a `new_message` event and returns. It does not:
-- Know how many SSE connections will receive it
-- Know whether the recipient has web push enabled
-- Care if the notification fails
-
-Notification delivery is a **separate concern** triggered after the write succeeds. It runs via `Promise.allSettled()` — fire-and-forget, never blocks the response.
-
-This means:
-- Adding a new reaction to events (e.g., "update unread badge") doesn't touch the send path
-- Notification failures don't affect message delivery
-- The system degrades gracefully — if Redis pub/sub is slow, messages still persist, they just arrive late via SSE
+To react to an existing event (e.g., analytics, audit log, unread badge), create a new handler file in `events/handlers/`, register it in `handlers/index.ts`, and subscribe to the relevant event. No existing service or handler code needs to change.
 
 ## Error Handling Strategy
 

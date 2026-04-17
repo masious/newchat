@@ -1,5 +1,4 @@
 import type { Database, Attachment } from "@newchat/db";
-import { logger } from "../lib/logger";
 import { BadRequestError } from "../errors";
 import { ensureConversationMember } from "./authorization";
 import {
@@ -9,9 +8,7 @@ import {
   validateMessageIds,
   fetchMessageWithSender,
 } from "../data/message-queries";
-import { getConversationMemberUserIds } from "../data/conversation-queries";
-import { publishConversationEvent } from "./realtime-events";
-import { notifyUserOfMessage } from "./notification-service";
+import { domainEvents } from "../events";
 
 export async function list(
   db: Database,
@@ -69,34 +66,12 @@ export async function send(
 
   const message = await fetchMessageWithSender(db, created.id);
   if (message) {
-    await publishConversationEvent(input.conversationId, {
-      type: "new_message",
-      conversationId: input.conversationId,
+    await domainEvents.emit("message.sent", {
       message,
-    });
-
-    const memberUserIds = await getConversationMemberUserIds(
-      db,
-      input.conversationId,
-    );
-
-    const notificationPromises = memberUserIds
-      .filter((id) => id !== input.senderId)
-      .map((recipientUserId) =>
-        notifyUserOfMessage(db, {
-          recipientUserId,
-          senderName: message.sender!.firstName,
-          content: input.content || "[Attachment]",
-          conversationId: input.conversationId,
-          conversationName:
-            conversation.type === "group"
-              ? conversation.name ?? undefined
-              : undefined,
-        }),
-      );
-
-    Promise.allSettled(notificationPromises).catch((error) => {
-      logger.error({ error }, "Notification dispatch failed");
+      conversationId: input.conversationId,
+      senderId: input.senderId,
+      conversationType: conversation.type,
+      conversationName: conversation.name,
     });
   }
 
@@ -126,8 +101,7 @@ export async function markRead(
     userId: input.userId,
   });
 
-  await publishConversationEvent(input.conversationId, {
-    type: "message_read",
+  await domainEvents.emit("message.read", {
     conversationId: input.conversationId,
     messageIds: input.messageIds,
     userId: input.userId,
@@ -141,8 +115,7 @@ export async function typing(
   input: { conversationId: number; userId: number },
 ) {
   await ensureConversationMember(db, input.conversationId, input.userId);
-  await publishConversationEvent(input.conversationId, {
-    type: "typing",
+  await domainEvents.emit("message.typing", {
     conversationId: input.conversationId,
     userId: input.userId,
   });

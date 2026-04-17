@@ -9,9 +9,11 @@ import { createRateLimitMiddleware } from "./middleware/rate-limit";
 import { createSSEHandler } from "./services/sse-handler";
 import { logger } from "./lib/logger";
 import { TOKEN_TTL_MS } from "./lib/constants";
+import { registerEventHandlers } from "./events";
 
 const app = new Hono();
 const db = createDb();
+registerEventHandlers(db);
 
 // Security headers
 app.use("*", async (c, next) => {

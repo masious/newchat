@@ -16,10 +16,7 @@ import {
   addConversationMember,
   removeConversationMember,
 } from "../data/conversation-queries";
-import {
-  publishMembershipChange,
-  publishConversationEvent,
-} from "./realtime-events";
+import { domainEvents } from "../events";
 
 export async function list(db: Database, input: { userId: number }) {
   const conversations = await fetchConversationSummaries(db, input.userId);
@@ -82,18 +79,11 @@ export async function create(
     throw new BadRequestError("Conversation summary unavailable");
   }
 
-  for (const memberId of memberIds) {
-    const summary =
-      memberId === input.creatorId
-        ? currentSummary
-        : await fetchConversationSummary(db, memberId, conversationId);
-    if (!summary) continue;
-    await publishMembershipChange(memberId, {
-      type: "join",
-      conversationId,
-      conversation: summary,
-    });
-  }
+  await domainEvents.emit("conversation.created", {
+    conversationId,
+    memberIds,
+    creatorId: input.creatorId,
+  });
 
   return { conversation: currentSummary };
 }
@@ -113,8 +103,7 @@ export async function updateName(
 ) {
   await ensureGroupOwner(db, input.conversationId, input.userId);
   await updateConversationName(db, input.conversationId, input.name);
-  await publishConversationEvent(input.conversationId, {
-    type: "conversation_updated",
+  await domainEvents.emit("conversation.renamed", {
     conversationId: input.conversationId,
     name: input.name,
   });
@@ -138,21 +127,7 @@ export async function addMember(
 
   await addConversationMember(db, input.conversationId, input.memberUserId);
 
-  const summary = await fetchConversationSummary(
-    db,
-    input.memberUserId,
-    input.conversationId,
-  );
-  if (summary) {
-    await publishMembershipChange(input.memberUserId, {
-      type: "join",
-      conversationId: input.conversationId,
-      conversation: summary,
-    });
-  }
-
-  await publishConversationEvent(input.conversationId, {
-    type: "member_added",
+  await domainEvents.emit("member.added", {
     conversationId: input.conversationId,
     userId: input.memberUserId,
   });
@@ -178,15 +153,9 @@ export async function removeMember(
 
   await removeConversationMember(db, input.conversationId, input.memberUserId);
 
-  await publishConversationEvent(input.conversationId, {
-    type: "member_removed",
+  await domainEvents.emit("member.removed", {
     conversationId: input.conversationId,
     userId: input.memberUserId,
-  });
-
-  await publishMembershipChange(input.memberUserId, {
-    type: "leave",
-    conversationId: input.conversationId,
   });
 
   return { success: true };
