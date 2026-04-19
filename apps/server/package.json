@@ -6,7 +6,11 @@
     "./trpc": "./src/trpc/index.ts"
   },
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "test": "bun test",
+    "lint": "eslint . && tsc --noEmit",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3",
@@ -24,9 +28,13 @@
     "zod": "^3"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@newchat/typescript-config": "workspace:*",
+    "@types/bun": "latest",
     "@types/jsonwebtoken": "^9",
     "@types/web-push": "^3.6.4",
-    "typescript": "^5"
+    "eslint": "^9",
+    "typescript": "^5",
+    "typescript-eslint": "^8.58.2"
   }
 }

@@ -17,12 +17,15 @@ function safe<K extends EventName>(event: K | readonly K[], callback: CallbackFn
 }
 
 // Redeclare .on() so consumers see CallbackFn (raw data) instead of Emittery's envelope
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 interface SafeEmitter {
     on<K extends EventName>(eventName: K | readonly K[], callback: CallbackFn<K>): UnsubscribeFunction;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class SafeEmitter extends Emittery<DomainEvents> {
     override on<K extends EventName>(eventName: K | readonly K[], callback: CallbackFn<K>) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return super.on(eventName, safe(eventName, callback) as any);
     }
 }

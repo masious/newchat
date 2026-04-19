@@ -1,0 +1,3 @@
+[test]
+coverageSkipTestFiles = true
+preload = ["./tests/setup.ts", "./tests/helpers/module-mocks.ts"]

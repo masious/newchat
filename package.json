@@ -9,9 +9,11 @@
     "db:generate": "turbo db:generate",
     "db:migrate": "turbo db:migrate",
     "db:push": "turbo db:push",
-    "db:nuke": "turbo db:nuke"
+    "db:nuke": "turbo db:nuke",
+    "test": "turbo test"
   },
   "devDependencies": {
+    "bun-types": "^1.3.12",
     "turbo": "^2"
   },
   "packageManager": "bun@1.2.5"

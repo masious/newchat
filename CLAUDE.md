@@ -17,6 +17,11 @@ bun run build
 # Lint all apps
 bun lint
 
+# Run tests (Bun test runner, server only for now)
+bun test                          # run all tests via Turbo
+cd apps/server && bun test        # server tests only
+cd apps/server && bun test --watch
+
 # Database commands (Drizzle Kit via Turbo)
 bun db:generate    # Generate migrations from schema changes
 bun db:migrate     # Run migrations

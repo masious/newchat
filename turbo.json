@@ -36,6 +36,9 @@
     },
     "db:push": {
       "cache": false
+    },
+    "test": {
+      "cache": false
     }
   }
 }

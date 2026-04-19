@@ -1,13 +1,6 @@
 import { Attachment } from "@newchat/db";
 
-export type MessageSender = {
-  id: number;
-  username: string | null;
-  firstName: string;
-  avatarUrl: string | null;
-};
-
-export type MessageWithSender = {
+export type LastMessage = {
   id: number;
   conversationId: number;
   content: string;
@@ -30,7 +23,7 @@ export type ConversationSummary = {
   name: string | null;
   createdBy: number | null;
   createdAt: Date;
-  lastMessage: MessageWithSender | null;
+  lastMessage: LastMessage | null;
   unreadCount: number;
   isTyping?: boolean;
   typingUserId?: number;
