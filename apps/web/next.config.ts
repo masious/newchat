@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
         hostname: "masious.ir",
         port: "",
         pathname: "/**",
-      }
+      },
     ],
   },
   async headers() {

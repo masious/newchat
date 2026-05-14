@@ -1,6 +1,6 @@
+import { and, authTokens, createDb, eq, users } from "@newchat/db";
 import { Bot } from "grammy";
 import { nanoid } from "nanoid";
-import { createDb, authTokens, users, eq, and } from "@newchat/db";
 import { logger } from "./lib/logger";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -10,8 +10,7 @@ if (!token) {
 
 const bot = new Bot(token);
 const db = createDb();
-const botUsername =
-  process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "newchatauthbot";
+const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "newchatauthbot";
 
 bot.command("start", async (ctx) => {
   try {
@@ -55,12 +54,7 @@ bot.command("start", async (ctx) => {
     const [updated] = await db
       .update(authTokens)
       .set({ status: "confirmed", telegramId, userId: user.id, updatedAt: new Date() })
-      .where(
-        and(
-          eq(authTokens.token, payload),
-          eq(authTokens.status, "pending"),
-        ),
-      )
+      .where(and(eq(authTokens.token, payload), eq(authTokens.status, "pending")))
       .returning();
 
     if (!updated) {

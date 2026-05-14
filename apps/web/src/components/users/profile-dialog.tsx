@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
-import type { SearchUser, ProfileUser, PresenceSummary } from "@/lib/trpc-types";
-import { BaseDialog } from "@/components/ui/base-dialog";
+import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { Avatar } from "@/components/ui/avatar";
-import { trpc } from "@/lib/trpc";
-import { formatPresence, userDisplayName } from "@/lib/formatting";
-import { ErrorMessage } from "@/components/ui/error-message";
+import { BaseDialog } from "@/components/ui/base-dialog";
 import { Button } from "@/components/ui/button";
+import { ErrorMessage } from "@/components/ui/error-message";
+import { formatPresence, userDisplayName } from "@/lib/formatting";
+import { trpc } from "@/lib/trpc";
+import type { PresenceSummary, ProfileUser, SearchUser } from "@/lib/trpc-types";
 
 type DisplayUser = (SearchUser | ProfileUser) & {
   presence?: PresenceSummary;
@@ -40,8 +40,7 @@ export function ProfileDialog({
     },
   });
 
-  const user: DisplayUser | null =
-    profileQuery.data?.user ?? initialUser ?? null;
+  const user: DisplayUser | null = profileQuery.data?.user ?? initialUser ?? null;
 
   const displayName = useMemo(() => userDisplayName(user), [user]);
 
@@ -55,16 +54,12 @@ export function ProfileDialog({
         if (!isOpen) onClose();
       }}
       title={displayName}
-      subtitle={
-        user?.username ? <>User Profile · @{user.username}</> : "User Profile"
-      }
+      subtitle={user?.username ? <>User Profile · @{user.username}</> : "User Profile"}
       size="lg"
       stacked
     >
       {!user && profileQuery.isLoading && (
-        <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">
-          Loading profile…
-        </p>
+        <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">Loading profile…</p>
       )}
       <ErrorMessage className="mt-6">{!user && errorMessage}</ErrorMessage>
 
@@ -73,9 +68,7 @@ export function ProfileDialog({
           <Avatar avatarUrl={user.avatarUrl} name={user.firstName} size="xl" />
           <div className="flex-1 space-y-3 text-sm text-slate-600 dark:text-slate-400">
             <div>
-              <p className="font-semibold text-slate-900 dark:text-slate-100">
-                Presence
-              </p>
+              <p className="font-semibold text-slate-900 dark:text-slate-100">Presence</p>
               <p>{presenceText}</p>
             </div>
           </div>
@@ -83,9 +76,7 @@ export function ProfileDialog({
       )}
 
       <div className="mt-6 flex justify-end gap-3">
-        <Dialog.Close render={<Button variant="secondary" />}>
-          Cancel
-        </Dialog.Close>
+        <Dialog.Close render={<Button variant="secondary" />}>Cancel</Dialog.Close>
         <Button
           size="lg"
           onClick={() =>

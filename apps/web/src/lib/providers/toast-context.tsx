@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { Toast } from "@base-ui/react/toast";
+import { useEffect } from "react";
 
 type ToastType = "error" | "success" | "info";
 
@@ -26,8 +26,7 @@ export function useToast() {
 
 export function AuthExpiredListener() {
   useEffect(() => {
-    const handler = () =>
-      addToast("Your session has expired. Please log in again.", "info");
+    const handler = () => addToast("Your session has expired. Please log in again.", "info");
     window.addEventListener("newchat:auth-expired", handler);
     return () => window.removeEventListener("newchat:auth-expired", handler);
   }, []);

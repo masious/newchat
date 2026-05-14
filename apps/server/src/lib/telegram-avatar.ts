@@ -1,5 +1,5 @@
-import { uploadBuffer, getPublicUrl } from "./r2";
 import { logger } from "./logger";
+import { getPublicUrl, uploadBuffer } from "./r2";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -8,9 +8,7 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
  * Returns the R2 public URL, or null if the user has no profile photo.
  * Uses a deterministic R2 key so repeated calls overwrite the same file.
  */
-export async function uploadTelegramAvatarToR2(
-  telegramId: string,
-): Promise<string | null> {
+export async function uploadTelegramAvatarToR2(telegramId: string): Promise<string | null> {
   if (!TELEGRAM_BOT_TOKEN) {
     logger.error("TELEGRAM_BOT_TOKEN not configured");
     return null;

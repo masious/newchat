@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { trpc } from "../trpc";
 
 export function usePushNotifications() {
@@ -10,6 +10,18 @@ export function usePushNotifications() {
 
   const registerPushMutation = trpc.push.subscribe.useMutation();
   const unregisterPushMutation = trpc.push.unsubscribe.useMutation();
+
+  const checkSubscription = useCallback(async () => {
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        const subscription = await registration.pushManager.getSubscription();
+        setIsSubscribed(!!subscription);
+      }
+    } catch (error) {
+      console.error("Error checking push subscription:", error);
+    }
+  }, []);
 
   useEffect(() => {
     // Check if browser supports notifications and service workers
@@ -25,18 +37,7 @@ export function usePushNotifications() {
       setPermission(Notification.permission);
       checkSubscription();
     }
-  }, []);
-
-  const checkSubscription = async () => {
-    try {
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (registration) {
-        const subscription = await registration.pushManager.getSubscription();
-        setIsSubscribed(!!subscription);
-      }
-    } catch (error) {
-      console.error("Error checking push subscription:", error);}
-  };
+  }, [checkSubscription]);
 
   const requestPermission = async (): Promise<boolean> => {
     if (!isSupported) {
@@ -87,7 +88,10 @@ export function usePushNotifications() {
 
       // Always send subscription to server (handles re-login, DB resets, key rotation)
       await registerPushMutation.mutateAsync({
-        subscription: subscription.toJSON() as { keys: { p256dh: string; auth: string }; endpoint: string },
+        subscription: subscription.toJSON() as {
+          keys: { p256dh: string; auth: string };
+          endpoint: string;
+        },
       });
 
       setIsSubscribed(true);

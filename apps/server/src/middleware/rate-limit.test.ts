@@ -1,18 +1,11 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { Hono } from "hono";
-import {
-  resetAllMocks,
-  mockRedisIncr,
-  mockRedisTtl,
-} from "../../tests/helpers/module-mocks";
+import { mockRedisIncr, mockRedisTtl, resetAllMocks } from "../../tests/helpers/module-mocks";
 import { createRateLimitMiddleware } from "./rate-limit";
 
 function createApp() {
   const app = new Hono();
-  app.use(
-    "/test",
-    createRateLimitMiddleware({ limit: 5, windowSec: 60, prefix: "rl:test" }),
-  );
+  app.use("/test", createRateLimitMiddleware({ limit: 5, windowSec: 60, prefix: "rl:test" }));
   app.get("/test", (c) => c.json({ ok: true }));
   return app;
 }
@@ -36,7 +29,7 @@ describe("Hono rate limit middleware", () => {
     const res = await app.request("/test");
 
     expect(res.status).toBe(429);
-    const body = await res.json();
+    const body = (await res.json()) as { error: string };
     expect(body.error).toBe("Too many requests");
   });
 

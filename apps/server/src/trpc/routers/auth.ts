@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { router, publicProcedure } from "../init";
-import { mapDomainError } from "../error-mapper";
-import * as authService from "../../services/auth-service";
 import { AUTH_TOKEN_PATTERN } from "../../lib/constants";
+import * as authService from "../../services/auth-service";
+import { mapDomainError } from "../error-mapper";
+import { publicProcedure, router } from "../init";
 
 const authTokenSchema = z.string().regex(AUTH_TOKEN_PATTERN);
 

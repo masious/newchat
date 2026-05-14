@@ -13,7 +13,7 @@ export interface TelegramNotificationPayload {
 
 export async function sendTelegramNotification(
   telegramId: string,
-  payload: TelegramNotificationPayload
+  payload: TelegramNotificationPayload,
 ) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
@@ -25,9 +25,8 @@ export async function sendTelegramNotification(
   const conversationUrl = `${webAppUrl}/?conversation=${payload.conversationId}`;
 
   // Truncate content if too long
-  const content = payload.content.length > 100
-    ? payload.content.substring(0, 100) + "..."
-    : payload.content;
+  const content =
+    payload.content.length > 100 ? `${payload.content.substring(0, 100)}...` : payload.content;
 
   const safeSender = escapeMarkdown(payload.senderName);
   const safeContent = escapeMarkdown(content);
@@ -37,19 +36,16 @@ export async function sendTelegramNotification(
     : `💬 *${safeSender}*:\n${safeContent}\n\n[Open in Kite](${conversationUrl})`;
 
   try {
-    const response = await fetch(
-      `https://api.telegram.org/bot${botToken}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: telegramId,
-          text,
-          parse_mode: "Markdown",
-          disable_web_page_preview: true,
-        }),
-      }
-    );
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: telegramId,
+        text,
+        parse_mode: "Markdown",
+        disable_web_page_preview: true,
+      }),
+    });
 
     const result = (await response.json()) as { ok: boolean; description?: string };
 

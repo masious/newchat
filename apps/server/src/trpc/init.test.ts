@@ -1,11 +1,7 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { TRPCError } from "@trpc/server";
-import {
-  resetAllMocks,
-  mockVerifyToken,
-  mockRedisIncr,
-} from "../../tests/helpers/module-mocks";
-import { router, publicProcedure, protectedProcedure } from "./init";
+import { mockRedisIncr, mockVerifyToken, resetAllMocks } from "../../tests/helpers/module-mocks";
+import { protectedProcedure, publicProcedure, router } from "./init";
 
 // Minimal test router to exercise middleware
 const testRouter = router({
@@ -15,11 +11,7 @@ const testRouter = router({
   })),
 });
 
-function createContext(overrides?: {
-  token?: string;
-  ip?: string;
-  userId?: number;
-}) {
+function createContext(overrides?: { token?: string; ip?: string; userId?: number }) {
   return {
     db: {} as any,
     ip: overrides?.ip ?? "127.0.0.1",
@@ -94,21 +86,17 @@ describe("rateLimit middleware", () => {
   test("uses userId when authed, IP when not", async () => {
     // Authed request — incr should be called with user:42 in the key
     mockVerifyToken.mockReturnValueOnce(42);
-    const authedCaller = testRouter.createCaller(
-      createContext({ token: "valid", ip: "10.0.0.1" }),
-    );
+    const authedCaller = testRouter.createCaller(createContext({ token: "valid", ip: "10.0.0.1" }));
     await authedCaller.protectedQuery();
-    const authedKey = mockRedisIncr.mock.calls[0]![0] as string;
+    const authedKey = mockRedisIncr.mock.calls[0]?.[0] as string;
     expect(authedKey).toContain("user:42");
 
     resetAllMocks();
 
     // Unauthed request — incr should be called with ip:10.0.0.1 in the key
-    const publicCaller = testRouter.createCaller(
-      createContext({ ip: "10.0.0.1" }),
-    );
+    const publicCaller = testRouter.createCaller(createContext({ ip: "10.0.0.1" }));
     await publicCaller.publicQuery();
-    const publicKey = mockRedisIncr.mock.calls[0]![0] as string;
+    const publicKey = mockRedisIncr.mock.calls[0]?.[0] as string;
     expect(publicKey).toContain("ip:10.0.0.1");
   });
 });

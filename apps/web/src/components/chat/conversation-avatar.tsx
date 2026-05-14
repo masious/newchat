@@ -17,17 +17,17 @@ function Avatar({
       <div
         className={cn(size, "shrink-0 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700")}
       >
-        <img
-          src={avatarUrl}
-          alt={name}
-          className="h-full w-full object-cover"
-        />
+        <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
       </div>
     );
   }
   return (
     <div
-      className={cn(size, "flex shrink-0 items-center justify-center rounded-full bg-slate-100 font-semibold text-slate-500 dark:bg-slate-700 dark:text-slate-400", textSize)}
+      className={cn(
+        size,
+        "flex shrink-0 items-center justify-center rounded-full bg-slate-100 font-semibold text-slate-500 dark:bg-slate-700 dark:text-slate-400",
+        textSize,
+      )}
     >
       {name.slice(0, 1)}
     </div>
@@ -52,9 +52,10 @@ export function ConversationAvatar({
   dmTextSize?: string;
 }) {
   if (conversation.type === "dm") {
-    const other = conversation.members.find((m) => m.id !== currentUserId) ??
-      conversation.members[0];
-    if (!other) return <Avatar avatarUrl={null} name="?" size={dmAvatarSize} textSize={dmTextSize} />;
+    const other =
+      conversation.members.find((m) => m.id !== currentUserId) ?? conversation.members[0];
+    if (!other)
+      return <Avatar avatarUrl={null} name="?" size={dmAvatarSize} textSize={dmTextSize} />;
     return (
       <Avatar
         avatarUrl={other.avatarUrl}
@@ -69,7 +70,15 @@ export function ConversationAvatar({
   const first = conversation.members[0];
   const second = conversation.members[1];
   if (!first) return <Avatar avatarUrl={null} name="#" size={dmAvatarSize} textSize={dmTextSize} />;
-  if (!second) return <Avatar avatarUrl={first.avatarUrl} name={first.firstName} size={dmAvatarSize} textSize={dmTextSize} />;
+  if (!second)
+    return (
+      <Avatar
+        avatarUrl={first.avatarUrl}
+        name={first.firstName}
+        size={dmAvatarSize}
+        textSize={dmTextSize}
+      />
+    );
 
   return (
     <div className={cn("relative shrink-0", containerSize)}>

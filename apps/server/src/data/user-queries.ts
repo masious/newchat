@@ -1,14 +1,4 @@
-import {
-  type Database,
-  users,
-  and,
-  eq,
-  ne,
-  ilike,
-  inArray,
-  or,
-  sql,
-} from "@newchat/db";
+import { and, type Database, eq, ilike, inArray, ne, or, sql, users } from "@newchat/db";
 
 export async function findUserById(db: Database, userId: number) {
   return db.query.users.findFirst({
@@ -55,11 +45,7 @@ export async function searchUsers(
     .where(
       and(
         ...(input.excludeUserId ? [ne(users.id, input.excludeUserId)] : []),
-        or(
-          ilike(users.username, term),
-          ilike(users.firstName, term),
-          ilike(users.lastName, term),
-        ),
+        or(ilike(users.username, term), ilike(users.firstName, term), ilike(users.lastName, term)),
       ),
     )
     .limit(input.limit);
@@ -67,10 +53,7 @@ export async function searchUsers(
 
 export async function findUsersByIds(db: Database, userIds: number[]) {
   if (!userIds.length) return [];
-  return db
-    .select({ id: users.id })
-    .from(users)
-    .where(inArray(users.id, userIds));
+  return db.select({ id: users.id }).from(users).where(inArray(users.id, userIds));
 }
 
 export async function updateNotificationChannel(
@@ -90,16 +73,10 @@ export async function updateNotificationChannel(
 }
 
 export async function updateLastSeen(db: Database, userId: number) {
-  await db
-    .update(users)
-    .set({ lastSeenAt: sql`now()` })
-    .where(eq(users.id, userId));
+  await db.update(users).set({ lastSeenAt: sql`now()` }).where(eq(users.id, userId));
 }
 
-export async function getLastSeenAt(
-  db: Database,
-  userId: number,
-): Promise<Date | null> {
+export async function getLastSeenAt(db: Database, userId: number): Promise<Date | null> {
   const row = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: { lastSeenAt: true },

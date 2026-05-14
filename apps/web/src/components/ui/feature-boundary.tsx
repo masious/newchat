@@ -1,7 +1,7 @@
 "use client";
 
+import { RefreshCw, TriangleAlert } from "lucide-react";
 import { Component, type ReactNode } from "react";
-import { TriangleAlert, RefreshCw } from "lucide-react";
 
 type Props = {
   children: ReactNode;
@@ -44,6 +44,7 @@ export class FeatureBoundary extends Component<Props, State> {
           <TriangleAlert className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
           <span>Something went wrong</span>
           <button
+            type="button"
             onClick={this.reset}
             className="ml-auto text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
           >
@@ -60,6 +61,7 @@ export class FeatureBoundary extends Component<Props, State> {
           Something went wrong
         </p>
         <button
+          type="button"
           onClick={this.reset}
           className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
         >

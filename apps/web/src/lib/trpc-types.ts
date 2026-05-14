@@ -1,5 +1,5 @@
-import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@newchat/server/trpc";
+import type { inferRouterOutputs } from "@trpc/server";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
@@ -10,8 +10,7 @@ export type ProfileUser = RouterOutputs["users"]["profile"]["user"];
 export type PresenceSummary = SearchUser["presence"];
 
 // Conversations
-export type ConversationSummary =
-  RouterOutputs["conversations"]["list"]["conversations"][number];
+export type ConversationSummary = RouterOutputs["conversations"]["list"]["conversations"][number];
 export type ConversationMember = ConversationSummary["members"][number];
 
 // Messages
@@ -24,8 +23,6 @@ export type OptimisticMessage = Message & {
   _status: "pending" | "failed";
 };
 
-export function isOptimisticMessage(
-  msg: Message,
-): msg is OptimisticMessage {
+export function isOptimisticMessage(msg: Message): msg is OptimisticMessage {
   return "_optimisticId" in msg;
 }

@@ -1,4 +1,4 @@
-import { ChangeEvent, KeyboardEvent, RefObject } from "react";
+import type { ChangeEvent, KeyboardEvent, RefObject } from "react";
 
 export function MessageTextarea({
   value,

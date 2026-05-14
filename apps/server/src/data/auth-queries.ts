@@ -1,4 +1,4 @@
-import { type Database, authTokens, eq, and } from "@newchat/db";
+import { and, authTokens, type Database, eq } from "@newchat/db";
 
 export async function insertAuthToken(db: Database, token: string) {
   await db.insert(authTokens).values({ token, status: "pending" });
@@ -22,12 +22,7 @@ export async function exchangeConfirmedToken(db: Database, token: string) {
   const [record] = await db
     .update(authTokens)
     .set({ status: "expired", updatedAt: new Date() })
-    .where(
-      and(
-        eq(authTokens.token, token),
-        eq(authTokens.status, "confirmed"),
-      ),
-    )
+    .where(and(eq(authTokens.token, token), eq(authTokens.status, "confirmed")))
     .returning();
   return record ?? null;
 }

@@ -1,5 +1,5 @@
-import { userDisplayName } from "@/lib/formatting";
 import { Avatar } from "@/components/ui/avatar";
+import { userDisplayName } from "@/lib/formatting";
 
 export function CurrentUserCard({
   currentUser,
@@ -18,6 +18,7 @@ export function CurrentUserCard({
 
   return (
     <button
+      type="button"
       onClick={onEditProfile}
       className="mb-3 flex items-center gap-3 border-y border-slate-200 px-3 py-2 text-left transition hover:border-indigo-400 hover:bg-indigo-50/40 dark:border-slate-700 dark:hover:border-indigo-500 dark:hover:bg-indigo-900/30"
     >
@@ -30,9 +31,7 @@ export function CurrentUserCard({
           {currentUser.username ? `@${currentUser.username}` : "Set username"}
         </p>
       </div>
-      <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-        Edit
-      </span>
+      <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">Edit</span>
     </button>
   );
 }

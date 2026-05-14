@@ -1,11 +1,11 @@
 import { router } from "./init";
 import { authRouter } from "./routers/auth";
-import { usersRouter } from "./routers/users";
 import { conversationsRouter } from "./routers/conversations";
 import { messagesRouter } from "./routers/messages";
-import { uploadsRouter } from "./routers/uploads";
 import { pushRouter } from "./routers/push";
 import { sseRouter } from "./routers/sse";
+import { uploadsRouter } from "./routers/uploads";
+import { usersRouter } from "./routers/users";
 
 export const appRouter = router({
   auth: authRouter,

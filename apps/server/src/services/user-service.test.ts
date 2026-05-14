@@ -1,15 +1,15 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { createTestUser } from "../../tests/helpers/factories.test";
 import {
-  resetAllMocks,
   mockFindUserById,
-  mockUpdateUser,
+  mockGetPresenceStatus,
   mockSearchUsers,
   mockUpdateNotificationChannel,
-  mockGetPresenceStatus,
+  mockUpdateUser,
   mockUploadTelegramAvatarToR2,
+  resetAllMocks,
 } from "../../tests/helpers/module-mocks";
-import { NotFoundError, BadRequestError } from "../errors";
+import { BadRequestError, NotFoundError } from "../errors";
 
 import * as userService from "./user-service";
 
@@ -37,12 +37,14 @@ describe("update", () => {
     mockUpdateUser.mockResolvedValueOnce(updated);
 
     const result = await userService.update({} as any, 1, {
-      username: "newname", displayName: "Alice",
+      username: "newname",
+      displayName: "Alice",
     });
 
     expect(result.user).toEqual(updated);
     expect(mockUpdateUser).toHaveBeenCalledWith(
-      expect.anything(), 1,
+      expect.anything(),
+      1,
       expect.objectContaining({ username: "newname", firstName: "Alice" }),
     );
   });
@@ -67,7 +69,8 @@ describe("search", () => {
     const user = createTestUser();
     mockSearchUsers.mockResolvedValueOnce([user]);
     mockGetPresenceStatus.mockResolvedValueOnce({
-      status: "online", lastSeen: new Date().toISOString(),
+      status: "online",
+      lastSeen: new Date().toISOString(),
     });
 
     const result = await userService.search({} as any, { query: "user" });
@@ -116,9 +119,9 @@ describe("fetchTelegramAvatar", () => {
   });
 
   test("throws NotFoundError when user does not exist", async () => {
-    await expect(
-      userService.fetchTelegramAvatar({} as any, 999),
-    ).rejects.toBeInstanceOf(NotFoundError);
+    await expect(userService.fetchTelegramAvatar({} as any, 999)).rejects.toBeInstanceOf(
+      NotFoundError,
+    );
   });
 });
 

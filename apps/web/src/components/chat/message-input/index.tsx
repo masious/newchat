@@ -1,30 +1,27 @@
 "use client";
 
+import { SendHorizontal } from "lucide-react";
 import {
-  ChangeEvent,
-  KeyboardEvent,
-  SubmitEvent,
+  type ChangeEvent,
+  type KeyboardEvent,
+  type SubmitEvent,
   useImperativeHandle,
   useState,
 } from "react";
-import { SendHorizontal } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
-import { trpc } from "@/lib/trpc";
+import { markOptimisticFailed, registerOptimisticMessage } from "@/lib/optimistic-messages";
 import { useAuth } from "@/lib/providers/auth-context";
 import { addToast } from "@/lib/providers/toast-context";
-import type { UploadedFile } from "@/lib/upload";
-import {
-  registerOptimisticMessage,
-  markOptimisticFailed,
-} from "@/lib/optimistic-messages";
+import { trpc } from "@/lib/trpc";
 import type { OptimisticMessage } from "@/lib/trpc-types";
-import { useTypingIndicator } from "./hooks/useTypingIndicator";
-import { useAutoResizeTextarea } from "./hooks/useAutoResizeTextarea";
-import { useFileAttachments } from "./hooks/useFileAttachments";
+import type { UploadedFile } from "@/lib/upload";
 import { AttachButton } from "./components/AttachButton";
 import { EmojiButton } from "./components/EmojiButton";
 import { MessageTextarea } from "./components/MessageTextarea";
 import { PendingAttachments } from "./components/PendingAttachments";
+import { useAutoResizeTextarea } from "./hooks/useAutoResizeTextarea";
+import { useFileAttachments } from "./hooks/useFileAttachments";
+import { useTypingIndicator } from "./hooks/useTypingIndicator";
 import type { MessageInputHandle } from "./types";
 
 export type { MessageInputHandle };
@@ -40,8 +37,7 @@ export function MessageInput({
   const { user } = useAuth();
   const [message, setMessage] = useState("");
 
-  const { notifyTyping, resetTypingThrottle } =
-    useTypingIndicator(conversationId);
+  const { notifyTyping, resetTypingThrottle } = useTypingIndicator(conversationId);
   const { textareaRef, resetHeight } = useAutoResizeTextarea(message);
   const fileHandlers = useFileAttachments(conversationId);
 
@@ -101,7 +97,7 @@ export function MessageInput({
 
     const trimmedContent = message.trim();
     const optimisticId = crypto.randomUUID();
-    const negativeId = -(Date.now());
+    const negativeId = -Date.now();
     const now = new Date().toISOString();
 
     const optimisticMessage: OptimisticMessage = {
@@ -129,26 +125,23 @@ export function MessageInput({
     resetTypingThrottle();
 
     // Insert optimistic message into cache
-    utils.messages.list.setInfiniteData(
-      { conversationId },
-      (current) => {
-        if (!current) return current;
-        const firstPage = current.pages[0];
-        return {
-          pages: [
-            {
-              ...firstPage,
-              messages: [
-                optimisticMessage as unknown as (typeof firstPage.messages)[number],
-                ...firstPage.messages,
-              ],
-            },
-            ...current.pages.slice(1),
-          ],
-          pageParams: current.pageParams,
-        };
-      },
-    );
+    utils.messages.list.setInfiniteData({ conversationId }, (current) => {
+      if (!current) return current;
+      const firstPage = current.pages[0];
+      return {
+        pages: [
+          {
+            ...firstPage,
+            messages: [
+              optimisticMessage as unknown as (typeof firstPage.messages)[number],
+              ...firstPage.messages,
+            ],
+          },
+          ...current.pages.slice(1),
+        ],
+        pageParams: current.pageParams,
+      };
+    });
 
     // Register for SSE deduplication
     registerOptimisticMessage({
@@ -169,25 +162,19 @@ export function MessageInput({
       });
     } catch (err) {
       markOptimisticFailed(optimisticId);
-      utils.messages.list.setInfiniteData(
-        { conversationId },
-        (current) => {
-          if (!current) return current;
-          return {
-            pages: current.pages.map((page) => ({
-              ...page,
-              messages: page.messages.map((msg) =>
-                msg.id === negativeId
-                  ? { ...msg, _status: "failed" }
-                  : msg,
-              ),
-            })),
-            pageParams: current.pageParams,
-          };
-        },
-      );
-      const message =
-        err instanceof Error ? err.message : "Failed to send message";
+      utils.messages.list.setInfiniteData({ conversationId }, (current) => {
+        if (!current) return current;
+        return {
+          pages: current.pages.map((page) => ({
+            ...page,
+            messages: page.messages.map((msg) =>
+              msg.id === negativeId ? { ...msg, _status: "failed" } : msg,
+            ),
+          })),
+          pageParams: current.pageParams,
+        };
+      });
+      const message = err instanceof Error ? err.message : "Failed to send message";
       addToast(message);
     }
   };
@@ -197,15 +184,9 @@ export function MessageInput({
       onSubmit={handleSubmit}
       className="border-t dark:bg-slate-700 border-slate-200 dark:border-slate-700"
     >
-      <PendingAttachments
-        entries={fileHandlers.entries}
-        onRemove={fileHandlers.removeFile}
-      />
+      <PendingAttachments entries={fileHandlers.entries} onRemove={fileHandlers.removeFile} />
       <div className="mx-auto flex items-center max-w-3xl gap-2 px-2 py-2 md:gap-3 md:px-2 md:py-4">
-        <AttachButton
-          fileInputRef={fileHandlers.fileInputRef}
-          onFileSelect={handleFileSelect}
-        />
+        <AttachButton fileInputRef={fileHandlers.fileInputRef} onFileSelect={handleFileSelect} />
         <MessageTextarea
           value={message}
           onChange={handleChange}

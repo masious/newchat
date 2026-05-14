@@ -1,8 +1,8 @@
 "use client";
 
 import { Toast } from "@base-ui/react/toast";
-import { toastManager, AuthExpiredListener } from "./toast-context";
 import { ToastViewport } from "@/components/ui/toast-container";
+import { AuthExpiredListener, toastManager } from "./toast-context";
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (

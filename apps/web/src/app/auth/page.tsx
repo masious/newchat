@@ -1,13 +1,13 @@
 "use client";
 
-import { Suspense } from "react";
 import { Send } from "lucide-react";
-import { useAuthFlow } from "./hooks/useAuthFlow";
-import { DeepLinkCard } from "./components/DeepLinkCard";
-import { StatusBanner } from "./components/StatusBanner";
-import { ExchangeError } from "./components/ExchangeError";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/ui/section-label";
+import { DeepLinkCard } from "./components/DeepLinkCard";
+import { ExchangeError } from "./components/ExchangeError";
+import { StatusBanner } from "./components/StatusBanner";
+import { useAuthFlow } from "./hooks/useAuthFlow";
 
 export default function AuthPage() {
   return (
@@ -32,8 +32,8 @@ function AuthPageContent() {
             Sign in to Kite
           </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            We&apos;ll open Telegram so you can confirm this login. This window
-            will keep checking for your confirmation automatically.
+            We&apos;ll open Telegram so you can confirm this login. This window will keep checking
+            for your confirmation automatically.
           </p>
         </div>
 
@@ -55,17 +55,12 @@ function AuthPageContent() {
         </div>
 
         {flow.exchangeError && (
-          <ExchangeError
-            isPending={flow.isExchangePending}
-            onRetry={flow.handleRetryExchange}
-          />
+          <ExchangeError isPending={flow.isExchangePending} onRetry={flow.handleRetryExchange} />
         )}
 
         {flow.pollStatus === "expired" && (
           <div className="mt-6 text-center">
-            <Button onClick={flow.handleRegenerate}>
-              Generate new link
-            </Button>
+            <Button onClick={flow.handleRegenerate}>Generate new link</Button>
           </div>
         )}
       </div>

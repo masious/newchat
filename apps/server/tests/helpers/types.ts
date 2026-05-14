@@ -33,4 +33,4 @@ export type PushSubscriptionRow = {
 
 export type IdRow = {
   id: number;
-}
+};

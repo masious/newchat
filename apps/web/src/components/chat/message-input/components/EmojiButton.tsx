@@ -1,14 +1,10 @@
 "use client";
 
-import { EmojiPicker } from "@ferrucc-io/emoji-picker";
 import { Popover } from "@base-ui/react/popover";
+import { EmojiPicker } from "@ferrucc-io/emoji-picker";
 import { Smile } from "lucide-react";
 
-export function EmojiButton({
-  onEmojiSelect,
-}: {
-  onEmojiSelect: (emoji: string) => void;
-}) {
+export function EmojiButton({ onEmojiSelect }: { onEmojiSelect: (emoji: string) => void }) {
   return (
     <Popover.Root>
       <Popover.Trigger

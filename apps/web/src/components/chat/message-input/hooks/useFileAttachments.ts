@@ -1,18 +1,18 @@
 import { useCallback, useRef, useSyncExternalStore } from "react";
-import { trpc } from "@/lib/trpc";
-import { uploadFileWithProgress, type UploadedFile } from "@/lib/upload";
+import type { trpc } from "@/lib/trpc";
+import { type UploadedFile, uploadFileWithProgress } from "@/lib/upload";
 import {
   addPendingFiles,
-  removePendingFile,
-  updateUploadProgress,
+  clearConversationUploads,
+  getSnapshotVersion,
+  getUploadsForConversation,
   markUploadDone,
   markUploadError,
-  clearConversationUploads,
+  removePendingFile,
   setAbortController,
-  getUploadsForConversation,
-  getSnapshotVersion,
   subscribeToUploads,
   type UploadEntry,
+  updateUploadProgress,
 } from "@/lib/upload-store";
 
 type TRPCUtils = ReturnType<typeof trpc.useUtils>;
@@ -34,9 +34,7 @@ export function useFileAttachments(conversationId: number) {
     }
   }
 
-  const isUploading = entries.some(
-    (e) => e.status === "uploading" || e.status === "pending",
-  );
+  const isUploading = entries.some((e) => e.status === "uploading" || e.status === "pending");
 
   // For backward compat: expose the File[] list for code that needs it
   const pendingFiles = entries.map((e) => e.file);
@@ -88,10 +86,7 @@ export function useFileAttachments(conversationId: number) {
           uploaded.push(result.value);
         } else {
           const [fileId] = entryList[i];
-          const errorMsg =
-            result.reason instanceof Error
-              ? result.reason.message
-              : "Upload failed";
+          const errorMsg = result.reason instanceof Error ? result.reason.message : "Upload failed";
           markUploadError(conversationId, fileId, errorMsg);
         }
       }

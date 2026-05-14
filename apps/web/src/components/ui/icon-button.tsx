@@ -41,10 +41,7 @@ export function IconButton({
   ...props
 }: IconButtonProps) {
   const button = (
-    <button
-      {...props}
-      className={cn(iconButtonVariants({ variant, size }), className)}
-    >
+    <button {...props} className={cn(iconButtonVariants({ variant, size }), className)}>
       {children}
     </button>
   );

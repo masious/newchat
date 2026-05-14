@@ -5,10 +5,7 @@ import { trpc } from "@/lib/trpc";
 
 const DEBOUNCE_MS = 300;
 
-export function useMarkReadOnVisible(
-  conversationId: number,
-  userId: number | undefined,
-) {
+export function useMarkReadOnVisible(conversationId: number, userId: number | undefined) {
   const utils = trpc.useUtils();
   const markRead = trpc.messages.markRead.useMutation({
     onSuccess: (_data, variables) => {
@@ -91,7 +88,7 @@ export function useMarkReadOnVisible(
       observer.disconnect();
       observerRef.current = null;
     };
-  }, [conversationId, userId, scheduleFlush]);
+  }, [scheduleFlush]);
 
   // Flush pending read receipts on unmount or conversation change
   useEffect(() => {
@@ -102,20 +99,17 @@ export function useMarkReadOnVisible(
       }
       flushMarkRead();
     };
-  }, [conversationId, userId, flushMarkRead]);
+  }, [flushMarkRead]);
 
-  const observeRef = useCallback(
-    (el: HTMLElement | null, messageId: number, senderId: number) => {
-      const observer = observerRef.current;
-      if (!observer || !el) return;
-      if (senderId === stableRef.current.userId) return;
+  const observeRef = useCallback((el: HTMLElement | null, messageId: number, senderId: number) => {
+    const observer = observerRef.current;
+    if (!observer || !el) return;
+    if (senderId === stableRef.current.userId) return;
 
-      el.dataset.messageId = String(messageId);
-      el.dataset.senderId = String(senderId);
-      observer.observe(el);
-    },
-    [],
-  );
+    el.dataset.messageId = String(messageId);
+    el.dataset.senderId = String(senderId);
+    observer.observe(el);
+  }, []);
 
   return { observeRef };
 }

@@ -15,9 +15,7 @@ export function NotificationSection({
 }) {
   return (
     <fieldset className="mt-6">
-      <SectionLabel as="legend">
-        Notifications
-      </SectionLabel>
+      <SectionLabel as="legend">Notifications</SectionLabel>
       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
         Choose how you want to receive message notifications
       </p>

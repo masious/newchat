@@ -1,14 +1,14 @@
-import type { Database, Attachment } from "@newchat/db";
-import { BadRequestError } from "../errors";
-import { ensureConversationMember } from "./authorization";
+import type { Attachment, Database } from "@newchat/db";
 import {
-  listMessages as listMessagesQuery,
+  fetchMessageWithSender,
   insertMessage,
+  listMessages as listMessagesQuery,
   upsertReadReceipts,
   validateMessageIds,
-  fetchMessageWithSender,
 } from "../data/message-queries";
+import { BadRequestError } from "../errors";
 import { domainEvents } from "../events";
+import { ensureConversationMember } from "./authorization";
 
 export async function list(
   db: Database,
@@ -31,8 +31,7 @@ export async function list(
 
   const hasMore = rows.length > limit;
   const items = hasMore ? rows.slice(0, -1) : rows;
-  const nextCursor =
-    hasMore && items.length ? items[items.length - 1].id : undefined;
+  const nextCursor = hasMore && items.length ? items[items.length - 1].id : undefined;
 
   return { messages: items, nextCursor };
 }
@@ -46,11 +45,7 @@ export async function send(
     attachments?: Attachment[];
   },
 ) {
-  const conversation = await ensureConversationMember(
-    db,
-    input.conversationId,
-    input.senderId,
-  );
+  const conversation = await ensureConversationMember(db, input.conversationId, input.senderId);
 
   const created = await insertMessage(db, {
     conversationId: input.conversationId,
@@ -110,10 +105,7 @@ export async function markRead(
   return { success: true };
 }
 
-export async function typing(
-  db: Database,
-  input: { conversationId: number; userId: number },
-) {
+export async function typing(db: Database, input: { conversationId: number; userId: number }) {
   await ensureConversationMember(db, input.conversationId, input.userId);
   await domainEvents.emit("message.typing", {
     conversationId: input.conversationId,

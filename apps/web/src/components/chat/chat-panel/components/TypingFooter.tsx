@@ -1,4 +1,4 @@
-import { ChatListContext } from "../types";
+import type { ChatListContext } from "../types";
 import { TypingBubble } from "./TypingBubble";
 
 export default function TypingFooter({ context }: { context?: ChatListContext }) {

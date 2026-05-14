@@ -17,10 +17,7 @@ export function findAndRemoveOptimistic(
   realMessage: { content: string | null },
 ): PendingEntry | null {
   for (const [key, entry] of pendingMessages) {
-    if (
-      entry.conversationId === conversationId &&
-      entry.content === realMessage.content
-    ) {
+    if (entry.conversationId === conversationId && entry.content === realMessage.content) {
       pendingMessages.delete(key);
       return entry;
     }

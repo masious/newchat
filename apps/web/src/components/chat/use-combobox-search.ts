@@ -1,15 +1,8 @@
 "use client";
 
-import {
-  createElement,
-  Fragment,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
-import type { ReactNode } from "react";
 import type { Combobox } from "@base-ui/react/combobox";
+import type { ReactNode } from "react";
+import { createElement, Fragment, useMemo, useRef, useState, useTransition } from "react";
 import { trpc } from "@/lib/trpc";
 import type { SearchUser } from "@/lib/trpc-types";
 
@@ -54,9 +47,7 @@ export function useComboboxSearch(selectedArray: SearchUser[]) {
       );
     }
     if (trimmed.length < MIN_QUERY_LENGTH && !blockStartStatus) {
-      return selectedArray.length > 0
-        ? null
-        : "Type at least 2 characters to search\u2026";
+      return selectedArray.length > 0 ? null : "Type at least 2 characters to search\u2026";
     }
     if (searchResults.length === 0 && !blockStartStatus) {
       return `No matches for \u201c${trimmed}\u201d.`;
@@ -69,10 +60,7 @@ export function useComboboxSearch(selectedArray: SearchUser[]) {
     return "Try a different search term.";
   }
 
-  function handleInputValueChange(
-    nextValue: string,
-    details: Combobox.Root.ChangeEventDetails,
-  ) {
+  function handleInputValueChange(nextValue: string, details: Combobox.Root.ChangeEventDetails) {
     setInputValue(nextValue);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);

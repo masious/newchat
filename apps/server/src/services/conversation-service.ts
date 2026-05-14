@@ -1,22 +1,18 @@
 import type { Database } from "@newchat/db";
-import { BadRequestError } from "../errors";
 import {
-  ensureConversationMember,
-  ensureGroupOwner,
-  ensureUsersExist,
-} from "./authorization";
-import {
+  addConversationMember,
+  createConversationWithMembers,
   fetchConversationSummaries,
   fetchConversationSummary,
   findExistingDm,
-  createConversationWithMembers,
   getConversationMembers,
   getConversationMemberUserIds,
-  updateConversationName,
-  addConversationMember,
   removeConversationMember,
+  updateConversationName,
 } from "../data/conversation-queries";
+import { BadRequestError } from "../errors";
 import { domainEvents } from "../events";
+import { ensureConversationMember, ensureGroupOwner, ensureUsersExist } from "./authorization";
 
 export async function list(db: Database, input: { userId: number }) {
   const conversations = await fetchConversationSummaries(db, input.userId);
@@ -32,29 +28,19 @@ export async function create(
     name?: string;
   },
 ) {
-  const sanitizedMemberIds = input.memberUserIds.filter(
-    (id) => id !== input.creatorId,
-  );
-  const memberIds = Array.from(
-    new Set<number>([...sanitizedMemberIds, input.creatorId]),
-  );
+  const sanitizedMemberIds = input.memberUserIds.filter((id) => id !== input.creatorId);
+  const memberIds = Array.from(new Set<number>([...sanitizedMemberIds, input.creatorId]));
 
   await ensureUsersExist(db, memberIds);
 
   if (input.type === "dm") {
     if (memberIds.length !== 2) {
-      throw new BadRequestError(
-        "DM conversations must include exactly two members",
-      );
+      throw new BadRequestError("DM conversations must include exactly two members");
     }
     const otherId = memberIds.find((id) => id !== input.creatorId)!;
     const existingId = await findExistingDm(db, input.creatorId, otherId);
     if (existingId) {
-      const conversation = await fetchConversationSummary(
-        db,
-        input.creatorId,
-        existingId,
-      );
+      const conversation = await fetchConversationSummary(db, input.creatorId, existingId);
       return { conversation };
     }
   } else if (!input.name) {
@@ -65,16 +51,12 @@ export async function create(
 
   const conversationId = await createConversationWithMembers(db, {
     type: input.type,
-    name: input.type === "group" ? input.name ?? null : null,
+    name: input.type === "group" ? (input.name ?? null) : null,
     createdBy: input.type === "group" ? input.creatorId : null,
     memberIds,
   });
 
-  const currentSummary = await fetchConversationSummary(
-    db,
-    input.creatorId,
-    conversationId,
-  );
+  const currentSummary = await fetchConversationSummary(db, input.creatorId, conversationId);
   if (!currentSummary) {
     throw new BadRequestError("Conversation summary unavailable");
   }
@@ -88,10 +70,7 @@ export async function create(
   return { conversation: currentSummary };
 }
 
-export async function getMembers(
-  db: Database,
-  input: { conversationId: number; userId: number },
-) {
+export async function getMembers(db: Database, input: { conversationId: number; userId: number }) {
   await ensureConversationMember(db, input.conversationId, input.userId);
   const members = await getConversationMembers(db, input.conversationId);
   return { members };
@@ -117,10 +96,7 @@ export async function addMember(
   await ensureGroupOwner(db, input.conversationId, input.userId);
   await ensureUsersExist(db, [input.memberUserId]);
 
-  const existingMemberIds = await getConversationMemberUserIds(
-    db,
-    input.conversationId,
-  );
+  const existingMemberIds = await getConversationMemberUserIds(db, input.conversationId);
   if (existingMemberIds.includes(input.memberUserId)) {
     throw new BadRequestError("User is already a member of this conversation");
   }
@@ -139,15 +115,8 @@ export async function removeMember(
   db: Database,
   input: { conversationId: number; userId: number; memberUserId: number },
 ) {
-  const conversation = await ensureGroupOwner(
-    db,
-    input.conversationId,
-    input.userId,
-  );
-  if (
-    conversation.createdBy !== null &&
-    input.memberUserId === conversation.createdBy
-  ) {
+  const conversation = await ensureGroupOwner(db, input.conversationId, input.userId);
+  if (conversation.createdBy !== null && input.memberUserId === conversation.createdBy) {
     throw new BadRequestError("Cannot remove the group owner");
   }
 

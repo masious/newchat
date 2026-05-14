@@ -1,8 +1,8 @@
 "use client";
 
-import { Fragment, useMemo } from "react";
 import { Combobox } from "@base-ui/react/combobox";
 import { Check, X } from "lucide-react";
+import { Fragment, useMemo } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { userDisplayName } from "@/lib/formatting";
 import type { SearchUser } from "@/lib/trpc-types";
@@ -106,27 +106,27 @@ export function UserSearchCombobox(props: UserSearchComboboxProps) {
               {(value: SearchUser[] | null) => {
                 const users = value ?? [];
                 return (
-                <Fragment>
-                  {users.map((user) => (
-                    <Combobox.Chip
-                      key={user.id}
-                      className="flex items-center gap-1 rounded-full bg-indigo-50 py-0.5 pl-2 pr-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
-                      aria-label={userDisplayName(user)}
-                    >
-                      {user.firstName}
-                      <Combobox.ChipRemove
-                        className="inline-flex items-center justify-center rounded-full bg-transparent p-0.5 text-inherit hover:bg-indigo-100 dark:hover:bg-indigo-800/40"
-                        aria-label="Remove"
+                  <Fragment>
+                    {users.map((user) => (
+                      <Combobox.Chip
+                        key={user.id}
+                        className="flex items-center gap-1 rounded-full bg-indigo-50 py-0.5 pl-2 pr-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+                        aria-label={userDisplayName(user)}
                       >
-                        <X className="h-3 w-3" />
-                      </Combobox.ChipRemove>
-                    </Combobox.Chip>
-                  ))}
-                  <Combobox.Input
-                    placeholder={users.length > 0 ? "" : placeholder}
-                    className="h-8 min-w-24 flex-1 rounded-lg border-0 bg-transparent px-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
-                  />
-                </Fragment>
+                        {user.firstName}
+                        <Combobox.ChipRemove
+                          className="inline-flex items-center justify-center rounded-full bg-transparent p-0.5 text-inherit hover:bg-indigo-100 dark:hover:bg-indigo-800/40"
+                          aria-label="Remove"
+                        >
+                          <X className="h-3 w-3" />
+                        </Combobox.ChipRemove>
+                      </Combobox.Chip>
+                    ))}
+                    <Combobox.Input
+                      placeholder={users.length > 0 ? "" : placeholder}
+                      className="h-8 min-w-24 flex-1 rounded-lg border-0 bg-transparent px-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    />
+                  </Fragment>
                 );
               }}
             </Combobox.Value>

@@ -1,24 +1,29 @@
-import { describe, test, expect, beforeEach } from "bun:test";
-import { createMockDb } from "../../tests/helpers/mocks";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { createTestConversationSummary } from "../../tests/helpers/factories.test";
+import { createMockDb } from "../../tests/helpers/mocks";
 import {
-  resetAllMocks,
+  mockAddConversationMember,
+  mockCreateConversationWithMembers,
+  mockEmit,
   mockFetchConversationSummaries,
   mockFetchConversationSummary,
   mockFindExistingDm,
-  mockCreateConversationWithMembers,
-  mockGetConversationMemberUserIds,
-  mockUpdateConversationName,
-  mockAddConversationMember,
-  mockRemoveConversationMember,
   mockFindUsersByIds,
-  mockEmit,
+  mockGetConversationMemberUserIds,
+  mockRemoveConversationMember,
+  mockUpdateConversationName,
+  resetAllMocks,
 } from "../../tests/helpers/module-mocks";
 import { BadRequestError, ForbiddenError } from "../errors";
 
 import * as conversationService from "./conversation-service";
 
-function memberDb(conv: { id: number; type: string; name: string | null; createdBy: number | null }) {
+function memberDb(conv: {
+  id: number;
+  type: string;
+  name: string | null;
+  createdBy: number | null;
+}) {
   const db = createMockDb();
   db.query.conversationMembers.findFirst.mockResolvedValue({
     conversation: { ...conv, createdAt: new Date() },
@@ -59,7 +64,9 @@ describe("create", () => {
       mockFetchConversationSummary.mockResolvedValueOnce(s);
 
       const result = await conversationService.create(db, {
-        creatorId: 1, type: "dm", memberUserIds: [2],
+        creatorId: 1,
+        type: "dm",
+        memberUserIds: [2],
       });
 
       expect(result.conversation).toEqual(s);
@@ -76,7 +83,9 @@ describe("create", () => {
       mockFetchConversationSummary.mockResolvedValueOnce(s);
 
       const result = await conversationService.create(db, {
-        creatorId: 1, type: "dm", memberUserIds: [2],
+        creatorId: 1,
+        type: "dm",
+        memberUserIds: [2],
       });
 
       expect(result.conversation).toEqual(s);
@@ -87,7 +96,9 @@ describe("create", () => {
       const db = createMockDb();
       await expect(
         conversationService.create(db, {
-          creatorId: 1, type: "dm", memberUserIds: [2, 3],
+          creatorId: 1,
+          type: "dm",
+          memberUserIds: [2, 3],
         }),
       ).rejects.toBeInstanceOf(BadRequestError);
     });
@@ -98,7 +109,9 @@ describe("create", () => {
       mockFetchConversationSummary.mockResolvedValueOnce(s);
 
       await conversationService.create(db, {
-        creatorId: 1, type: "dm", memberUserIds: [2, 1, 2],
+        creatorId: 1,
+        type: "dm",
+        memberUserIds: [2, 1, 2],
       });
 
       expect(mockFindUsersByIds).toHaveBeenCalledWith(
@@ -115,7 +128,10 @@ describe("create", () => {
       mockFetchConversationSummary.mockResolvedValueOnce(s);
 
       const result = await conversationService.create(db, {
-        creatorId: 1, type: "group", memberUserIds: [2, 3], name: "Team",
+        creatorId: 1,
+        type: "group",
+        memberUserIds: [2, 3],
+        name: "Team",
       });
 
       expect(result.conversation).toEqual(s);
@@ -129,7 +145,9 @@ describe("create", () => {
       const db = createMockDb();
       await expect(
         conversationService.create(db, {
-          creatorId: 1, type: "group", memberUserIds: [2],
+          creatorId: 1,
+          type: "group",
+          memberUserIds: [2],
         }),
       ).rejects.toBeInstanceOf(BadRequestError);
     });
@@ -138,7 +156,10 @@ describe("create", () => {
       const db = createMockDb();
       await expect(
         conversationService.create(db, {
-          creatorId: 1, type: "group", memberUserIds: [], name: "Solo",
+          creatorId: 1,
+          type: "group",
+          memberUserIds: [],
+          name: "Solo",
         }),
       ).rejects.toBeInstanceOf(BadRequestError);
     });
@@ -149,7 +170,10 @@ describe("create", () => {
       mockFetchConversationSummary.mockResolvedValueOnce(s);
 
       await conversationService.create(db, {
-        creatorId: 1, type: "group", memberUserIds: [2, 3], name: "Team",
+        creatorId: 1,
+        type: "group",
+        memberUserIds: [2, 3],
+        name: "Team",
       });
 
       expect(mockEmit).toHaveBeenCalledWith(
@@ -165,7 +189,9 @@ describe("updateName", () => {
     const db = groupOwnerDb();
 
     const result = await conversationService.updateName(db, {
-      conversationId: 1, userId: 1, name: "New Name",
+      conversationId: 1,
+      userId: 1,
+      name: "New Name",
     });
 
     expect(result).toEqual({ success: true });
@@ -192,7 +218,9 @@ describe("addMember", () => {
     mockGetConversationMemberUserIds.mockResolvedValueOnce([1, 2]);
 
     const result = await conversationService.addMember(db, {
-      conversationId: 1, userId: 1, memberUserId: 3,
+      conversationId: 1,
+      userId: 1,
+      memberUserId: 3,
     });
 
     expect(result).toEqual({ success: true });
@@ -209,7 +237,9 @@ describe("addMember", () => {
 
     await expect(
       conversationService.addMember(db, {
-        conversationId: 1, userId: 1, memberUserId: 3,
+        conversationId: 1,
+        userId: 1,
+        memberUserId: 3,
       }),
     ).rejects.toBeInstanceOf(BadRequestError);
   });
@@ -220,7 +250,9 @@ describe("removeMember", () => {
     const db = groupOwnerDb();
 
     const result = await conversationService.removeMember(db, {
-      conversationId: 1, userId: 1, memberUserId: 2,
+      conversationId: 1,
+      userId: 1,
+      memberUserId: 2,
     });
 
     expect(result).toEqual({ success: true });
@@ -236,7 +268,9 @@ describe("removeMember", () => {
 
     await expect(
       conversationService.removeMember(db, {
-        conversationId: 1, userId: 1, memberUserId: 1,
+        conversationId: 1,
+        userId: 1,
+        memberUserId: 1,
       }),
     ).rejects.toBeInstanceOf(BadRequestError);
   });

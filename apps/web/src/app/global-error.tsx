@@ -1,9 +1,8 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
-import Error from "next/error";
+import type Error from "next/error";
 import { useEffect } from "react";
-
 
 export default function GlobalError({
   error,
@@ -12,17 +11,27 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-
   useEffect(() => {
     Sentry.captureException(error);
   }, [error]);
-  
+
   return (
-    <html>
+    <html lang="en">
       <body>
-        <div style={{ display: "flex", minHeight: "100vh", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
+        <div
+          style={{
+            display: "flex",
+            minHeight: "100vh",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "1rem",
+          }}
+        >
           <h2>Something went wrong</h2>
-          <button onClick={reset}>Try again</button>
+          <button type="button" onClick={reset}>
+            Try again
+          </button>
         </div>
       </body>
     </html>

@@ -1,29 +1,23 @@
 // Smoke test — validates that test infrastructure works end-to-end:
 // setup.ts preloads env vars, factories produce correct shapes, mocks behave.
 
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import {
-  createTestUser,
-  createTestConversation,
-  createTestMessage,
-  createTestAuthToken,
-  createTestPushSubscription,
   createTestAttachment,
-  createTestMessageWithSender,
+  createTestAuthToken,
+  createTestConversation,
   createTestConversationSummary,
+  createTestMessage,
+  createTestMessageWithSender,
+  createTestPushSubscription,
+  createTestUser,
   resetFactoryCounters,
 } from "./factories.test";
-import {
-  createMockRedis,
-  createMockDb,
-  createMockDomainEvents,
-} from "./mocks";
+import { createMockDb, createMockDomainEvents, createMockRedis } from "./mocks";
 
 describe("test setup", () => {
   test("env vars are set by preload", () => {
-    expect(process.env.JWT_SECRET).toBe(
-      "test-jwt-secret-do-not-use-in-production",
-    );
+    expect(process.env.JWT_SECRET).toBe("test-jwt-secret-do-not-use-in-production");
     expect(process.env.R2_ACCOUNT_ID).toBe("test-account-id");
     expect(process.env.NODE_ENV).toBe("test");
   });

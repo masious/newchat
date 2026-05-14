@@ -1,16 +1,16 @@
-import { nanoid } from "nanoid";
 import type { Database } from "@newchat/db";
-import { UnauthorizedError } from "../errors";
+import { nanoid } from "nanoid";
 import {
-  insertAuthToken,
-  findAuthToken,
-  expireAuthToken,
   exchangeConfirmedToken,
+  expireAuthToken,
+  findAuthToken,
+  insertAuthToken,
 } from "../data/auth-queries";
+import { UnauthorizedError } from "../errors";
+import { EXCHANGE_CACHE_TTL_SEC, TOKEN_TTL_MS } from "../lib/constants";
 import { signToken } from "../lib/jwt";
-import { TOKEN_TTL_MS, EXCHANGE_CACHE_TTL_SEC } from "../lib/constants";
-import { redisPublisher } from "../lib/redis";
 import { logger } from "../lib/logger";
+import { redisPublisher } from "../lib/redis";
 
 const exchangeCacheKey = (token: string) => `auth:exchange:${token}`;
 
@@ -53,7 +53,7 @@ export async function exchange(db: Database, token: string) {
   }
 
   const record = await exchangeConfirmedToken(db, token);
-  if (!record || !record.userId) {
+  if (!record?.userId) {
     throw new UnauthorizedError("Invalid or expired token");
   }
 

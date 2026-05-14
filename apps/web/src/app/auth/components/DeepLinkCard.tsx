@@ -1,4 +1,4 @@
-import { ExternalLink, Copy, Check } from "lucide-react";
+import { Check, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/ui/section-label";
 
@@ -38,11 +38,7 @@ export function DeepLinkCard({
           disabled={!telegramLink}
           className="flex items-center gap-1.5"
         >
-          {copied ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <Copy className="h-4 w-4" />
-          )}
+          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           {copied ? "Copied" : "Copy link"}
         </Button>
       </div>

@@ -1,10 +1,8 @@
-import { createDb } from "../index";
 import { sql } from "drizzle-orm";
+import { createDb } from "../index";
 
 if (!process.argv.includes("--confirm")) {
-  console.error(
-    "This will DROP all tables, enums, and data. Run with --confirm to proceed.",
-  );
+  console.error("This will DROP all tables, enums, and data. Run with --confirm to proceed.");
   process.exit(1);
 }
 

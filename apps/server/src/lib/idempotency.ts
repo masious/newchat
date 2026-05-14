@@ -1,6 +1,6 @@
-import { redisPublisher } from "./redis";
 import { IDEMPOTENCY_TTL_SEC } from "./constants";
 import { logger } from "./logger";
+import { redisPublisher } from "./redis";
 
 // Wraps a mutation handler with Redis-backed idempotency. Returns the cached
 // response when the same `input.idempotencyKey` has been seen before for this
@@ -13,14 +13,8 @@ export function idempotent<
   TCtx extends { userId: number },
   TInput extends { idempotencyKey: string },
   TOutput,
->(
-  path: string,
-  handler: (opts: { ctx: TCtx; input: TInput }) => Promise<TOutput>,
-) {
-  return async (opts: {
-    ctx: TCtx;
-    input: TInput;
-  }): Promise<TOutput> => {
+>(path: string, handler: (opts: { ctx: TCtx; input: TInput }) => Promise<TOutput>) {
+  return async (opts: { ctx: TCtx; input: TInput }): Promise<TOutput> => {
     const cacheKey = `idem:user:${opts.ctx.userId}:${path}:${opts.input.idempotencyKey}`;
 
     try {
@@ -35,12 +29,7 @@ export function idempotent<
     const result = await handler(opts);
 
     try {
-      await redisPublisher.set(
-        cacheKey,
-        JSON.stringify(result),
-        "EX",
-        IDEMPOTENCY_TTL_SEC,
-      );
+      await redisPublisher.set(cacheKey, JSON.stringify(result), "EX", IDEMPOTENCY_TTL_SEC);
     } catch (err) {
       logger.warn({ err, cacheKey }, "Idempotency cache write failed");
     }

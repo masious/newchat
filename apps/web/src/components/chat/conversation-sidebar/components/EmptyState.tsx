@@ -1,12 +1,8 @@
 import { MessageCircle } from "lucide-react";
-import { EmptyState as EmptyStateBase } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { EmptyState as EmptyStateBase } from "@/components/ui/empty-state";
 
-export function EmptyState({
-  onOpenNewChat,
-}: {
-  onOpenNewChat: () => void;
-}) {
+export function EmptyState({ onOpenNewChat }: { onOpenNewChat: () => void }) {
   return (
     <EmptyStateBase
       icon={<MessageCircle className="h-12 w-12" strokeWidth={1} />}

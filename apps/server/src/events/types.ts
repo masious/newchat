@@ -1,8 +1,6 @@
 import type { fetchMessageWithSender } from "../data/message-queries";
 
-export type EventMessage = NonNullable<
-  Awaited<ReturnType<typeof fetchMessageWithSender>>
->;
+export type EventMessage = NonNullable<Awaited<ReturnType<typeof fetchMessageWithSender>>>;
 
 export type DomainEvents = {
   "message.sent": {

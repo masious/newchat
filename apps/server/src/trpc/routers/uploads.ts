@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { router, protectedProcedure } from "../init";
-import { mapDomainError } from "../error-mapper";
 import * as uploadService from "../../services/upload-service";
+import { mapDomainError } from "../error-mapper";
+import { protectedProcedure, router } from "../init";
 
 export const uploadsRouter = router({
   getPresignedUrl: protectedProcedure

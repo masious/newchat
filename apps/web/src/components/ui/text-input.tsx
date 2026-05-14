@@ -1,9 +1,6 @@
 import { cn } from "@/lib/cn";
 
-export function TextInput({
-  className,
-  ...props
-}: React.ComponentProps<"input">) {
+export function TextInput({ className, ...props }: React.ComponentProps<"input">) {
   return (
     <input
       className={cn(

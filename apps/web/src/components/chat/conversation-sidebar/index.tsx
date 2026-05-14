@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
 import { ScrollArea } from "@base-ui/react/scroll-area";
+import { useMemo } from "react";
 import { formatRelativeTime, getConversationName } from "@/lib/formatting";
+import type { ConversationSummary, SearchUser } from "@/lib/trpc-types";
 import { UserResultList } from "../user-result-list";
-import { SidebarHeader } from "./components/SidebarHeader";
-import { SearchInput } from "./components/SearchInput";
 import { ConversationListItem } from "./components/ConversationListItem";
 import { EmptyState } from "./components/EmptyState";
 import { LoadingSkeleton } from "./components/LoadingSkeleton";
-import type { ConversationSummary, SearchUser } from "@/lib/trpc-types";
+import { SearchInput } from "./components/SearchInput";
+import { SidebarHeader } from "./components/SidebarHeader";
 
 export type { ConversationSummary, PresenceSummary } from "@/lib/trpc-types";
 
@@ -60,10 +60,7 @@ export function ConversationSidebar({
     return conversations.filter((conversation) => {
       const name = conversation.name ?? "Direct message";
       const snippet = conversation.lastMessage?.content ?? "";
-      return (
-        name.toLowerCase().includes(lower) ||
-        snippet.toLowerCase().includes(lower)
-      );
+      return name.toLowerCase().includes(lower) || snippet.toLowerCase().includes(lower);
     });
   }, [conversations, filter]);
 
@@ -90,9 +87,7 @@ export function ConversationSidebar({
         <ScrollArea.Viewport className="h-full overscroll-contain">
           <ScrollArea.Content className="min-w-full!">
             {isLoading && <LoadingSkeleton />}
-            {!isLoading && filtered.length === 0 && (
-              <EmptyState onOpenNewChat={onOpenNewChat} />
-            )}
+            {!isLoading && filtered.length === 0 && <EmptyState onOpenNewChat={onOpenNewChat} />}
             <ul>
               {filtered.map((conversation) => {
                 const isSelected = conversation.id === selectedId;
@@ -107,9 +102,8 @@ export function ConversationSidebar({
                   lastMessagePreview = lastMsg.content;
                 } else if (lastMsg.attachments?.length) {
                   const count = lastMsg.attachments.length;
-                  lastMessagePreview = count === 1
-                    ? `Sent an attachment`
-                    : `Sent ${count} attachments`;
+                  lastMessagePreview =
+                    count === 1 ? `Sent an attachment` : `Sent ${count} attachments`;
                 } else {
                   lastMessagePreview = "No messages yet";
                 }

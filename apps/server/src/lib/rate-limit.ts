@@ -50,10 +50,7 @@ export async function incrementConcurrency(
 /**
  * Decrement a concurrency counter. Floors at 0.
  */
-export async function decrementConcurrency(
-  redis: Redis,
-  key: string,
-): Promise<void> {
+export async function decrementConcurrency(redis: Redis, key: string): Promise<void> {
   const val = await redis.decr(key);
   if (val < 0) {
     await redis.set(key, 0);

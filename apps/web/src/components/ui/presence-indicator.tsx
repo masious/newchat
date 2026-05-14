@@ -17,9 +17,7 @@ export function PresenceIndicator({ presence }: PresenceIndicatorProps) {
       : "Offline";
   return (
     <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-      <span
-        className={cn("h-2 w-2 rounded-full", isOnline ? "bg-emerald-500" : "bg-slate-400")}
-      />
+      <span className={cn("h-2 w-2 rounded-full", isOnline ? "bg-emerald-500" : "bg-slate-400")} />
       <span>{label}</span>
     </div>
   );

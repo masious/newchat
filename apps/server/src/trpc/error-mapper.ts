@@ -1,10 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import {
-  ForbiddenError,
-  NotFoundError,
-  BadRequestError,
-  UnauthorizedError,
-} from "../errors";
+import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "../errors";
 
 export function mapDomainError(err: unknown): never {
   if (err instanceof ForbiddenError)

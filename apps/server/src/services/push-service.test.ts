@@ -1,11 +1,11 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import {
-  resetAllMocks,
-  mockFindPushSubscription,
-  mockUpdatePushSubscriptionKeys,
-  mockInsertPushSubscription,
-  mockDeleteUserSubscriptions,
   mockDeleteSubscriptionByEndpoint,
+  mockDeleteUserSubscriptions,
+  mockFindPushSubscription,
+  mockInsertPushSubscription,
+  mockUpdatePushSubscriptionKeys,
+  resetAllMocks,
 } from "../../tests/helpers/module-mocks";
 
 import * as pushService from "./push-service";
@@ -51,10 +51,16 @@ describe("unsubscribe", () => {
 
 describe("unsubscribeEndpoint", () => {
   test("deletes subscription by endpoint", async () => {
-    const result = await pushService.unsubscribeEndpoint({} as any, 1, "https://push.example.com/sub/1");
+    const result = await pushService.unsubscribeEndpoint(
+      {} as any,
+      1,
+      "https://push.example.com/sub/1",
+    );
     expect(result).toEqual({ success: true });
     expect(mockDeleteSubscriptionByEndpoint).toHaveBeenCalledWith(
-      expect.anything(), 1, "https://push.example.com/sub/1",
+      expect.anything(),
+      1,
+      "https://push.example.com/sub/1",
     );
   });
 });

@@ -1,10 +1,10 @@
 "use client";
 
 import { BaseDialog } from "@/components/ui/base-dialog";
-import { useSettingsForm } from "./hooks/useSettingsForm";
-import { SettingsSection } from "./components/SettingsSection";
-import { NotificationSection } from "./components/NotificationSection";
 import { DialogFooter } from "./components/DialogFooter";
+import { NotificationSection } from "./components/NotificationSection";
+import { SettingsSection } from "./components/SettingsSection";
+import { useSettingsForm } from "./hooks/useSettingsForm";
 
 export function SettingsDialog({
   open,
@@ -54,10 +54,7 @@ export function SettingsDialog({
           onWebToggle={form.setEnableWeb}
         />
 
-        <DialogFooter
-          isBusy={form.isBusy}
-          submitLabel={form.submitLabel}
-        />
+        <DialogFooter isBusy={form.isBusy} submitLabel={form.submitLabel} />
       </form>
     </BaseDialog>
   );

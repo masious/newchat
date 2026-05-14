@@ -1,7 +1,7 @@
-import { cn } from "@/lib/cn";
 import { Clock } from "lucide-react";
-import { formatRelativeTime, formatAbsoluteTime } from "@/lib/formatting";
-import { AttachmentPreview, type Attachment } from "./components/AttachmentPreview";
+import { cn } from "@/lib/cn";
+import { formatAbsoluteTime, formatRelativeTime } from "@/lib/formatting";
+import { type Attachment, AttachmentPreview } from "./components/AttachmentPreview";
 import CheckIcon from "./components/CheckIcon";
 import DoubleCheckIcon from "./components/DoubleCheckIcon";
 
@@ -42,7 +42,12 @@ export function MessageBubble({
         {attachments && attachments.length > 0 && (
           <div className="mb-1.5 flex flex-col gap-1.5 -mx-2">
             {attachments.map((att, i) => (
-              <AttachmentPreview key={i} attachment={att} isMine={isMine} onImageLoad={onImageLoad} />
+              <AttachmentPreview
+                key={i}
+                attachment={att}
+                isMine={isMine}
+                onImageLoad={onImageLoad}
+              />
             ))}
           </div>
         )}
@@ -75,12 +80,20 @@ export function MessageBubble({
           <div className="mt-1 flex items-center gap-2 text-[10px]">
             <span className="text-red-300">Failed to send</span>
             {onRetry && (
-              <button onClick={onRetry} className="font-semibold text-white underline">
+              <button
+                type="button"
+                onClick={onRetry}
+                className="font-semibold text-white underline"
+              >
                 Retry
               </button>
             )}
             {onDiscard && (
-              <button onClick={onDiscard} className="font-semibold text-red-300 underline">
+              <button
+                type="button"
+                onClick={onDiscard}
+                className="font-semibold text-red-300 underline"
+              >
                 Discard
               </button>
             )}

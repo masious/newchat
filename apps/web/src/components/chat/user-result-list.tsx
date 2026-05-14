@@ -1,11 +1,11 @@
-import { userDisplayName } from "@/lib/formatting";
-import { Avatar } from "@/components/ui/avatar";
 import { Collapsible } from "@base-ui/react/collapsible";
-import { Search, ChevronDown } from "lucide-react";
-import { SectionLabel } from "@/components/ui/section-label";
-import { ErrorMessage } from "@/components/ui/error-message";
+import { ChevronDown, Search } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { PresenceIndicator } from "@/components/ui/presence-indicator";
+import { SectionLabel } from "@/components/ui/section-label";
+import { userDisplayName } from "@/lib/formatting";
 import type { SearchUser } from "@/lib/trpc-types";
 
 export function UserResultList({
@@ -22,7 +22,10 @@ export function UserResultList({
   onViewProfile: (user: SearchUser) => void;
 }) {
   return (
-    <Collapsible.Root defaultOpen className="border-y border-slate-100 px-4 py-3 dark:border-slate-700">
+    <Collapsible.Root
+      defaultOpen
+      className="border-y border-slate-100 px-4 py-3 dark:border-slate-700"
+    >
       <div className="flex items-center justify-between">
         <SectionLabel as={Collapsible.Trigger} className="flex items-center gap-1">
           People
@@ -47,6 +50,7 @@ export function UserResultList({
             {results.map((user) => (
               <li key={user.id}>
                 <button
+                  type="button"
                   onClick={() => onViewProfile(user)}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-left transition hover:border-indigo-400 hover:bg-indigo-50/40 dark:border-slate-700 dark:hover:bg-indigo-900/30"
                 >

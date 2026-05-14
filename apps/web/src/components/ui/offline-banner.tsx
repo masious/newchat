@@ -1,7 +1,7 @@
 "use client";
 
+import { RefreshCw, WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
-import { WifiOff, RefreshCw } from "lucide-react";
 
 export function OfflineBanner() {
   const [disconnected, setDisconnected] = useState(false);
@@ -31,6 +31,7 @@ export function OfflineBanner() {
       <WifiOff className="h-4 w-4" />
       <span>Connection lost. Messages may be delayed.</span>
       <button
+        type="button"
         onClick={handleRetry}
         className="ml-2 flex items-center gap-1 rounded-lg bg-white/20 px-3 py-1 text-sm font-semibold hover:bg-white/30"
       >

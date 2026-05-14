@@ -1,5 +1,5 @@
-import type { Attachment } from "./trpc-types";
 import type { trpc } from "./trpc";
+import type { Attachment } from "./trpc-types";
 
 type TrpcClient = ReturnType<typeof trpc.useUtils>;
 
@@ -40,10 +40,7 @@ async function getImageDimensions(file: File): Promise<{ width: number; height: 
   });
 }
 
-export async function uploadFile(
-  file: File,
-  utils: TrpcClient,
-): Promise<UploadedFile> {
+export async function uploadFile(file: File, utils: TrpcClient): Promise<UploadedFile> {
   const contentType = file.type || "application/octet-stream";
 
   const [dimensions, presignedData] = await Promise.all([

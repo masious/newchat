@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Plus, UserPen, Settings, LogOut } from "lucide-react";
 import { Popover } from "@base-ui/react/popover";
-import { IconButton } from "@/components/ui/icon-button";
+import { LogOut, Plus, Settings, UserPen } from "lucide-react";
+import { useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import { IconButton } from "@/components/ui/icon-button";
 import { userDisplayName } from "@/lib/formatting";
 
 export function SidebarHeader({
@@ -32,15 +32,17 @@ export function SidebarHeader({
       {currentUser ? (
         <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
           <Popover.Trigger className="flex flex-1 items-center gap-2.5 rounded-lg p-1 -m-1 transition hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer">
-            <Avatar avatarUrl={currentUser.avatarUrl ?? null} name={currentUser.firstName} size="sm" />
+            <Avatar
+              avatarUrl={currentUser.avatarUrl ?? null}
+              name={currentUser.firstName}
+              size="sm"
+            />
             <div className="min-w-0 text-left">
               <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {displayName}
               </p>
               <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                {currentUser.username
-                  ? `@${currentUser.username}`
-                  : "Set username"}
+                {currentUser.username ? `@${currentUser.username}` : "Set username"}
               </p>
             </div>
           </Popover.Trigger>
@@ -100,9 +102,7 @@ export function SidebarHeader({
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-red-600 dark:bg-slate-700 dark:text-red-400">
                       <LogOut className="h-4 w-4" />
                     </div>
-                    <p className="text-sm font-semibold text-red-600 dark:text-red-400">
-                      Log out
-                    </p>
+                    <p className="text-sm font-semibold text-red-600 dark:text-red-400">Log out</p>
                   </button>
                 </div>
               </Popover.Popup>
@@ -112,12 +112,7 @@ export function SidebarHeader({
       ) : (
         <div />
       )}
-      <IconButton
-        onClick={onOpenNewChat}
-        variant="primary"
-        size="lg"
-        label="New chat"
-      >
+      <IconButton onClick={onOpenNewChat} variant="primary" size="lg" label="New chat">
         <Plus className="h-4 w-4" />
       </IconButton>
     </div>

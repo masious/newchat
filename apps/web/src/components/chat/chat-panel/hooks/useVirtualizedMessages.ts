@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 
 const SCROLL_THRESHOLD = 200;
@@ -34,11 +34,7 @@ export function useVirtualizedMessages(conversationId: number) {
         messagesQuery.fetchNextPage();
       }
     },
-    [
-      messagesQuery.hasNextPage,
-      messagesQuery.isFetchingNextPage,
-      messagesQuery.fetchNextPage,
-    ],
+    [messagesQuery.hasNextPage, messagesQuery.isFetchingNextPage, messagesQuery.fetchNextPage],
   );
 
   return {

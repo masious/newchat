@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { router, protectedProcedure } from "../init";
-import { mapDomainError } from "../error-mapper";
 import * as pushService from "../../services/push-service";
+import { mapDomainError } from "../error-mapper";
+import { protectedProcedure, router } from "../init";
 
 export const pushRouter = router({
   subscribe: protectedProcedure
@@ -18,11 +18,7 @@ export const pushRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await pushService.subscribe(
-          ctx.db,
-          ctx.userId!,
-          input.subscription,
-        );
+        return await pushService.subscribe(ctx.db, ctx.userId!, input.subscription);
       } catch (err) {
         throw mapDomainError(err);
       }
@@ -42,11 +38,7 @@ export const pushRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await pushService.unsubscribeEndpoint(
-          ctx.db,
-          ctx.userId!,
-          input.endpoint,
-        );
+        return await pushService.unsubscribeEndpoint(ctx.db, ctx.userId!, input.endpoint);
       } catch (err) {
         throw mapDomainError(err);
       }

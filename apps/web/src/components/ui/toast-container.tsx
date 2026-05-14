@@ -19,7 +19,10 @@ export function ToastViewport() {
         <Toast.Root
           key={toast.id}
           toast={toast}
-          className={cn("toast-enter flex items-center gap-3 rounded-lg px-4 py-3 text-sm shadow-lg transition-all data-ending-style:translate-x-full data-ending-style:opacity-0 data-starting-style:translate-x-full data-starting-style:opacity-0", typeStyles[toast.type ?? "error"])}
+          className={cn(
+            "toast-enter flex items-center gap-3 rounded-lg px-4 py-3 text-sm shadow-lg transition-all data-ending-style:translate-x-full data-ending-style:opacity-0 data-starting-style:translate-x-full data-starting-style:opacity-0",
+            typeStyles[toast.type ?? "error"],
+          )}
         >
           <Toast.Title className="flex-1">{toast.title}</Toast.Title>
           <Toast.Close className="text-white/80 hover:text-white">

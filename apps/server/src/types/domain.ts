@@ -1,4 +1,4 @@
-import { Attachment } from "@newchat/db";
+import type { Attachment } from "@newchat/db";
 
 export type LastMessage = {
   id: number;

@@ -1,5 +1,5 @@
-import { ChangeEvent, RefObject } from "react";
 import { Paperclip } from "lucide-react";
+import type { ChangeEvent, RefObject } from "react";
 import { IconButton } from "@/components/ui/icon-button";
 
 export function AttachButton({
@@ -11,11 +11,7 @@ export function AttachButton({
 }) {
   return (
     <>
-      <IconButton
-        type="button"
-        onClick={() => fileInputRef.current?.click()}
-        label="Attach file"
-      >
+      <IconButton type="button" onClick={() => fileInputRef.current?.click()} label="Attach file">
         <Paperclip className="h-5 w-5" />
       </IconButton>
       <input

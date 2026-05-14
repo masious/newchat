@@ -1,8 +1,8 @@
-import { ChangeEvent } from "react";
 import { Camera } from "lucide-react";
+import type { ChangeEvent } from "react";
 import { Avatar } from "@/components/ui/avatar";
-import { TextInput } from "@/components/ui/text-input";
 import { FormField } from "@/components/ui/form-field";
+import { TextInput } from "@/components/ui/text-input";
 
 export function ProfileSection({
   avatarPreview,
@@ -35,16 +35,9 @@ export function ProfileSection({
           <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition group-hover:opacity-100">
             <Camera className="h-8 w-8 text-white" />
           </div>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={onAvatarChange}
-          />
+          <input type="file" accept="image/*" className="hidden" onChange={onAvatarChange} />
         </label>
-        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          Click to change photo
-        </p>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Click to change photo</p>
       </div>
 
       <div className="mt-6 space-y-4">

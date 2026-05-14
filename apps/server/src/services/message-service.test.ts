@@ -1,16 +1,16 @@
-import { describe, test, expect, beforeEach } from "bun:test";
-import { createMockDb } from "../../tests/helpers/mocks";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { createTestMessageWithSender } from "../../tests/helpers/factories.test";
+import { createMockDb } from "../../tests/helpers/mocks";
 import {
-  resetAllMocks,
-  mockListMessages,
+  mockEmit,
+  mockFetchMessageWithSender,
   mockInsertMessage,
+  mockListMessages,
   mockUpsertReadReceipts,
   mockValidateMessageIds,
-  mockFetchMessageWithSender,
-  mockEmit,
+  resetAllMocks,
 } from "../../tests/helpers/module-mocks";
-import { ForbiddenError, BadRequestError } from "../errors";
+import { BadRequestError, ForbiddenError } from "../errors";
 
 import * as messageService from "./message-service";
 
@@ -40,9 +40,7 @@ describe("list", () => {
 
   test("sets nextCursor when hasMore", async () => {
     const db = authPassDb();
-    const items = Array.from({ length: 26 }, (_, i) =>
-      createTestMessageWithSender({ id: 26 - i }),
-    );
+    const items = Array.from({ length: 26 }, (_, i) => createTestMessageWithSender({ id: 26 - i }));
     mockListMessages.mockResolvedValueOnce(items);
 
     const result = await messageService.list(db as any, { conversationId: 10, senderId: 1 });
@@ -80,7 +78,9 @@ describe("send", () => {
     mockFetchMessageWithSender.mockResolvedValueOnce(created);
 
     const result = await messageService.send(db as any, {
-      conversationId: 10, senderId: 1, content: "hello",
+      conversationId: 10,
+      senderId: 1,
+      content: "hello",
     });
 
     expect(result.message).toEqual(created);
@@ -97,7 +97,9 @@ describe("send", () => {
     mockFetchMessageWithSender.mockResolvedValueOnce(created);
 
     await messageService.send(db as any, {
-      conversationId: 10, senderId: 1, content: "hello",
+      conversationId: 10,
+      senderId: 1,
+      content: "hello",
     });
 
     expect(mockEmit).toHaveBeenCalledWith(
@@ -112,7 +114,9 @@ describe("send", () => {
     mockFetchMessageWithSender.mockResolvedValueOnce(null);
 
     await messageService.send(db as any, {
-      conversationId: 10, senderId: 1, content: "hello",
+      conversationId: 10,
+      senderId: 1,
+      content: "hello",
     });
 
     expect(mockEmit).not.toHaveBeenCalled();
@@ -134,7 +138,9 @@ describe("markRead", () => {
     mockValidateMessageIds.mockResolvedValueOnce([{ id: 1 }, { id: 2 }]);
 
     const result = await messageService.markRead(db as any, {
-      conversationId: 10, userId: 1, messageIds: [1, 2],
+      conversationId: 10,
+      userId: 1,
+      messageIds: [1, 2],
     });
 
     expect(result).toEqual({ success: true });

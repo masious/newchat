@@ -1,12 +1,8 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { createMockDb } from "../../tests/helpers/mocks";
-import { resetAllMocks, mockFindUsersByIds } from "../../tests/helpers/module-mocks";
-import {
-  ensureConversationMember,
-  ensureGroupOwner,
-  ensureUsersExist,
-} from "./authorization";
-import { ForbiddenError, BadRequestError } from "../errors";
+import { mockFindUsersByIds, resetAllMocks } from "../../tests/helpers/module-mocks";
+import { BadRequestError, ForbiddenError } from "../errors";
+import { ensureConversationMember, ensureGroupOwner, ensureUsersExist } from "./authorization";
 
 beforeEach(() => {
   resetAllMocks();
@@ -15,7 +11,13 @@ beforeEach(() => {
 describe("ensureConversationMember", () => {
   test("returns conversation when user is a member", async () => {
     const db = createMockDb();
-    const conversation = { id: 1, type: "dm" as const, name: null, createdBy: null, createdAt: new Date() };
+    const conversation = {
+      id: 1,
+      type: "dm" as const,
+      name: null,
+      createdBy: null,
+      createdAt: new Date(),
+    };
     db.query.conversationMembers.findFirst.mockResolvedValueOnce({ conversation });
 
     const result = await ensureConversationMember(db as any, 1, 1);
@@ -26,25 +28,31 @@ describe("ensureConversationMember", () => {
     const db = createMockDb();
     db.query.conversationMembers.findFirst.mockResolvedValueOnce(null);
 
-    await expect(
-      ensureConversationMember(db as any, 1, 999),
-    ).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(ensureConversationMember(db as any, 1, 999)).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
   });
 
   test("throws ForbiddenError when conversation does not exist", async () => {
     const db = createMockDb();
     db.query.conversationMembers.findFirst.mockResolvedValueOnce(null);
 
-    await expect(
-      ensureConversationMember(db as any, 999, 1),
-    ).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(ensureConversationMember(db as any, 999, 1)).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
   });
 });
 
 describe("ensureGroupOwner", () => {
   test("returns conversation when user is the group owner", async () => {
     const db = createMockDb();
-    const conversation = { id: 1, type: "group" as const, name: "Team", createdBy: 1, createdAt: new Date() };
+    const conversation = {
+      id: 1,
+      type: "group" as const,
+      name: "Team",
+      createdBy: 1,
+      createdAt: new Date(),
+    };
     db.query.conversationMembers.findFirst.mockResolvedValueOnce({ conversation });
 
     const result = await ensureGroupOwner(db as any, 1, 1);
@@ -53,12 +61,16 @@ describe("ensureGroupOwner", () => {
 
   test("throws ForbiddenError when user is member but not owner", async () => {
     const db = createMockDb();
-    const conversation = { id: 1, type: "group", name: "Team", createdBy: 2, createdAt: new Date() };
+    const conversation = {
+      id: 1,
+      type: "group",
+      name: "Team",
+      createdBy: 2,
+      createdAt: new Date(),
+    };
     db.query.conversationMembers.findFirst.mockResolvedValueOnce({ conversation });
 
-    await expect(
-      ensureGroupOwner(db as any, 1, 1),
-    ).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(ensureGroupOwner(db as any, 1, 1)).rejects.toBeInstanceOf(ForbiddenError);
   });
 
   test("throws ForbiddenError when conversation is a DM", async () => {
@@ -66,14 +78,18 @@ describe("ensureGroupOwner", () => {
     const conversation = { id: 1, type: "dm", name: null, createdBy: null, createdAt: new Date() };
     db.query.conversationMembers.findFirst.mockResolvedValueOnce({ conversation });
 
-    await expect(
-      ensureGroupOwner(db as any, 1, 1),
-    ).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(ensureGroupOwner(db as any, 1, 1)).rejects.toBeInstanceOf(ForbiddenError);
   });
 
   test("allows any member when createdBy is null", async () => {
     const db = createMockDb();
-    const conversation = { id: 1, type: "group" as const, name: "Team", createdBy: null, createdAt: new Date() };
+    const conversation = {
+      id: 1,
+      type: "group" as const,
+      name: "Team",
+      createdBy: null,
+      createdAt: new Date(),
+    };
     db.query.conversationMembers.findFirst.mockResolvedValueOnce({ conversation });
 
     const result = await ensureGroupOwner(db as any, 1, 1);
@@ -92,9 +108,7 @@ describe("ensureUsersExist", () => {
     const db = createMockDb();
     mockFindUsersByIds.mockResolvedValueOnce([{ id: 1 }]);
 
-    await expect(
-      ensureUsersExist(db as any, [1, 2]),
-    ).rejects.toBeInstanceOf(BadRequestError);
+    await expect(ensureUsersExist(db as any, [1, 2])).rejects.toBeInstanceOf(BadRequestError);
   });
 
   test("no-op for empty array", async () => {

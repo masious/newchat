@@ -1,11 +1,11 @@
 "use client";
 
-import { ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { type ChangeEvent, useEffect, useState } from "react";
+import { usePushNotifications } from "@/lib/hooks/use-push-notifications";
 import { useAuth } from "@/lib/providers/auth-context";
 import { trpc } from "@/lib/trpc";
 import { uploadFile } from "@/lib/upload";
-import { usePushNotifications } from "@/lib/hooks/use-push-notifications";
 
 export function useOnboardingForm() {
   const router = useRouter();
@@ -32,19 +32,15 @@ export function useOnboardingForm() {
 
   // Notification preferences
   const [enableWebNotifications, setEnableWebNotifications] = useState(false);
-  const [enableTelegramNotifications, setEnableTelegramNotifications] =
-    useState(true);
+  const [enableTelegramNotifications, setEnableTelegramNotifications] = useState(true);
   const pushNotifications = usePushNotifications();
 
   // Fetch Telegram avatar on mount (only if user has no existing avatar)
-  const telegramAvatarQuery = trpc.users.fetchTelegramAvatar.useQuery(
-    undefined,
-    {
-      enabled: Boolean(user && !user.avatarUrl),
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  );
+  const telegramAvatarQuery = trpc.users.fetchTelegramAvatar.useQuery(undefined, {
+    enabled: Boolean(user && !user.avatarUrl),
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
 
   // Pre-populate fields when user data loads
   useEffect(() => {
@@ -73,8 +69,7 @@ export function useOnboardingForm() {
     },
   });
 
-  const updateNotificationPrefs =
-    trpc.users.updateNotificationPreferences.useMutation();
+  const updateNotificationPrefs = trpc.users.updateNotificationPreferences.useMutation();
 
   const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -98,9 +93,7 @@ export function useOnboardingForm() {
       return;
     }
     if (!/^[a-zA-Z0-9_]+$/.test(trimmedUsername)) {
-      setUsernameError(
-        "Username can only contain letters, numbers, and underscores",
-      );
+      setUsernameError("Username can only contain letters, numbers, and underscores");
       return;
     }
 
@@ -142,11 +135,8 @@ export function useOnboardingForm() {
 
     // Handle notification preferences (non-blocking)
     try {
-      const wantsWeb =
-        enableWebNotifications && pushNotifications.isSupported;
-      const webGranted = wantsWeb
-        ? await pushNotifications.requestPermission()
-        : false;
+      const wantsWeb = enableWebNotifications && pushNotifications.isSupported;
+      const webGranted = wantsWeb ? await pushNotifications.requestPermission() : false;
 
       const web = webGranted;
       const telegram = enableTelegramNotifications;

@@ -1,13 +1,10 @@
-import { initTRPC, TRPCError } from "@trpc/server";
 import { createDb, type Database } from "@newchat/db";
-import { verifyToken } from "../lib/jwt";
-import { redisPublisher } from "../lib/redis";
-import { checkRateLimit } from "../lib/rate-limit";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { getClientIp } from "../lib/client-ip";
-import {
-  PROCEDURE_RATE_LIMITS,
-  DEFAULT_RATE_LIMIT,
-} from "../middleware/trpc-rate-limit";
+import { verifyToken } from "../lib/jwt";
+import { checkRateLimit } from "../lib/rate-limit";
+import { redisPublisher } from "../lib/redis";
+import { DEFAULT_RATE_LIMIT, PROCEDURE_RATE_LIMITS } from "../middleware/trpc-rate-limit";
 
 let _db: Database | undefined;
 function getDb() {
@@ -54,12 +51,7 @@ const rateLimit = t.middleware(async ({ ctx, path, next }) => {
   const identifier = ctx.userId ? `user:${ctx.userId}` : `ip:${ctx.ip}`;
   const key = `rl:${path}:${identifier}`;
 
-  const result = await checkRateLimit(
-    redisPublisher,
-    key,
-    config.limit,
-    config.windowSec,
-  );
+  const result = await checkRateLimit(redisPublisher, key, config.limit, config.windowSec);
 
   if (!result.allowed) {
     throw new TRPCError({

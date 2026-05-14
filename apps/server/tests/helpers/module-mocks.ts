@@ -8,8 +8,8 @@
 // Path resolution: from tests/helpers/, ../../src/... resolves to src/...
 
 import { mock } from "bun:test";
-import { AuthTokenRow, PushSubscriptionRow, IdRow, UserRow } from "./types";
-import { ConversationSummary } from "@/types/domain";
+import type { ConversationSummary } from "@/types/domain";
+import type { AuthTokenRow, IdRow, PushSubscriptionRow, UserRow } from "./types";
 
 // ---------------------------------------------------------------------------
 // Data: user-queries
@@ -17,10 +17,12 @@ import { ConversationSummary } from "@/types/domain";
 export const mockFindUserById = mock(() => Promise.resolve(null as UserRow | null));
 export const mockUpdateUser = mock(() => Promise.resolve(null as UserRow | null));
 export const mockSearchUsers = mock(() => Promise.resolve([] as UserRow[]));
-export const mockFindUsersByIds = mock((_db: any, _userIds: number[]) => Promise.resolve([] as IdRow[]));
+export const mockFindUsersByIds = mock((_db: any, _userIds: number[]) =>
+  Promise.resolve([] as IdRow[]),
+);
 export const mockUpdateNotificationChannel = mock(() => Promise.resolve(null as UserRow | null));
 export const mockUpdateLastSeen = mock(() => Promise.resolve());
-export const mockGetLastSeenAt = mock(() => Promise.resolve(null));
+export const mockGetLastSeenAt = mock(() => Promise.resolve(null as Date | null));
 
 mock.module("../../src/data/user-queries", () => ({
   findUserById: mockFindUserById,
@@ -52,8 +54,12 @@ mock.module("../../src/data/message-queries", () => ({
 // ---------------------------------------------------------------------------
 // Data: conversation-queries
 // ---------------------------------------------------------------------------
-export const mockFetchConversationSummaries = mock(() => Promise.resolve([] as ConversationSummary[]));
-export const mockFetchConversationSummary = mock(() => Promise.resolve(null as unknown as ConversationSummary));
+export const mockFetchConversationSummaries = mock(() =>
+  Promise.resolve([] as ConversationSummary[]),
+);
+export const mockFetchConversationSummary = mock(() =>
+  Promise.resolve(null as unknown as ConversationSummary),
+);
 export const mockFindExistingDm = mock(() => Promise.resolve(null as number | null));
 export const mockCreateConversationWithMembers = mock(() => Promise.resolve(1));
 export const mockGetConversationMembers = mock(() => Promise.resolve([]));
@@ -80,7 +86,9 @@ mock.module("../../src/data/conversation-queries", () => ({
 export const mockInsertAuthToken = mock(() => Promise.resolve());
 export const mockFindAuthToken = mock(() => Promise.resolve(null as unknown as AuthTokenRow));
 export const mockExpireAuthToken = mock(() => Promise.resolve());
-export const mockExchangeConfirmedToken = mock(() => Promise.resolve(null as unknown as AuthTokenRow));
+export const mockExchangeConfirmedToken = mock(() =>
+  Promise.resolve(null as unknown as AuthTokenRow),
+);
 
 mock.module("../../src/data/auth-queries", () => ({
   insertAuthToken: mockInsertAuthToken,
@@ -97,7 +105,9 @@ export const mockUpdatePushSubscriptionKeys = mock(() => Promise.resolve());
 export const mockInsertPushSubscription = mock(() => Promise.resolve({ id: 1 }));
 export const mockDeleteUserSubscriptions = mock(() => Promise.resolve());
 export const mockDeleteSubscriptionByEndpoint = mock(() => Promise.resolve());
-export const mockFindUserPushSubscriptions = mock(() => Promise.resolve([] as PushSubscriptionRow[]));
+export const mockFindUserPushSubscriptions = mock(() =>
+  Promise.resolve([] as PushSubscriptionRow[]),
+);
 export const mockDeletePushSubscriptionById = mock(() => Promise.resolve());
 
 mock.module("../../src/data/push-queries", () => ({
@@ -126,7 +136,7 @@ export const mockRedisGet = mock(() => Promise.resolve(null as unknown as string
 export const mockRedisSet = mock((..._args: unknown[]) => Promise.resolve("OK"));
 export const mockRedisDel = mock(() => Promise.resolve(1));
 export const mockRedisPublish = mock(() => Promise.resolve(0));
-export const mockRedisIncr = mock(() => Promise.resolve(1));
+export const mockRedisIncr = mock((_key: string) => Promise.resolve(1));
 export const mockRedisExpire = mock(() => Promise.resolve(1));
 export const mockRedisTtl = mock(() => Promise.resolve(60));
 
@@ -210,9 +220,7 @@ mock.module("../../src/lib/web-push", () => ({
 // ---------------------------------------------------------------------------
 // Lib: telegram-notifier
 // ---------------------------------------------------------------------------
-export const mockSendTelegramNotification = mock(() =>
-  Promise.resolve({ success: true }),
-);
+export const mockSendTelegramNotification = mock(() => Promise.resolve({ success: true }));
 
 mock.module("../../src/lib/telegram-notifier", () => ({
   sendTelegramNotification: mockSendTelegramNotification,
@@ -249,7 +257,9 @@ export function resetAllMocks() {
 
   // Data: conversation-queries
   mockFetchConversationSummaries.mockReset().mockResolvedValue([]);
-  mockFetchConversationSummary.mockReset().mockResolvedValue(null as unknown as ConversationSummary);
+  mockFetchConversationSummary
+    .mockReset()
+    .mockResolvedValue(null as unknown as ConversationSummary);
   mockFindExistingDm.mockReset().mockResolvedValue(null);
   mockCreateConversationWithMembers.mockReset().mockResolvedValue(1);
   mockGetConversationMembers.mockReset().mockResolvedValue([]);

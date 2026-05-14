@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { router, protectedProcedure } from "../init";
-import { mapDomainError } from "../error-mapper";
-import * as userService from "../../services/user-service";
-import { r2UrlSchema } from "../../lib/upload-constants";
 import { USER_SEARCH_MAX_LIMIT } from "../../lib/constants";
+import { r2UrlSchema } from "../../lib/upload-constants";
+import * as userService from "../../services/user-service";
+import { mapDomainError } from "../error-mapper";
+import { protectedProcedure, router } from "../init";
 
 export const usersRouter = router({
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -16,7 +16,11 @@ export const usersRouter = router({
   update: protectedProcedure
     .input(
       z.object({
-        username: z.string().min(3).max(32).regex(/^[a-zA-Z0-9_]+$/),
+        username: z
+          .string()
+          .min(3)
+          .max(32)
+          .regex(/^[a-zA-Z0-9_]+$/),
         displayName: z.string().min(1).max(80),
         avatar: r2UrlSchema.optional(),
         completeOnboarding: z.boolean().optional(),
@@ -29,14 +33,13 @@ export const usersRouter = router({
         throw mapDomainError(err);
       }
     }),
-  fetchTelegramAvatar: protectedProcedure
-    .query(async ({ ctx }) => {
-      try {
-        return await userService.fetchTelegramAvatar(ctx.db, ctx.userId!);
-      } catch (err) {
-        throw mapDomainError(err);
-      }
-    }),
+  fetchTelegramAvatar: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await userService.fetchTelegramAvatar(ctx.db, ctx.userId!);
+    } catch (err) {
+      throw mapDomainError(err);
+    }
+  }),
   search: protectedProcedure
     .input(
       z.object({
@@ -83,11 +86,7 @@ export const usersRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await userService.updateNotificationPreferences(
-          ctx.db,
-          ctx.userId!,
-          input.channel,
-        );
+        return await userService.updateNotificationPreferences(ctx.db, ctx.userId!, input.channel);
       } catch (err) {
         throw mapDomainError(err);
       }

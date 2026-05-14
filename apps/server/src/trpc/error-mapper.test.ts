@@ -1,11 +1,6 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { TRPCError } from "@trpc/server";
-import {
-  ForbiddenError,
-  NotFoundError,
-  BadRequestError,
-  UnauthorizedError,
-} from "../errors";
+import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "../errors";
 import { mapDomainError } from "./error-mapper";
 
 describe("mapDomainError", () => {

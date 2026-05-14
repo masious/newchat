@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import jwt from "jsonwebtoken";
 
 // Same constants as jwt.ts — tests verify the configuration produces correct tokens.

@@ -2,10 +2,10 @@
 
 import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
-import { addToast } from "./toast-context";
 import { useState } from "react";
-import { trpc } from "../trpc";
 import { getAuthToken } from "../auth-storage";
+import { trpc } from "../trpc";
+import { addToast } from "./toast-context";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -48,8 +48,7 @@ function getQueryClient() {
   return browserQueryClient;
 }
 
-const defaultServerUrl =
-  process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:4000";
+const defaultServerUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:4000";
 
 export function TrpcProvider({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();

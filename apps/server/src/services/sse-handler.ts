@@ -1,24 +1,18 @@
-import type { Context } from "hono";
-import { streamSSE } from "hono/streaming";
 import type { Database } from "@newchat/db";
 import { conversationMembers, eq } from "@newchat/db";
-
-import { createRedisSubscriber, redisPublisher } from "../lib/redis";
-import { decrementConcurrency } from "../lib/rate-limit";
-import {
-  markOnline,
-  markOffline,
-  setPresenceStatus,
-  PRESENCE_CHANNEL,
-} from "../lib/presence";
-import { logger } from "../lib/logger";
+import type { Context } from "hono";
+import { streamSSE } from "hono/streaming";
 import {
   MAX_SSE_CONNECTIONS,
-  SSE_CONN_TTL_SEC,
-  SSE_MAX_LIFETIME_MS,
-  SSE_KEEPALIVE_MS,
   PRESENCE_HEARTBEAT_MS,
+  SSE_CONN_TTL_SEC,
+  SSE_KEEPALIVE_MS,
+  SSE_MAX_LIFETIME_MS,
 } from "../lib/constants";
+import { logger } from "../lib/logger";
+import { markOffline, markOnline, PRESENCE_CHANNEL, setPresenceStatus } from "../lib/presence";
+import { decrementConcurrency } from "../lib/rate-limit";
+import { createRedisSubscriber, redisPublisher } from "../lib/redis";
 
 // ── AUTHENTICATING ──────────────────────────────────────────────
 
@@ -61,9 +55,7 @@ async function subscribe(db: Database, userId: number) {
 
   const subscriber = createRedisSubscriber();
   const conversationChannels = new Set(
-    channelsResult.map(
-      ({ conversationId }) => `conversation:${conversationId}`,
-    ),
+    channelsResult.map(({ conversationId }) => `conversation:${conversationId}`),
   );
 
   if (conversationChannels.size > 0) {
@@ -103,9 +95,7 @@ function handleMessage(
       event: "membership" as const,
       data: parsed,
       sideEffect: async () => {
-        const data = parsed as
-          | { type?: "join" | "leave"; conversationId?: number }
-          | string;
+        const data = parsed as { type?: "join" | "leave"; conversationId?: number } | string;
         if (
           typeof data === "object" &&
           data &&

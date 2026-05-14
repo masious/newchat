@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "test": "bun test",
-    "lint": "eslint . && tsc --noEmit",
+    "lint": "biome check . && tsc --noEmit",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage"
   },
@@ -28,13 +28,10 @@
     "zod": "^3"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@newchat/typescript-config": "workspace:*",
     "@types/bun": "latest",
     "@types/jsonwebtoken": "^9",
     "@types/web-push": "^3.6.4",
-    "eslint": "^9",
-    "typescript": "^5",
-    "typescript-eslint": "^8.58.2"
+    "typescript": "^5"
   }
 }

@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { createMockRedis } from "../../tests/helpers/mocks";
-import { checkRateLimit, incrementConcurrency, decrementConcurrency } from "./rate-limit";
+import { checkRateLimit, decrementConcurrency, incrementConcurrency } from "./rate-limit";
 
 let redis: ReturnType<typeof createMockRedis>;
 
@@ -63,14 +63,14 @@ describe("decrementConcurrency", () => {
   test("decrements the counter", async () => {
     redis._store.set("conc:user:1", { value: "3" });
     await decrementConcurrency(redis as any, "conc:user:1");
-    expect(redis._store.get("conc:user:1")!.value).toBe("2");
+    expect(redis._store.get("conc:user:1")?.value).toBe("2");
   });
 
   test("floors at 0 when counter goes negative", async () => {
     // No key → decr returns -1 → should set to 0
     await decrementConcurrency(redis as any, "conc:user:1");
     // redis.set(key, 0) stores number 0 directly
-    const stored = redis._store.get("conc:user:1")!.value;
+    const stored = redis._store.get("conc:user:1")?.value;
     expect(Number(stored)).toBe(0);
   });
 });

@@ -1,28 +1,21 @@
-import {
-  pgTable,
-  pgEnum,
-  text,
-  varchar,
-  integer,
-  boolean,
-  timestamp,
-  primaryKey,
-  jsonb,
-  index,
-  unique,
-} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  unique,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 // Enums
-export const conversationTypeEnum = pgEnum("conversation_type", [
-  "dm",
-  "group",
-]);
-export const authTokenStatusEnum = pgEnum("auth_token_status", [
-  "pending",
-  "confirmed",
-  "expired",
-]);
+export const conversationTypeEnum = pgEnum("conversation_type", ["dm", "group"]);
+export const authTokenStatusEnum = pgEnum("auth_token_status", ["pending", "confirmed", "expired"]);
 export const notificationChannelEnum = pgEnum("notification_channel", [
   "web",
   "telegram",
@@ -87,17 +80,14 @@ export const conversations = pgTable("conversations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const conversationsRelations = relations(
-  conversations,
-  ({ one, many }) => ({
-    creator: one(users, {
-      fields: [conversations.createdBy],
-      references: [users.id],
-    }),
-    members: many(conversationMembers),
-    messages: many(messages),
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [conversations.createdBy],
+    references: [users.id],
   }),
-);
+  members: many(conversationMembers),
+  messages: many(messages),
+}));
 
 // Conversation Members
 export const conversationMembers = pgTable(
@@ -117,19 +107,16 @@ export const conversationMembers = pgTable(
   ],
 );
 
-export const conversationMembersRelations = relations(
-  conversationMembers,
-  ({ one }) => ({
-    conversation: one(conversations, {
-      fields: [conversationMembers.conversationId],
-      references: [conversations.id],
-    }),
-    user: one(users, {
-      fields: [conversationMembers.userId],
-      references: [users.id],
-    }),
+export const conversationMembersRelations = relations(conversationMembers, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [conversationMembers.conversationId],
+    references: [conversations.id],
   }),
-);
+  user: one(users, {
+    fields: [conversationMembers.userId],
+    references: [users.id],
+  }),
+}));
 
 // Attachment type for messages
 export type Attachment = {
@@ -157,10 +144,7 @@ export const messages = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [
-    index("messages_conversation_id_created_at_idx").on(
-      t.conversationId,
-      t.createdAt.desc(),
-    ),
+    index("messages_conversation_id_created_at_idx").on(t.conversationId, t.createdAt.desc()),
     index("messages_sender_id_idx").on(t.senderId),
   ],
 );
@@ -219,12 +203,9 @@ export const pushSubscriptions = pgTable(
   (t) => [unique("push_subscriptions_user_id_endpoint_unique").on(t.userId, t.endpoint)],
 );
 
-export const pushSubscriptionsRelations = relations(
-  pushSubscriptions,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [pushSubscriptions.userId],
-      references: [users.id],
-    }),
+export const pushSubscriptionsRelations = relations(pushSubscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [pushSubscriptions.userId],
+    references: [users.id],
   }),
-);
+}));

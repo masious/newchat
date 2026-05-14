@@ -1,15 +1,15 @@
 import {
-  type Database,
   type Attachment,
-  users,
-  messages,
-  readReceipts,
   and,
+  type Database,
   desc,
   eq,
   inArray,
   lt,
+  messages,
+  readReceipts,
   sql,
+  users,
 } from "@newchat/db";
 
 export async function listMessages(
@@ -20,8 +20,7 @@ export async function listMessages(
   if (input.cursor) {
     conditions.push(lt(messages.id, input.cursor));
   }
-  const whereClause =
-    conditions.length > 1 ? and(...conditions) : conditions[0];
+  const whereClause = conditions.length > 1 ? and(...conditions) : conditions[0];
 
   return db
     .select({
@@ -47,10 +46,7 @@ export async function listMessages(
     .leftJoin(users, eq(users.id, messages.senderId))
     .leftJoin(
       readReceipts,
-      and(
-        eq(readReceipts.messageId, messages.id),
-        eq(readReceipts.userId, input.userId),
-      ),
+      and(eq(readReceipts.messageId, messages.id), eq(readReceipts.userId, input.userId)),
     )
     .where(whereClause)
     .orderBy(desc(messages.createdAt))
@@ -114,10 +110,7 @@ export async function validateMessageIds(
   return rows;
 }
 
-export async function fetchMessageWithSender(
-  db: Database,
-  messageId: number,
-) {
+export async function fetchMessageWithSender(db: Database, messageId: number) {
   const [row] = await db
     .select({
       id: messages.id,

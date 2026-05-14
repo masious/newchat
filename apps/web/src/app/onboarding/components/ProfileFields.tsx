@@ -1,5 +1,5 @@
-import { TextInput } from "@/components/ui/text-input";
 import { FormField } from "@/components/ui/form-field";
+import { TextInput } from "@/components/ui/text-input";
 
 interface ProfileFieldsProps {
   username: string;
@@ -32,10 +32,7 @@ export function ProfileFields({
         />
       </FormField>
 
-      <FormField
-        label="Display name"
-        description="This is what your contacts will see."
-      >
+      <FormField label="Display name" description="This is what your contacts will see.">
         <TextInput
           type="text"
           required

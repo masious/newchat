@@ -1,15 +1,14 @@
+import { trpcServer } from "@hono/trpc-server";
+import { and, authTokens, createDb, eq, lt } from "@newchat/db";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { trpcServer } from "@hono/trpc-server";
-import { appRouter } from "./trpc/router";
-import { createTRPCContext } from "./trpc/init";
-import { createDb, authTokens, and, eq, lt } from "@newchat/db";
-
+import { registerEventHandlers } from "./events";
+import { TOKEN_TTL_MS } from "./lib/constants";
+import { logger } from "./lib/logger";
 import { createRateLimitMiddleware } from "./middleware/rate-limit";
 import { createSSEHandler } from "./services/sse-handler";
-import { logger } from "./lib/logger";
-import { TOKEN_TTL_MS } from "./lib/constants";
-import { registerEventHandlers } from "./events";
+import { createTRPCContext } from "./trpc/init";
+import { appRouter } from "./trpc/router";
 
 const app = new Hono();
 const db = createDb();
@@ -31,9 +30,7 @@ async function expirePendingTokens() {
     await db
       .update(authTokens)
       .set({ status: "expired", updatedAt: new Date() })
-      .where(
-        and(eq(authTokens.status, "pending"), lt(authTokens.createdAt, cutoff)),
-      );
+      .where(and(eq(authTokens.status, "pending"), lt(authTokens.createdAt, cutoff)));
   } catch (error) {
     logger.error({ error }, "Failed to expire tokens");
   }
@@ -44,9 +41,14 @@ setInterval(expirePendingTokens, 60_000);
 // CORS
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
-  : ["http://localhost:3000", "http://localhost:3001", "http://192.168.0.113:3001",
-    "https://localhost:3000", "https://localhost:3001", "https://192.168.0.113:3001"
-  ];
+  : [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://192.168.0.113:3001",
+      "https://localhost:3000",
+      "https://localhost:3001",
+      "https://192.168.0.113:3001",
+    ];
 
 app.use(
   "*",

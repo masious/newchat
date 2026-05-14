@@ -1,11 +1,11 @@
 import type { Database } from "@newchat/db";
-import { NotFoundError, BadRequestError } from "../errors";
 import {
   findUserById,
-  updateUser as updateUserQuery,
   searchUsers as searchUsersQuery,
   updateNotificationChannel,
+  updateUser as updateUserQuery,
 } from "../data/user-queries";
+import { BadRequestError, NotFoundError } from "../errors";
 import { getPresenceStatus } from "../lib/presence";
 import { uploadTelegramAvatarToR2 } from "../lib/telegram-avatar";
 
@@ -27,7 +27,7 @@ export async function update(
     completeOnboarding?: boolean;
   },
 ) {
-  let updated;
+  let updated: Awaited<ReturnType<typeof updateUserQuery>>;
   try {
     updated = await updateUserQuery(db, userId, {
       username: input.username,

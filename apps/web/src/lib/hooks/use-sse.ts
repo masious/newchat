@@ -1,30 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
-import { trpc } from "../trpc";
+import { useCallback, useEffect, useRef } from "react";
 import { useAuth } from "../providers/auth-context";
 import {
-  handleNewMessage,
-  handleTyping,
-  handleMessageRead,
   handleConversationUpdated,
   handleMemberAdded,
   handleMemberRemoved,
   handleMembership,
+  handleMessageRead,
+  handleNewMessage,
   handlePresence,
+  handleTyping,
 } from "../sse-cache-updaters";
+import { trpc } from "../trpc";
 
-const defaultServerUrl =
-  process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:4000";
+const defaultServerUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:4000";
 
 const MAX_RETRIES = 10;
 
 export function useSSE() {
   const { token, user } = useAuth();
   const utils = trpc.useUtils();
-  const typingTimers = useRef<
-    Map<number, ReturnType<typeof setTimeout>>
-  >(new Map());
+  const typingTimers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   const hasConnectedBefore = useRef(false);
 
   const refetchAfterReconnect = useCallback(() => {
@@ -42,7 +39,7 @@ export function useSSE() {
     const handleConversationEvent = (event: MessageEvent) => {
       try {
         const payload = JSON.parse(event.data ?? "{}");
-        if (!payload || !payload.payload) return;
+        if (!payload?.payload) return;
         const { payload: detail } = payload;
         if (!detail || typeof detail !== "object") return;
         if (detail.type === "new_message" && detail.message) {
@@ -112,7 +109,7 @@ export function useSSE() {
             window.dispatchEvent(new CustomEvent("newchat:sse-disconnected"));
             return;
           }
-          const delay = Math.min(2000 * Math.pow(1.5, retryCount - 1), 30_000);
+          const delay = Math.min(2000 * 1.5 ** (retryCount - 1), 30_000);
           setTimeout(() => {
             if (!cancelled) connect();
           }, delay);
@@ -128,7 +125,7 @@ export function useSSE() {
           window.dispatchEvent(new CustomEvent("newchat:sse-disconnected"));
           return;
         }
-        const delay = Math.min(5000 * Math.pow(1.5, retryCount - 1), 30_000);
+        const delay = Math.min(5000 * 1.5 ** (retryCount - 1), 30_000);
         setTimeout(() => {
           if (!cancelled) connect();
         }, delay);
@@ -156,5 +153,5 @@ export function useSSE() {
       typingTimers.current.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, utils, user?.id, refetchAfterReconnect]);
+  }, [token, utils, user?.id, refetchAfterReconnect, user, createTicket.mutateAsync]);
 }

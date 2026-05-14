@@ -1,8 +1,8 @@
-import { cn } from "@/lib/cn";
 import { ContextMenu } from "@base-ui/react/context-menu";
-import { VolumeX, Trash2 } from "lucide-react";
-import type { ConversationSummary } from "@/lib/trpc-types";
+import { Trash2, VolumeX } from "lucide-react";
 import { ConversationAvatar } from "@/components/chat/conversation-avatar";
+import { cn } from "@/lib/cn";
+import type { ConversationSummary } from "@/lib/trpc-types";
 
 export function ConversationListItem({
   conversation,
@@ -31,10 +31,13 @@ export function ConversationListItem({
         <ContextMenu.Trigger
           render={
             <button
+              type="button"
               onClick={() => onSelect(conversation.id)}
               className={cn(
                 "flex w-full items-center gap-3 px-4 py-3 text-left transition",
-                isSelected ? "bg-indigo-50 dark:bg-indigo-900/30" : "hover:bg-slate-50 dark:hover:bg-slate-700",
+                isSelected
+                  ? "bg-indigo-50 dark:bg-indigo-900/30"
+                  : "hover:bg-slate-50 dark:hover:bg-slate-700",
               )}
             />
           }

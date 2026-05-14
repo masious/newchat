@@ -3,11 +3,8 @@
 // Use `overrides` to customize specific fields per test.
 
 import type { Attachment } from "@newchat/db";
-import type {
-  Member,
-  ConversationSummary,
-} from "@/types/domain";
-import { AuthTokenRow, PushSubscriptionRow, UserRow } from "./types";
+import type { ConversationSummary, Member } from "@/types/domain";
+import type { AuthTokenRow, PushSubscriptionRow, UserRow } from "./types";
 
 // ---------------------------------------------------------------------------
 // Counters — ensure unique IDs across a test file without coordination
@@ -59,9 +56,7 @@ type ConversationRow = {
   createdAt: Date;
 };
 
-export function createTestConversation(
-  overrides?: Partial<ConversationRow>,
-): ConversationRow {
+export function createTestConversation(overrides?: Partial<ConversationRow>): ConversationRow {
   const n = ++conversationCounter;
   return {
     id: n,
@@ -101,9 +96,7 @@ export function createTestMessage(overrides?: Partial<MessageRow>): MessageRow {
 // ---------------------------------------------------------------------------
 // Auth Tokens
 // ---------------------------------------------------------------------------
-export function createTestAuthToken(
-  overrides?: Partial<AuthTokenRow>,
-): AuthTokenRow {
+export function createTestAuthToken(overrides?: Partial<AuthTokenRow>): AuthTokenRow {
   const n = ++authTokenCounter;
   return {
     id: n,
@@ -140,9 +133,7 @@ export function createTestPushSubscription(
 // Domain types (for service-layer tests)
 // ---------------------------------------------------------------------------
 
-export function createTestMessageWithSender(
-  overrides?: Record<string, unknown>,
-) {
+export function createTestMessageWithSender(overrides?: Record<string, unknown>) {
   const n = ++messageCounter;
   const senderN = ++userCounter;
   return {
@@ -194,9 +185,7 @@ export function createTestConversationSummary(
 // Attachments
 // ---------------------------------------------------------------------------
 
-export function createTestAttachment(
-  overrides?: Partial<Attachment>,
-): Attachment {
+export function createTestAttachment(overrides?: Partial<Attachment>): Attachment {
   return {
     url: "https://test.r2.dev/uploads/test-file.jpg",
     name: "test-file.jpg",

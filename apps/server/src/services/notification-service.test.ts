@@ -1,12 +1,12 @@
-import { describe, test, expect, beforeEach } from "bun:test";
-import { createTestUser, createTestPushSubscription } from "../../tests/helpers/factories.test";
+import { beforeEach, describe, expect, test } from "bun:test";
+import { createTestPushSubscription, createTestUser } from "../../tests/helpers/factories.test";
 import {
-  resetAllMocks,
+  mockDeletePushSubscriptionById,
   mockFindUserById,
   mockFindUserPushSubscriptions,
-  mockDeletePushSubscriptionById,
   mockSendPushNotification,
   mockSendTelegramNotification,
+  resetAllMocks,
 } from "../../tests/helpers/module-mocks";
 
 import { notifyUserOfMessage } from "./notification-service";

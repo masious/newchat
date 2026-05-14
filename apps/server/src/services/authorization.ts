@@ -1,11 +1,6 @@
-import {
-  type Database,
-  conversationMembers,
-  and,
-  eq,
-} from "@newchat/db";
-import { ForbiddenError, BadRequestError } from "../errors";
+import { and, conversationMembers, type Database, eq } from "@newchat/db";
 import { findUsersByIds } from "../data/user-queries";
+import { BadRequestError, ForbiddenError } from "../errors";
 
 export async function ensureConversationMember(
   db: Database,
@@ -27,16 +22,8 @@ export async function ensureConversationMember(
   return membership.conversation;
 }
 
-export async function ensureGroupOwner(
-  db: Database,
-  conversationId: number,
-  userId: number,
-) {
-  const conversation = await ensureConversationMember(
-    db,
-    conversationId,
-    userId,
-  );
+export async function ensureGroupOwner(db: Database, conversationId: number, userId: number) {
+  const conversation = await ensureConversationMember(db, conversationId, userId);
   if (conversation.type !== "group") {
     throw new ForbiddenError("Not a group conversation");
   }

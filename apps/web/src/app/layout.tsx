@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { TrpcProvider } from "@/lib/providers/trpc-provider";
-import { ToastProvider } from "@/lib/providers/toast-provider";
-import { AuthProvider } from "@/lib/providers/auth-context";
-import { RealtimeProvider } from "@/lib/providers/realtime-provider";
 import { AuthGuard } from "@/components/auth-guard";
 import { FeatureBoundary } from "@/components/ui/feature-boundary";
+import { AuthProvider } from "@/lib/providers/auth-context";
+import { RealtimeProvider } from "@/lib/providers/realtime-provider";
+import { ToastProvider } from "@/lib/providers/toast-provider";
+import { TrpcProvider } from "@/lib/providers/trpc-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,11 +12,7 @@ export const metadata: Metadata = {
   description: "A chat application",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

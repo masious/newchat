@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export function getEnvOrThrow(name: string): string {
@@ -49,11 +49,7 @@ export async function getPresignedUploadUrl(
   return { url, contentDisposition };
 }
 
-export async function uploadBuffer(
-  key: string,
-  body: Buffer,
-  contentType: string,
-): Promise<void> {
+export async function uploadBuffer(key: string, body: Buffer, contentType: string): Promise<void> {
   const command = new PutObjectCommand({
     Bucket: R2_BUCKET_NAME,
     Key: key,

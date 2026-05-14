@@ -1,14 +1,14 @@
+import { sql } from "drizzle-orm";
 import { createDb } from "../index";
 import {
-  users,
   authTokens,
-  pushSubscriptions,
-  readReceipts,
-  messages,
   conversationMembers,
   conversations,
+  messages,
+  pushSubscriptions,
+  readReceipts,
+  users,
 } from "../schema";
-import { sql } from "drizzle-orm";
 
 const db = createDb();
 

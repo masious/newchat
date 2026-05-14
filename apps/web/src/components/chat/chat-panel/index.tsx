@@ -1,44 +1,36 @@
 "use client";
 
-import {
-  useCallback,
-  useRef,
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-} from "react";
-import {
-  List,
-  AutoSizer,
-  CellMeasurer,
-  CellMeasurerCache,
-} from "react-virtualized";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ListRowProps } from "react-virtualized";
+import { AutoSizer, CellMeasurer, CellMeasurerCache, List } from "react-virtualized";
 import "react-virtualized/styles.css";
-import { useAuth } from "@/lib/providers/auth-context";
-import { trpc } from "@/lib/trpc";
-import { addToast } from "@/lib/providers/toast-context";
-import { registerOptimisticMessage, markOptimisticFailed } from "@/lib/optimistic-messages";
-import { isOptimisticMessage, type OptimisticMessage, type ConversationSummary } from "@/lib/trpc-types";
-import { MessageBubble } from "../message-bubble";
-import { MessageInput, type MessageInputHandle } from "../message-input";
-import type { Attachment } from "../message-bubble/components/AttachmentPreview";
+import { FeatureBoundary } from "@/components/ui/feature-boundary";
+import { cn } from "@/lib/cn";
 import { formatDateSeparator, isSameDay } from "@/lib/formatting";
 import { useTimeTick } from "@/lib/hooks/use-relative-time";
-import { cn } from "@/lib/cn";
-import { useDragAndDrop } from "./hooks/useDragAndDrop";
+import { markOptimisticFailed, registerOptimisticMessage } from "@/lib/optimistic-messages";
+import { useAuth } from "@/lib/providers/auth-context";
+import { addToast } from "@/lib/providers/toast-context";
+import { trpc } from "@/lib/trpc";
+import {
+  type ConversationSummary,
+  isOptimisticMessage,
+  type OptimisticMessage,
+} from "@/lib/trpc-types";
+import { MessageBubble } from "../message-bubble";
+import type { Attachment } from "../message-bubble/components/AttachmentPreview";
+import { MessageInput, type MessageInputHandle } from "../message-input";
 import { ChatHeader } from "./components/ChatHeader";
-import { DragOverlay } from "./components/DragOverlay";
-import { LoadingMessages } from "./components/LoadingMessages";
-import { EmptyMessages } from "./components/EmptyMessages";
 import { DateSeparator } from "./components/DateSeparator";
+import { DragOverlay } from "./components/DragOverlay";
+import { EmptyMessages } from "./components/EmptyMessages";
+import LoadingHeader from "./components/LoadingHeader";
+import { LoadingMessages } from "./components/LoadingMessages";
+import TypingFooter from "./components/TypingFooter";
+import { useDragAndDrop } from "./hooks/useDragAndDrop";
 import { useMarkReadOnVisible } from "./hooks/useMarkReadOnVisible";
 import { useVirtualizedMessages } from "./hooks/useVirtualizedMessages";
 import type { ChatListContext } from "./types";
-import LoadingHeader from "./components/LoadingHeader";
-import TypingFooter from "./components/TypingFooter";
-import { FeatureBoundary } from "@/components/ui/feature-boundary";
 
 const HEADER_ROW_COUNT = 1;
 const AT_BOTTOM_THRESHOLD = 50;
@@ -73,12 +65,8 @@ export function ChatPanel({
   const utils = trpc.useUtils();
   const sendMessage = trpc.messages.send.useMutation();
 
-  const {
-    messagesQuery,
-    flatMessages,
-    prevMessageCountRef,
-    handleScrollNearTop,
-  } = useVirtualizedMessages(conversationId);
+  const { messagesQuery, flatMessages, prevMessageCountRef, handleScrollNearTop } =
+    useVirtualizedMessages(conversationId);
 
   const handleRetryMessage = useCallback(
     async (message: OptimisticMessage) => {
@@ -170,7 +158,7 @@ export function ChatPanel({
   // Reset cache on conversation switch
   useEffect(() => {
     cache.clearAll();
-  }, [conversationId, cache]);
+  }, [cache]);
 
   // Scroll state
   const [atBottom, setAtBottom] = useState(true);
@@ -192,8 +180,7 @@ export function ChatPanel({
       scrollHeight: number;
     }) => {
       scrollTopRef.current = scrollTop;
-      const isAtBottom =
-        scrollTop + clientHeight >= scrollHeight - AT_BOTTOM_THRESHOLD;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - AT_BOTTOM_THRESHOLD;
       setAtBottom(isAtBottom);
 
       handleScrollNearTop(scrollTop);
@@ -261,18 +248,9 @@ export function ChatPanel({
       // Row 0 = loading header
       if (index === 0) {
         return (
-          <CellMeasurer
-            cache={cache}
-            columnIndex={0}
-            key={key}
-            parent={parent}
-            rowIndex={index}
-          >
+          <CellMeasurer cache={cache} columnIndex={0} key={key} parent={parent} rowIndex={index}>
             {({ registerChild }) => (
-              <div
-                ref={registerChild as React.Ref<HTMLDivElement>}
-                style={style}
-              >
+              <div ref={registerChild as React.Ref<HTMLDivElement>} style={style}>
                 <LoadingHeader context={listContext} />
               </div>
             )}
@@ -287,28 +265,15 @@ export function ChatPanel({
 
       const isMine = message.sender?.id === user?.id;
       const prev = messageIndex > 0 ? flatMessages[messageIndex - 1] : null;
-      const showDateSeparator =
-        !prev || !isSameDay(prev.createdAt, message.createdAt);
+      const showDateSeparator = !prev || !isSameDay(prev.createdAt, message.createdAt);
       const optimistic = isOptimisticMessage(message);
 
       return (
-        <CellMeasurer
-          cache={cache}
-          columnIndex={0}
-          key={key}
-          parent={parent}
-          rowIndex={index}
-        >
+        <CellMeasurer cache={cache} columnIndex={0} key={key} parent={parent} rowIndex={index}>
           {({ registerChild, measure }) => (
-            <div
-              ref={registerChild as React.Ref<HTMLDivElement>}
-              style={style}
-            >
+            <div ref={registerChild as React.Ref<HTMLDivElement>} style={style}>
               <div
-                className={cn(
-                  "px-4 pb-3 md:px-6",
-                  optimistic && "animate-message-send",
-                )}
+                className={cn("px-4 pb-3 md:px-6", optimistic && "animate-message-send")}
                 ref={
                   optimistic || message.readByMe
                     ? undefined
@@ -317,9 +282,7 @@ export function ChatPanel({
               >
                 <div className="mx-auto max-w-3xl">
                   {showDateSeparator && (
-                    <DateSeparator
-                      label={formatDateSeparator(message.createdAt)}
-                    />
+                    <DateSeparator label={formatDateSeparator(message.createdAt)} />
                   )}
                   <FeatureBoundary name="MessageBubble" fallback="hidden">
                     <MessageBubble
@@ -327,10 +290,7 @@ export function ChatPanel({
                       createdAt={message.createdAt}
                       isMine={isMine}
                       readByOthers={Boolean(message.readByOthers)}
-                      attachments={
-                        (message as { attachments?: Attachment[] | null })
-                          .attachments
-                      }
+                      attachments={(message as { attachments?: Attachment[] | null }).attachments}
                       isPending={optimistic && message._status === "pending"}
                       isFailed={optimistic && message._status === "failed"}
                       onImageLoad={measure}
@@ -353,7 +313,15 @@ export function ChatPanel({
         </CellMeasurer>
       );
     },
-    [cache, flatMessages, user?.id, observeRef, listContext, handleRetryMessage, handleDiscardMessage],
+    [
+      cache,
+      flatMessages,
+      user?.id,
+      observeRef,
+      listContext,
+      handleRetryMessage,
+      handleDiscardMessage,
+    ],
   );
 
   const headerContent = (

@@ -1,19 +1,13 @@
 "use client";
 
-import { useAuth } from "@/lib/providers/auth-context";
 import { BaseDialog } from "@/components/ui/base-dialog";
 import { userDisplayName } from "@/lib/formatting";
-import { useEditProfileForm } from "./hooks/useEditProfileForm";
-import { ProfileSection } from "./components/ProfileSection";
+import { useAuth } from "@/lib/providers/auth-context";
 import { DialogFooter } from "./components/DialogFooter";
+import { ProfileSection } from "./components/ProfileSection";
+import { useEditProfileForm } from "./hooks/useEditProfileForm";
 
-export function EditProfileDialog({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function EditProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user } = useAuth();
   const form = useEditProfileForm(open, onClose);
 
@@ -51,10 +45,7 @@ export function EditProfileDialog({
           usernameError={form.usernameError}
         />
 
-        <DialogFooter
-          isBusy={form.isBusy}
-          submitLabel={form.submitLabel}
-        />
+        <DialogFooter isBusy={form.isBusy} submitLabel={form.submitLabel} />
       </form>
     </BaseDialog>
   );

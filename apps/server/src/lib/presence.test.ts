@@ -3,13 +3,13 @@
 // dependencies (redisPublisher, domainEvents, user-queries) to verify the
 // interaction patterns: Redis sets, event emissions, and DB fallback.
 
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import {
-  resetAllMocks,
-  mockRedisGet,
-  mockRedisSet,
   mockEmit,
   mockGetLastSeenAt,
+  mockRedisGet,
+  mockRedisSet,
+  resetAllMocks,
 } from "../../tests/helpers/module-mocks";
 import { PRESENCE_TTL_SEC } from "./constants";
 
@@ -23,12 +23,7 @@ type PresenceStatus = { status: "online" | "offline"; lastSeen: string };
 const presenceKey = (userId: number) => `presence:${userId}`;
 
 async function setPresenceStatus(userId: number, status: PresenceStatus) {
-  await redisPublisher.set(
-    presenceKey(userId),
-    JSON.stringify(status),
-    "EX",
-    PRESENCE_TTL_SEC,
-  );
+  await redisPublisher.set(presenceKey(userId), JSON.stringify(status), "EX", PRESENCE_TTL_SEC);
 }
 
 async function markOnline(userId: number) {
@@ -52,10 +47,7 @@ async function markOffline(userId: number) {
   });
 }
 
-async function getPresenceStatus(
-  db: unknown,
-  userId: number,
-): Promise<PresenceStatus> {
+async function getPresenceStatus(db: unknown, userId: number): Promise<PresenceStatus> {
   const raw = await redisPublisher.get(presenceKey(userId));
   if (raw) {
     try {
@@ -121,7 +113,7 @@ describe("markOffline", () => {
 
 describe("getPresenceStatus", () => {
   test("returns status from Redis when available", async () => {
-    const cached = { status: "online", lastSeen: "2025-01-01T00:00:00.000Z" };
+    const cached = { status: "online" as const, lastSeen: "2025-01-01T00:00:00.000Z" };
     mockRedisGet.mockResolvedValueOnce(JSON.stringify(cached));
 
     const result = await getPresenceStatus({}, 7);

@@ -1,10 +1,10 @@
 import type { Database } from "@newchat/db";
 import {
-  findPushSubscription,
-  updatePushSubscriptionKeys,
-  insertPushSubscription,
-  deleteUserSubscriptions,
   deleteSubscriptionByEndpoint,
+  deleteUserSubscriptions,
+  findPushSubscription,
+  insertPushSubscription,
+  updatePushSubscriptionKeys,
 } from "../data/push-queries";
 
 export async function subscribe(
@@ -12,11 +12,7 @@ export async function subscribe(
   userId: number,
   subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
 ) {
-  const existing = await findPushSubscription(
-    db,
-    userId,
-    subscription.endpoint,
-  );
+  const existing = await findPushSubscription(db, userId, subscription.endpoint);
 
   if (existing) {
     await updatePushSubscriptionKeys(db, existing.id, subscription.keys);
@@ -37,11 +33,7 @@ export async function unsubscribe(db: Database, userId: number) {
   return { success: true };
 }
 
-export async function unsubscribeEndpoint(
-  db: Database,
-  userId: number,
-  endpoint: string,
-) {
+export async function unsubscribeEndpoint(db: Database, userId: number, endpoint: string) {
   await deleteSubscriptionByEndpoint(db, userId, endpoint);
   return { success: true };
 }

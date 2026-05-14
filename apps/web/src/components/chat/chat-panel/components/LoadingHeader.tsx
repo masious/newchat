@@ -1,4 +1,4 @@
-import { ChatListContext } from "../types";
+import type { ChatListContext } from "../types";
 
 export default function LoadingHeader({ context }: { context?: ChatListContext }) {
   if (!context) return null;

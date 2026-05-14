@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { trpc } from "@/lib/trpc";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/providers/auth-context";
+import { trpc } from "@/lib/trpc";
 
-const BOT_USERNAME =
-  process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "newchatauthbot";
+const BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "newchatauthbot";
 
 type TokenInfo = { token: string; expiresAt: string } | null;
 
@@ -49,7 +48,7 @@ export function useAuthFlow() {
     if (initiated.current) return;
     initiated.current = true;
     createToken.mutate();
-  }, []);
+  }, [createToken.mutate]);
 
   useEffect(() => {
     if (!tokenInfo || pollStatus !== "pending") return;

@@ -1,8 +1,8 @@
-import { cn } from "@/lib/cn";
-import { isImageType, formatFileSize } from "@/lib/upload";
-import type { Attachment } from "@/lib/trpc-types";
-import Image from "next/image";
 import { FileDown } from "lucide-react";
+import Image from "next/image";
+import { cn } from "@/lib/cn";
+import type { Attachment } from "@/lib/trpc-types";
+import { formatFileSize, isImageType } from "@/lib/upload";
 
 export type { Attachment };
 

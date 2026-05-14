@@ -1,9 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { CurrentUser } from "../trpc-types";
-import { trpc } from "../trpc";
 import { getAuthToken, setAuthToken, subscribeToAuthToken } from "../auth-storage";
+import { trpc } from "../trpc";
+import type { CurrentUser } from "../trpc-types";
 
 type AuthContextValue = {
   status: "loading" | "authenticated" | "unauthenticated";
@@ -54,16 +54,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setTokenState(newToken);
   }, []);
 
-  const { mutateAsync: unsubscribeEndpoint } =
-    trpc.push.unsubscribeEndpoint.useMutation();
+  const { mutateAsync: unsubscribeEndpoint } = trpc.push.unsubscribeEndpoint.useMutation();
 
   const logout = useCallback(async () => {
     // Best-effort push notification cleanup before clearing auth
     try {
       if ("serviceWorker" in navigator) {
         const registration = await navigator.serviceWorker.getRegistration();
-        const subscription =
-          await registration?.pushManager?.getSubscription();
+        const subscription = await registration?.pushManager?.getSubscription();
         if (subscription) {
           const endpoint = subscription.endpoint;
           await subscription.unsubscribe();

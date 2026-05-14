@@ -6,9 +6,7 @@ export function formatTimestamp(value: string | Date | undefined): string {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function formatPresence(
-  presence?: { status: string; lastSeen: string },
-): string {
+export function formatPresence(presence?: { status: string; lastSeen: string }): string {
   if (!presence) return "Offline";
   if (presence.status === "online") return "Online now";
   if (presence.lastSeen) {

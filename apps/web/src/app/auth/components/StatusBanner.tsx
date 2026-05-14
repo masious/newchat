@@ -1,4 +1,4 @@
-import { Loader, Radio, CheckCircle2, AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader, Radio } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { PollStatus } from "../hooks/useAuthFlow";
 
@@ -48,9 +48,7 @@ export function StatusBanner({ status }: StatusBannerProps) {
         config.classes,
       )}
     >
-      <Icon
-        className={cn("h-4 w-4 shrink-0", config.pulse && "animate-pulse")}
-      />
+      <Icon className={cn("h-4 w-4 shrink-0", config.pulse && "animate-pulse")} />
       <p className="font-semibold">{config.text}</p>
     </div>
   );

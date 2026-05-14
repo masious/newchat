@@ -1,4 +1,4 @@
-import { DragEvent, useRef, useState } from "react";
+import { type DragEvent, useRef, useState } from "react";
 
 export function useDragAndDrop(onDrop: (files: File[]) => void) {
   const [isDragOver, setIsDragOver] = useState(false);

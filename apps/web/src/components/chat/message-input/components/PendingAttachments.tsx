@@ -1,8 +1,8 @@
-import Image from "next/image";
 import { Progress } from "@base-ui/react/progress";
-import { isImageType } from "@/lib/upload";
 import { FileText, X } from "lucide-react";
+import Image from "next/image";
 import { IconButton } from "@/components/ui/icon-button";
+import { isImageType } from "@/lib/upload";
 import type { UploadEntryWithId } from "../hooks/useFileAttachments";
 
 export function PendingAttachments({
@@ -17,8 +17,7 @@ export function PendingAttachments({
   return (
     <div className="mx-auto flex max-w-3xl flex-wrap gap-2 px-6 pt-3">
       {entries.map((entry) => {
-        const showProgress =
-          entry.status === "uploading" || entry.status === "pending";
+        const showProgress = entry.status === "uploading" || entry.status === "pending";
         return (
           <div key={entry.id} className="flex flex-col gap-1">
             <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
@@ -34,9 +33,7 @@ export function PendingAttachments({
                 <FileText className="h-4 w-4 shrink-0 text-slate-400" />
               )}
               <span className="max-w-30 truncate">{entry.file.name}</span>
-              {entry.status === "error" && (
-                <span className="text-red-500 text-[10px]">Failed</span>
-              )}
+              {entry.status === "error" && <span className="text-red-500 text-[10px]">Failed</span>}
               <IconButton
                 type="button"
                 size="xs"

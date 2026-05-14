@@ -1,7 +1,7 @@
-import { Dialog } from "@base-ui/react/dialog";
 import { ScrollArea } from "@base-ui/react";
-import { cn } from "@/lib/cn";
+import { Dialog } from "@base-ui/react/dialog";
 import { SectionLabel } from "@/components/ui/section-label";
+import { cn } from "@/lib/cn";
 
 const sizeClasses = {
   md: "min-w-md max-w-md",
@@ -31,10 +31,7 @@ export function BaseDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop
-          className={cn(
-            "dialog-backdrop fixed inset-0 bg-black/40",
-            stacked ? "z-60" : "z-50",
-          )}
+          className={cn("dialog-backdrop fixed inset-0 bg-black/40", stacked ? "z-60" : "z-50")}
         />
         <Dialog.Viewport
           className={cn(
@@ -61,9 +58,7 @@ export function BaseDialog({
                           {title}
                         </Dialog.Title>
                         {subtitle && (
-                          <SectionLabel as={Dialog.Description}>
-                            {subtitle}
-                          </SectionLabel>
+                          <SectionLabel as={Dialog.Description}>{subtitle}</SectionLabel>
                         )}
                       </div>
                       <Dialog.Close className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">

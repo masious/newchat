@@ -1,6 +1,6 @@
 import type { Database } from "@newchat/db";
-import { registerRealtimeHandlers } from "./realtime";
 import { registerNotificationHandlers } from "./notifications";
+import { registerRealtimeHandlers } from "./realtime";
 
 export function registerEventHandlers(db: Database): void {
   registerRealtimeHandlers(db);

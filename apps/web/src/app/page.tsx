@@ -1,21 +1,21 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import {
-  Radio,
-  Zap,
-  Server,
-  ShieldCheck,
-  Layers,
+  ArrowRight,
+  BookOpen,
   ExternalLink,
   FileText,
-  BookOpen,
-  ArrowRight,
+  Layers,
+  Radio,
+  Server,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { SectionLabel } from "@/components/ui/section-label";
 import { cn } from "@/lib/cn";
 import { useTilt } from "@/lib/hooks";
-import { SectionLabel } from "@/components/ui/section-label";
 
 const HIGHLIGHTS = [
   { icon: Radio, text: "Real-time messaging via SSE and Redis pub/sub" },
@@ -71,9 +71,7 @@ export default function LandingPage() {
       <section className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center gap-12 px-6 py-12 lg:flex-row lg:items-start lg:gap-16 lg:py-20">
         {/* Left — text content */}
         <div className="flex max-w-lg flex-1 flex-col">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Kite
-          </h1>
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Kite</h1>
           <p className="mt-3 text-lg text-slate-500 dark:text-slate-400">
             Real-time messaging, built for the details that matter.
           </p>
@@ -98,10 +96,9 @@ export default function LandingPage() {
           <div className="mt-8">
             <SectionLabel as="h2">Why this exists</SectionLabel>
             <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              Most chat demos skip the hard parts&mdash;consistency under
-              concurrent writes, graceful reconnection, delivery guarantees,
-              presence that actually expires. Kite is a focused exercise in
-              building those things properly: real infrastructure, real
+              Most chat demos skip the hard parts&mdash;consistency under concurrent writes,
+              graceful reconnection, delivery guarantees, presence that actually expires. Kite is a
+              focused exercise in building those things properly: real infrastructure, real
               trade-offs, no shortcuts.
             </p>
           </div>

@@ -34,7 +34,7 @@ export function createMockRedis() {
 
     get: mock((key: string) => {
       if (isExpired(key)) return Promise.resolve(null);
-      return Promise.resolve(store.get(key)!.value);
+      return Promise.resolve(store.get(key)?.value);
     }),
 
     set: mock((...args: unknown[]) => {
@@ -58,7 +58,7 @@ export function createMockRedis() {
 
     getdel: mock((key: string) => {
       if (isExpired(key)) return Promise.resolve(null);
-      const value = store.get(key)!.value;
+      const value = store.get(key)?.value;
       store.delete(key);
       return Promise.resolve(value);
     }),
@@ -96,9 +96,7 @@ export function createMockRedis() {
       const entry = store.get(key);
       if (!entry) return Promise.resolve(-2);
       if (!entry.expiresAt) return Promise.resolve(-1);
-      return Promise.resolve(
-        Math.max(0, Math.ceil((entry.expiresAt - Date.now()) / 1000)),
-      );
+      return Promise.resolve(Math.max(0, Math.ceil((entry.expiresAt - Date.now()) / 1000)));
     }),
 
     publish: mock((_channel: string, _message: string) => {
@@ -154,25 +152,20 @@ export function createMockDomainEvents() {
       }
     }),
 
-    on: mock(
-      (
-        name: keyof DomainEvents,
-        callback: (data: unknown) => void | Promise<void>,
-      ) => {
-        const key = name as string;
-        if (!listeners.has(key)) {
-          listeners.set(key, []);
+    on: mock((name: keyof DomainEvents, callback: (data: unknown) => void | Promise<void>) => {
+      const key = name as string;
+      if (!listeners.has(key)) {
+        listeners.set(key, []);
+      }
+      listeners.get(key)?.push(callback);
+      return () => {
+        const arr = listeners.get(key);
+        if (arr) {
+          const idx = arr.indexOf(callback);
+          if (idx >= 0) arr.splice(idx, 1);
         }
-        listeners.get(key)!.push(callback);
-        return () => {
-          const arr = listeners.get(key);
-          if (arr) {
-            const idx = arr.indexOf(callback);
-            if (idx >= 0) arr.splice(idx, 1);
-          }
-        };
-      },
-    ),
+      };
+    }),
 
     clearAll() {
       emittedEvents.length = 0;
@@ -253,9 +246,7 @@ export function createMockDb() {
       where: mock(() => Promise.resolve()),
     })),
     execute: mock(() => Promise.resolve({ rows: [] })),
-    transaction: mock(
-      async (fn: (tx: unknown) => Promise<unknown>) => fn(db),
-    ),
+    transaction: mock(async (fn: (tx: unknown) => Promise<unknown>) => fn(db)),
   } as any;
 
   return db;

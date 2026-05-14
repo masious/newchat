@@ -1,15 +1,9 @@
-import { type Database } from "@newchat/db";
-import { logger } from "../lib/logger";
-import {
-  sendPushNotification,
-  type PushPayload,
-} from "../lib/web-push";
-import { sendTelegramNotification } from "../lib/telegram-notifier";
+import type { Database } from "@newchat/db";
+import { deletePushSubscriptionById, findUserPushSubscriptions } from "../data/push-queries";
 import { findUserById } from "../data/user-queries";
-import {
-  findUserPushSubscriptions,
-  deletePushSubscriptionById,
-} from "../data/push-queries";
+import { logger } from "../lib/logger";
+import { sendTelegramNotification } from "../lib/telegram-notifier";
+import { type PushPayload, sendPushNotification } from "../lib/web-push";
 
 export interface NotificationPayload {
   recipientUserId: number;

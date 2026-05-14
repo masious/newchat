@@ -27,13 +27,9 @@ export function SwitchOption({
       <div>
         <div className="flex items-center gap-2">
           <span className="text-slate-600 dark:text-slate-400">{icon}</span>
-          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            {label}
-          </span>
+          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{label}</span>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          {description}
-        </p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
       </div>
     </div>
   );

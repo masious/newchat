@@ -2,15 +2,15 @@
 // requires lateral joins and json_agg which aren't expressible via
 // the Drizzle query builder without losing readability / performance.
 import {
-  type Database,
-  Attachment,
-  conversations,
-  conversationMembers,
-  users,
-  sql,
-  eq,
+  type Attachment,
   and,
   asc,
+  conversationMembers,
+  conversations,
+  type Database,
+  eq,
+  sql,
+  users,
 } from "@newchat/db";
 import type { ConversationSummary } from "../types/domain";
 
@@ -67,9 +67,7 @@ export async function fetchConversationSummaries(
   options: { conversationId?: number } = {},
 ) {
   const filter =
-    options.conversationId !== undefined
-      ? sql`AND c.id = ${options.conversationId}`
-      : sql``;
+    options.conversationId !== undefined ? sql`AND c.id = ${options.conversationId}` : sql``;
 
   const result = await db.execute<ConversationRow>(sql`
     SELECT
@@ -122,7 +120,7 @@ export async function fetchConversationSummaries(
     ORDER BY COALESCE(last_msg.created_at, c.created_at) DESC
   `);
 
-  return result.rows.map(mapConversationRow);
+  return result.map(mapConversationRow);
 }
 
 export async function fetchConversationSummary(
@@ -136,11 +134,7 @@ export async function fetchConversationSummary(
   return summary;
 }
 
-export async function findExistingDm(
-  db: Database,
-  userIdA: number,
-  userIdB: number,
-) {
+export async function findExistingDm(db: Database, userIdA: number, userIdB: number) {
   const result = await db.execute<{ id: number }>(sql`
     SELECT c.id
     FROM conversations c
@@ -155,7 +149,7 @@ export async function findExistingDm(
     HAVING COUNT(*) = 2
     LIMIT 1
   `);
-  return result.rows[0]?.id ?? null;
+  return result[0]?.id ?? null;
 }
 
 export async function createConversationWithMembers(
@@ -188,10 +182,7 @@ export async function createConversationWithMembers(
   });
 }
 
-export async function getConversationMembers(
-  db: Database,
-  conversationId: number,
-) {
+export async function getConversationMembers(db: Database, conversationId: number) {
   return db
     .select({
       id: users.id,
@@ -206,10 +197,7 @@ export async function getConversationMembers(
     .orderBy(asc(users.firstName));
 }
 
-export async function getConversationMemberUserIds(
-  db: Database,
-  conversationId: number,
-) {
+export async function getConversationMemberUserIds(db: Database, conversationId: number) {
   const rows = await db
     .select({ userId: conversationMembers.userId })
     .from(conversationMembers)
@@ -217,22 +205,11 @@ export async function getConversationMemberUserIds(
   return rows.map((r) => r.userId);
 }
 
-export async function updateConversationName(
-  db: Database,
-  conversationId: number,
-  name: string,
-) {
-  await db
-    .update(conversations)
-    .set({ name })
-    .where(eq(conversations.id, conversationId));
+export async function updateConversationName(db: Database, conversationId: number, name: string) {
+  await db.update(conversations).set({ name }).where(eq(conversations.id, conversationId));
 }
 
-export async function addConversationMember(
-  db: Database,
-  conversationId: number,
-  userId: number,
-) {
+export async function addConversationMember(db: Database, conversationId: number, userId: number) {
   await db.insert(conversationMembers).values({ conversationId, userId });
 }
 

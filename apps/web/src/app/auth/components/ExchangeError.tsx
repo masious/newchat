@@ -12,9 +12,7 @@ export function ExchangeError({ isPending, onRetry }: ExchangeErrorProps) {
       <div className="flex items-start gap-3">
         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
         <div>
-          <p className="text-sm font-semibold text-red-800 dark:text-red-300">
-            Sign-in failed
-          </p>
+          <p className="text-sm font-semibold text-red-800 dark:text-red-300">Sign-in failed</p>
           <p className="mt-1 text-sm text-red-600 dark:text-red-400">
             Your identity was confirmed, but we couldn&apos;t complete sign-in.
           </p>

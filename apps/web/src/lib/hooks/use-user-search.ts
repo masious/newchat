@@ -45,7 +45,7 @@ export function useUserSearch() {
         });
       }, DEBOUNCE_MS);
     },
-    [utils, startTransition],
+    [utils],
   );
 
   const reset = useCallback(() => {

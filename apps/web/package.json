@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "biome check . && eslint ."
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0-rc.0",
@@ -26,7 +26,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
-    "@eslint/js": "^9.14.0",
     "@next/eslint-plugin-next": "^15.5.14",
     "@newchat/server": "workspace:*",
     "@newchat/typescript-config": "workspace:*",
@@ -36,17 +35,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-virtualized": "^9.21.30",
-    "@typescript-eslint/eslint-plugin": "^8.13.0",
-    "@typescript-eslint/parser": "^8.13.0",
-    "@rushstack/eslint-patch": "^1.10.4",
-    "eslint-import-resolver-node": "^0.3.9",
-    "eslint-import-resolver-typescript": "^3.6.1",
     "eslint": "^9",
     "eslint-config-next": "^15",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsx-a11y": "^6.10.0",
-    "eslint-plugin-react": "^7.37.0",
-    "eslint-plugin-react-hooks": "^5.0.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

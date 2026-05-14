@@ -1,5 +1,5 @@
-import { trpc } from "./trpc";
-import { findAndRemoveOptimistic, cleanupStale } from "./optimistic-messages";
+import { cleanupStale, findAndRemoveOptimistic } from "./optimistic-messages";
+import type { trpc } from "./trpc";
 import type { CurrentUser } from "./trpc-types";
 
 export type SSEUtils = ReturnType<typeof trpc.useUtils>;
@@ -23,42 +23,37 @@ export function handleNewMessage(
   const pendingEntry = findAndRemoveOptimistic(conversationId, message);
   cleanupStale();
 
-  utils.messages.list.setInfiniteData(
-    { conversationId },
-    (previous) => {
-      if (!previous) return previous;
-      const alreadyExists = previous.pages.some((page) =>
-        page.messages.some((m) => m.id === message.id),
-      );
-      if (alreadyExists) return previous;
+  utils.messages.list.setInfiniteData({ conversationId }, (previous) => {
+    if (!previous) return previous;
+    const alreadyExists = previous.pages.some((page) =>
+      page.messages.some((m) => m.id === message.id),
+    );
+    if (alreadyExists) return previous;
 
-      if (pendingEntry) {
-        // Replace the optimistic message in-place with the real one
-        return {
-          pages: previous.pages.map((page) => ({
-            ...page,
-            messages: page.messages.map((m) =>
-              m.id === pendingEntry.negativeId ? message : m,
-            ),
-          })),
-          pageParams: previous.pageParams,
-        };
-      }
-
-      const firstPage = previous.pages[0];
-      const restPages = previous.pages.slice(1);
-      const updatedFirstPage = firstPage
-        ? {
-            ...firstPage,
-            messages: [message, ...firstPage.messages],
-          }
-        : { messages: [message], nextCursor: undefined };
+    if (pendingEntry) {
+      // Replace the optimistic message in-place with the real one
       return {
-        pages: [updatedFirstPage, ...restPages],
+        pages: previous.pages.map((page) => ({
+          ...page,
+          messages: page.messages.map((m) => (m.id === pendingEntry.negativeId ? message : m)),
+        })),
         pageParams: previous.pageParams,
       };
-    },
-  );
+    }
+
+    const firstPage = previous.pages[0];
+    const restPages = previous.pages.slice(1);
+    const updatedFirstPage = firstPage
+      ? {
+          ...firstPage,
+          messages: [message, ...firstPage.messages],
+        }
+      : { messages: [message], nextCursor: undefined };
+    return {
+      pages: [updatedFirstPage, ...restPages],
+      pageParams: previous.pageParams,
+    };
+  });
 
   utils.conversations.list.setData(undefined, (data) => {
     if (!data) return data;
@@ -67,15 +62,11 @@ export function handleNewMessage(
     for (let i = 0; i < items.length; i += 1) {
       if (items[i].id === conversationId) {
         found = true;
-        const unreadIncrement =
-          user && message.sender?.id !== user.id ? 1 : 0;
+        const unreadIncrement = user && message.sender?.id !== user.id ? 1 : 0;
         items[i] = {
           ...items[i],
           lastMessage: message,
-          unreadCount: Math.max(
-            0,
-            (items[i].unreadCount ?? 0) + unreadIncrement,
-          ),
+          unreadCount: Math.max(0, (items[i].unreadCount ?? 0) + unreadIncrement),
         };
         break;
       }
@@ -101,9 +92,7 @@ export function handleNewMessage(
     if (!d) return d;
     return {
       conversations: d.conversations.map((c) =>
-        c.id === conversationId
-          ? { ...c, typingUserId: undefined, isTyping: false }
-          : c,
+        c.id === conversationId ? { ...c, typingUserId: undefined, isTyping: false } : c,
       ),
     };
   });
@@ -159,31 +148,26 @@ export function handleMessageRead(
 ) {
   const readIds = new Set(detail.messageIds as number[]);
   const isMyRead = detail.userId === currentUserId;
-  utils.messages.list.setInfiniteData(
-    { conversationId: detail.conversationId },
-    (current) => {
-      if (!current) return current;
-      return {
-        pages: current.pages.map((page) => ({
-          ...page,
-          messages: page.messages.map((msg) => {
-            if (!readIds.has(msg.id)) return msg;
-            const updates: Record<string, boolean> = {};
-            if (msg.sender?.id !== detail.userId) {
-              updates.readByOthers = true;
-            }
-            if (isMyRead) {
-              updates.readByMe = true;
-            }
-            return Object.keys(updates).length > 0
-              ? { ...msg, ...updates }
-              : msg;
-          }),
-        })),
-        pageParams: current.pageParams,
-      };
-    },
-  );
+  utils.messages.list.setInfiniteData({ conversationId: detail.conversationId }, (current) => {
+    if (!current) return current;
+    return {
+      pages: current.pages.map((page) => ({
+        ...page,
+        messages: page.messages.map((msg) => {
+          if (!readIds.has(msg.id)) return msg;
+          const updates: Record<string, boolean> = {};
+          if (msg.sender?.id !== detail.userId) {
+            updates.readByOthers = true;
+          }
+          if (isMyRead) {
+            updates.readByMe = true;
+          }
+          return Object.keys(updates).length > 0 ? { ...msg, ...updates } : msg;
+        }),
+      })),
+      pageParams: current.pageParams,
+    };
+  });
   utils.conversations.list.setData(undefined, (data) => {
     if (!data) return data;
     const items = data.conversations.map((conversation) => {
@@ -210,9 +194,7 @@ export function handleMembership(
     if (payload.type === "join" && payload.conversation) {
       if (existing) {
         conversations = data.conversations.map((conversation) =>
-          conversation.id === payload.conversation.id
-            ? payload.conversation
-            : conversation,
+          conversation.id === payload.conversation.id ? payload.conversation : conversation,
         );
       } else {
         conversations = [payload.conversation, ...data.conversations];
@@ -241,9 +223,7 @@ export function handleConversationUpdated(
   utils.conversations.list.setData(undefined, (data) => {
     if (!data) return data;
     return {
-      conversations: data.conversations.map((c) =>
-        c.id === conversationId ? { ...c, name } : c,
-      ),
+      conversations: data.conversations.map((c) => (c.id === conversationId ? { ...c, name } : c)),
     };
   });
 }
@@ -254,9 +234,7 @@ export function handleMemberAdded(
   detail: Record<string, any>,
 ) {
   const conversationId = detail.conversationId as number;
-  utils.conversations.members
-    .invalidate({ conversationId })
-    .catch(() => {});
+  utils.conversations.members.invalidate({ conversationId }).catch(() => {});
   utils.conversations.list.invalidate().catch(() => {});
 }
 
@@ -271,15 +249,11 @@ export function handleMemberRemoved(
     utils.conversations.list.setData(undefined, (data) => {
       if (!data) return data;
       return {
-        conversations: data.conversations.filter(
-          (c) => c.id !== conversationId,
-        ),
+        conversations: data.conversations.filter((c) => c.id !== conversationId),
       };
     });
   } else {
-    utils.conversations.members
-      .invalidate({ conversationId })
-      .catch(() => {});
+    utils.conversations.members.invalidate({ conversationId }).catch(() => {});
   }
 }
 

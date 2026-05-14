@@ -1,8 +1,8 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { trpc } from "@/lib/trpc";
+import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import { useAuth } from "@/lib/providers/auth-context";
+import { trpc } from "@/lib/trpc";
 import { uploadFile } from "@/lib/upload";
 
 export function useEditProfileForm(open: boolean, onClose: () => void) {
@@ -67,9 +67,7 @@ export function useEditProfileForm(open: boolean, onClose: () => void) {
       return;
     }
     if (!/^[a-zA-Z0-9_]+$/.test(trimmed)) {
-      setUsernameError(
-        "Username can only contain letters, numbers, and underscores",
-      );
+      setUsernameError("Username can only contain letters, numbers, and underscores");
       return;
     }
 

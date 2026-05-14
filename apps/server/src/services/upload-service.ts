@@ -11,15 +11,16 @@ export async function getPresignedUrl(
     throw new BadRequestError(`Content type "${input.contentType}" is not allowed`);
   }
   if (input.size > MAX_FILE_SIZE) {
-    throw new BadRequestError(
-      `File size exceeds maximum of ${MAX_FILE_SIZE / 1024 / 1024}MB`,
-    );
+    throw new BadRequestError(`File size exceeds maximum of ${MAX_FILE_SIZE / 1024 / 1024}MB`);
   }
 
   const safeFilename = input.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
   const key = `uploads/${userId}/${nanoid(12)}/${safeFilename}`;
 
-  const { url: uploadUrl, contentDisposition } = await getPresignedUploadUrl(key, input.contentType);
+  const { url: uploadUrl, contentDisposition } = await getPresignedUploadUrl(
+    key,
+    input.contentType,
+  );
   const publicUrl = getPublicUrl(key);
 
   return { uploadUrl, publicUrl, key, contentDisposition };

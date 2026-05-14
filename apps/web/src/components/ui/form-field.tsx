@@ -10,21 +10,10 @@ type FormFieldProps = {
   children: React.ReactNode;
 };
 
-export function FormField({
-  label,
-  error,
-  description,
-  className,
-  children,
-}: FormFieldProps) {
+export function FormField({ label, error, description, className, children }: FormFieldProps) {
   return (
-    <Field.Root
-      className={cn("flex flex-col text-sm", className)}
-      invalid={!!error}
-    >
-      <Field.Label className="text-slate-600 dark:text-slate-400">
-        {label}
-      </Field.Label>
+    <Field.Root className={cn("flex flex-col text-sm", className)} invalid={!!error}>
+      <Field.Label className="text-slate-600 dark:text-slate-400">{label}</Field.Label>
       <div className="mt-1">{children}</div>
       {error ? (
         <ErrorMessage>{error}</ErrorMessage>

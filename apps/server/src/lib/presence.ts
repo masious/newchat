@@ -1,9 +1,9 @@
 import type { Database } from "@newchat/db";
-import { redisPublisher } from "./redis";
-import { PRESENCE_TTL_SEC } from "./constants";
-import { updateLastSeen, getLastSeenAt } from "../data/user-queries";
-import { logger } from "./logger";
+import { getLastSeenAt, updateLastSeen } from "../data/user-queries";
 import { domainEvents } from "../events";
+import { PRESENCE_TTL_SEC } from "./constants";
+import { logger } from "./logger";
+import { redisPublisher } from "./redis";
 
 export type PresenceStatus = {
   status: "online" | "offline";
@@ -13,16 +13,8 @@ const presenceKey = (userId: number) => `presence:${userId}`;
 
 export const PRESENCE_CHANNEL = "presence:updates";
 
-export async function setPresenceStatus(
-  userId: number,
-  status: PresenceStatus,
-) {
-  await redisPublisher.set(
-    presenceKey(userId),
-    JSON.stringify(status),
-    "EX",
-    PRESENCE_TTL_SEC,
-  );
+export async function setPresenceStatus(userId: number, status: PresenceStatus) {
+  await redisPublisher.set(presenceKey(userId), JSON.stringify(status), "EX", PRESENCE_TTL_SEC);
 }
 
 export async function markOnline(db: Database, userId: number) {
@@ -49,10 +41,7 @@ export async function markOffline(db: Database, userId: number) {
   });
 }
 
-export async function getPresenceStatus(
-  db: Database,
-  userId: number,
-): Promise<PresenceStatus> {
+export async function getPresenceStatus(db: Database, userId: number): Promise<PresenceStatus> {
   const raw = await redisPublisher.get(presenceKey(userId));
   if (raw) {
     try {

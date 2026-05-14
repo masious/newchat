@@ -1,9 +1,9 @@
 "use client";
 
-import { useOnboardingForm } from "./hooks/useOnboardingForm";
-import { ProfileFields } from "./components/ProfileFields";
 import { AvatarPicker } from "./components/AvatarPicker";
 import { NotificationToggle } from "./components/NotificationToggle";
+import { ProfileFields } from "./components/ProfileFields";
+import { useOnboardingForm } from "./hooks/useOnboardingForm";
 
 export default function OnboardingPage() {
   const form = useOnboardingForm();

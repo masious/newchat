@@ -55,7 +55,11 @@ export function removePendingFile(conversationId: number, fileId: string): void 
   notify();
 }
 
-export function updateUploadProgress(conversationId: number, fileId: string, progress: number): void {
+export function updateUploadProgress(
+  conversationId: number,
+  fileId: string,
+  progress: number,
+): void {
   const entry = store.get(conversationId);
   if (!entry) return;
   const file = entry.entries.get(fileId);

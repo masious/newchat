@@ -1,14 +1,14 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { createTestAuthToken } from "../../tests/helpers/factories.test";
 import {
-  resetAllMocks,
-  mockInsertAuthToken,
-  mockFindAuthToken,
-  mockExpireAuthToken,
   mockExchangeConfirmedToken,
-  mockSignToken,
+  mockExpireAuthToken,
+  mockFindAuthToken,
+  mockInsertAuthToken,
   mockRedisGet,
   mockRedisSet,
+  mockSignToken,
+  resetAllMocks,
 } from "../../tests/helpers/module-mocks";
 import { UnauthorizedError } from "../errors";
 import { TOKEN_TTL_MS } from "../lib/constants";
@@ -46,9 +46,7 @@ describe("pollToken", () => {
   });
 
   test("returns confirmed status", async () => {
-    mockFindAuthToken.mockResolvedValueOnce(
-      createTestAuthToken({ status: "confirmed" }),
-    );
+    mockFindAuthToken.mockResolvedValueOnce(createTestAuthToken({ status: "confirmed" }));
     const result = await authService.pollToken({} as any, "token");
     expect(result.status).toBe("confirmed");
   });
@@ -73,7 +71,7 @@ describe("pollToken", () => {
 
 describe("exchange", () => {
   test("returns JWT for confirmed token", async () => {
-    mockExchangeConfirmedToken.mockResolvedValueOnce({ userId: 42 });
+    mockExchangeConfirmedToken.mockResolvedValueOnce(createTestAuthToken({ userId: 42 }));
     mockSignToken.mockReturnValueOnce("real-jwt");
 
     const result = await authService.exchange({} as any, "token");
@@ -83,7 +81,7 @@ describe("exchange", () => {
   });
 
   test("caches JWT in Redis", async () => {
-    mockExchangeConfirmedToken.mockResolvedValueOnce({ userId: 42 });
+    mockExchangeConfirmedToken.mockResolvedValueOnce(createTestAuthToken({ userId: 42 }));
 
     await authService.exchange({} as any, "token");
 
@@ -105,21 +103,21 @@ describe("exchange", () => {
   });
 
   test("throws UnauthorizedError for invalid token", async () => {
-    await expect(
-      authService.exchange({} as any, "bad-token"),
-    ).rejects.toBeInstanceOf(UnauthorizedError);
+    await expect(authService.exchange({} as any, "bad-token")).rejects.toBeInstanceOf(
+      UnauthorizedError,
+    );
   });
 
   test("degrades gracefully on Redis read failure", async () => {
     mockRedisGet.mockRejectedValueOnce(new Error("Redis down"));
-    mockExchangeConfirmedToken.mockResolvedValueOnce({ userId: 42 });
+    mockExchangeConfirmedToken.mockResolvedValueOnce(createTestAuthToken({ userId: 42 }));
 
     const result = await authService.exchange({} as any, "token");
     expect(result.token).toBe("mock-jwt-token");
   });
 
   test("degrades gracefully on Redis write failure", async () => {
-    mockExchangeConfirmedToken.mockResolvedValueOnce({ userId: 42 });
+    mockExchangeConfirmedToken.mockResolvedValueOnce(createTestAuthToken({ userId: 42 }));
     mockRedisSet.mockRejectedValueOnce(new Error("Redis down"));
 
     const result = await authService.exchange({} as any, "token");

@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { Toggle } from "@base-ui/react/toggle";
-import { trpc } from "@/lib/trpc";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BaseDialog } from "@/components/ui/base-dialog";
-import type { SearchUser } from "@/lib/trpc-types";
-import { TextInput } from "@/components/ui/text-input";
-import { FormField } from "@/components/ui/form-field";
-import { UserSearchCombobox } from "./user-search-combobox";
-import { ErrorMessage } from "@/components/ui/error-message";
 import { Button } from "@/components/ui/button";
+import { ErrorMessage } from "@/components/ui/error-message";
+import { FormField } from "@/components/ui/form-field";
+import { TextInput } from "@/components/ui/text-input";
 import { cn } from "@/lib/cn";
+import { trpc } from "@/lib/trpc";
+import type { SearchUser } from "@/lib/trpc-types";
+import { UserSearchCombobox } from "./user-search-combobox";
 
 function useTabTransition(selected: string) {
   const [displayed, setDisplayed] = useState(selected);
@@ -44,13 +44,7 @@ function useTabTransition(selected: string) {
   return { displayed, phase, direction };
 }
 
-export function NewChatDialog({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function NewChatDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
   const [type, setType] = useState<"dm" | "group">("dm");
   const { displayed: displayedType, phase, direction } = useTabTransition(type);
@@ -76,11 +70,9 @@ export function NewChatDialog({
   // Check if a DM already exists with the selected user
   const existingDmId = useMemo(() => {
     if (type !== "dm" || !selectedUser) return null;
-    const conversations =
-      utils.conversations.list.getData()?.conversations ?? [];
+    const conversations = utils.conversations.list.getData()?.conversations ?? [];
     const existing = conversations.find(
-      (c) =>
-        c.type === "dm" && c.members.some((m) => m.id === selectedUser.id),
+      (c) => c.type === "dm" && c.members.some((m) => m.id === selectedUser.id),
     );
     return existing?.id ?? null;
   }, [type, selectedUser, utils.conversations.list]);
@@ -98,16 +90,10 @@ export function NewChatDialog({
     }
 
     const ids =
-      type === "dm"
-        ? selectedUser
-          ? [selectedUser.id]
-          : []
-        : selectedUsers.map((u) => u.id);
+      type === "dm" ? (selectedUser ? [selectedUser.id] : []) : selectedUsers.map((u) => u.id);
 
     if (ids.length === 0) {
-      setError(
-        type === "dm" ? "Select a teammate" : "Select at least one teammate",
-      );
+      setError(type === "dm" ? "Select a teammate" : "Select at least one teammate");
       return;
     }
     if (type === "group" && !name.trim()) {

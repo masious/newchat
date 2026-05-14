@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { router, protectedProcedure } from "../init";
-import { idempotent } from "../../lib/idempotency";
-import { mapDomainError } from "../error-mapper";
-import * as messageService from "../../services/message-service";
-import { ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE, r2UrlSchema } from "../../lib/upload-constants";
 import { MESSAGES_MAX_LIMIT } from "../../lib/constants";
+import { idempotent } from "../../lib/idempotency";
+import { ALLOWED_CONTENT_TYPES, MAX_FILE_SIZE, r2UrlSchema } from "../../lib/upload-constants";
+import * as messageService from "../../services/message-service";
+import { mapDomainError } from "../error-mapper";
+import { protectedProcedure, router } from "../init";
 
 export const messagesRouter = router({
   list: protectedProcedure
@@ -27,30 +27,35 @@ export const messagesRouter = router({
     }),
   send: protectedProcedure
     .input(
-      z.object({
-        idempotencyKey: z.string().uuid(),
-        conversationId: z.number().int().positive(),
-        content: z.string().max(10_000).default(""),
-        attachments: z
-          .array(
-            z.object({
-              url: r2UrlSchema,
-              name: z.string().max(255),
-              type: z.string().max(127).refine(
-                (t) => ALLOWED_CONTENT_TYPES.has(t),
-                { message: "Content type not allowed" },
-              ),
-              size: z.number().int().nonnegative().max(MAX_FILE_SIZE),
-              width: z.number().int().positive().optional(),
-              height: z.number().int().positive().optional(),
-            }),
-          )
-          .max(10)
-          .optional(),
-      }).refine(
-        (data) => data.content.trim().length > 0 || (data.attachments && data.attachments.length > 0),
-        { message: "Message must have content or attachments" },
-      ),
+      z
+        .object({
+          idempotencyKey: z.string().uuid(),
+          conversationId: z.number().int().positive(),
+          content: z.string().max(10_000).default(""),
+          attachments: z
+            .array(
+              z.object({
+                url: r2UrlSchema,
+                name: z.string().max(255),
+                type: z
+                  .string()
+                  .max(127)
+                  .refine((t) => ALLOWED_CONTENT_TYPES.has(t), {
+                    message: "Content type not allowed",
+                  }),
+                size: z.number().int().nonnegative().max(MAX_FILE_SIZE),
+                width: z.number().int().positive().optional(),
+                height: z.number().int().positive().optional(),
+              }),
+            )
+            .max(10)
+            .optional(),
+        })
+        .refine(
+          (data) =>
+            data.content.trim().length > 0 || (data.attachments && data.attachments.length > 0),
+          { message: "Message must have content or attachments" },
+        ),
     )
     .mutation(
       idempotent("messages.send", async ({ ctx, input }) => {

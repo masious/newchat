@@ -1,25 +1,22 @@
-import { type ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-const avatarVariants = cva(
-  "shrink-0 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700",
-  {
-    variants: {
-      size: {
-        xs: "h-7 w-7",
-        sm: "h-9 w-9",
-        md: "h-10 w-10",
-        lg: "h-20 w-20",
-        xl: "h-24 w-24",
-        "2xl": "h-30 w-30",
-      },
-    },
-    defaultVariants: {
-      size: "md",
+const avatarVariants = cva("shrink-0 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700", {
+  variants: {
+    size: {
+      xs: "h-7 w-7",
+      sm: "h-9 w-9",
+      md: "h-10 w-10",
+      lg: "h-20 w-20",
+      xl: "h-24 w-24",
+      "2xl": "h-30 w-30",
     },
   },
-);
+  defaultVariants: {
+    size: "md",
+  },
+});
 
 const fallbackTextSize: Record<NonNullable<VariantProps<typeof avatarVariants>["size"]>, string> = {
   xs: "text-xs",
@@ -38,21 +35,10 @@ type AvatarProps = {
   className?: string;
 } & VariantProps<typeof avatarVariants>;
 
-export function Avatar({
-  avatarUrl,
-  name,
-  size = "md",
-  status,
-  fallback,
-  className,
-}: AvatarProps) {
+export function Avatar({ avatarUrl, name, size = "md", status, fallback, className }: AvatarProps) {
   const content = avatarUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={avatarUrl}
-      alt={name}
-      className="h-full w-full object-cover"
-    />
+    <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
   ) : (
     <div
       className={cn(
@@ -67,9 +53,7 @@ export function Avatar({
   if (status) {
     return (
       <div className="relative shrink-0">
-        <div className={cn(avatarVariants({ size }), className)}>
-          {content}
-        </div>
+        <div className={cn(avatarVariants({ size }), className)}>{content}</div>
         <span
           className={cn(
             "absolute bottom-0 right-0 h-3 w-3 rounded-full ring-2 ring-white dark:ring-slate-800",
@@ -80,9 +64,5 @@ export function Avatar({
     );
   }
 
-  return (
-    <div className={cn(avatarVariants({ size }), className)}>
-      {content}
-    </div>
-  );
+  return <div className={cn(avatarVariants({ size }), className)}>{content}</div>;
 }

@@ -1,4 +1,4 @@
-import { Sun, Moon, VolumeX, Volume2 } from "lucide-react";
+import { Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { SectionLabel } from "@/components/ui/section-label";
 
 export function SettingsSection({
@@ -14,9 +14,7 @@ export function SettingsSection({
 }) {
   return (
     <fieldset className="mt-6">
-      <SectionLabel as="legend">
-        Appearance
-      </SectionLabel>
+      <SectionLabel as="legend">Appearance</SectionLabel>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {onToggleDarkMode && (
           <button
@@ -25,11 +23,7 @@ export function SettingsSection({
             className="flex items-center gap-3 rounded-lg border border-slate-200 p-4 text-left hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/50"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
-              {isDark ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </div>
             <div>
               <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -48,20 +42,14 @@ export function SettingsSection({
             className="flex items-center gap-3 rounded-lg border border-slate-200 p-4 text-left hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/50"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
-              {muted ? (
-                <VolumeX className="h-4 w-4" />
-              ) : (
-                <Volume2 className="h-4 w-4" />
-              )}
+              {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </div>
             <div>
               <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                 {muted ? "Sounds off" : "Sounds on"}
               </span>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                {muted
-                  ? "Enable notification sounds"
-                  : "Mute notification sounds"}
+                {muted ? "Enable notification sounds" : "Mute notification sounds"}
               </p>
             </div>
           </button>

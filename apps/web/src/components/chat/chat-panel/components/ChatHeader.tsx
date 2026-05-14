@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { formatRelativeTime } from "@/lib/formatting";
 import { Menu, Users } from "lucide-react";
-import { IconButton } from "@/components/ui/icon-button";
-import type { ConversationSummary } from "@/lib/trpc-types";
+import { useState } from "react";
 import { ConversationAvatar } from "@/components/chat/conversation-avatar";
 import { GroupSettingsDialog } from "@/components/chat/group-settings-dialog";
+import { IconButton } from "@/components/ui/icon-button";
+import { formatRelativeTime } from "@/lib/formatting";
+import { trpc } from "@/lib/trpc";
+import type { ConversationSummary } from "@/lib/trpc-types";
 
 function formatPresenceSubtitle(presence: { status: string; lastSeen: string }): string | null {
   if (presence.status === "online") return "online";
@@ -39,9 +39,7 @@ export function ChatHeader({
     { enabled: Boolean(otherMemberId), refetchInterval: 60_000 },
   );
 
-  const presenceEntry = presenceQuery.data?.entries?.find(
-    (e) => e.userId === otherMemberId,
-  );
+  const presenceEntry = presenceQuery.data?.entries?.find((e) => e.userId === otherMemberId);
 
   const subtitle = isTyping
     ? `${typingUserName || "Someone"} is typing...`
@@ -68,11 +66,7 @@ export function ChatHeader({
           <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 truncate">
             {conversationName}
           </h2>
-          {subtitle && (
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {subtitle}
-            </p>
-          )}
+          {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>}
         </div>
         {conversation.type === "group" && (
           <>

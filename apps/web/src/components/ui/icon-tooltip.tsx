@@ -2,13 +2,7 @@
 
 import { Tooltip } from "@base-ui/react/tooltip";
 
-export function IconTooltip({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactElement;
-}) {
+export function IconTooltip({ label, children }: { label: string; children: React.ReactElement }) {
   return (
     <Tooltip.Root>
       <Tooltip.Trigger render={children} />

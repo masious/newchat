@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { router, protectedProcedure } from "../init";
 import { idempotent } from "../../lib/idempotency";
-import { mapDomainError } from "../error-mapper";
 import * as conversationService from "../../services/conversation-service";
+import { mapDomainError } from "../error-mapper";
+import { protectedProcedure, router } from "../init";
 
 export const conversationsRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
