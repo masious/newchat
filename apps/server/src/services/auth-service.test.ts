@@ -73,7 +73,7 @@ describe("pollToken", () => {
 
 describe("exchange", () => {
   test("returns JWT for confirmed token", async () => {
-    mockExchangeConfirmedToken.mockResolvedValueOnce({ id: 42 });
+    mockExchangeConfirmedToken.mockResolvedValueOnce({ userId: 42 });
     mockSignToken.mockReturnValueOnce("real-jwt");
 
     const result = await authService.exchange({} as any, "token");
@@ -83,7 +83,7 @@ describe("exchange", () => {
   });
 
   test("caches JWT in Redis", async () => {
-    mockExchangeConfirmedToken.mockResolvedValueOnce({ id: 42 });
+    mockExchangeConfirmedToken.mockResolvedValueOnce({ userId: 42 });
 
     await authService.exchange({} as any, "token");
 
@@ -112,14 +112,14 @@ describe("exchange", () => {
 
   test("degrades gracefully on Redis read failure", async () => {
     mockRedisGet.mockRejectedValueOnce(new Error("Redis down"));
-    mockExchangeConfirmedToken.mockResolvedValueOnce({ id: 42 });
+    mockExchangeConfirmedToken.mockResolvedValueOnce({ userId: 42 });
 
     const result = await authService.exchange({} as any, "token");
     expect(result.token).toBe("mock-jwt-token");
   });
 
   test("degrades gracefully on Redis write failure", async () => {
-    mockExchangeConfirmedToken.mockResolvedValueOnce({ id: 42 });
+    mockExchangeConfirmedToken.mockResolvedValueOnce({ userId: 42 });
     mockRedisSet.mockRejectedValueOnce(new Error("Redis down"));
 
     const result = await authService.exchange({} as any, "token");

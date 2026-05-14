@@ -54,7 +54,7 @@ mock.module("../../src/data/message-queries", () => ({
 // ---------------------------------------------------------------------------
 export const mockFetchConversationSummaries = mock(() => Promise.resolve([] as ConversationSummary[]));
 export const mockFetchConversationSummary = mock(() => Promise.resolve(null as unknown as ConversationSummary));
-export const mockFindExistingDm = mock(() => Promise.resolve(-1));
+export const mockFindExistingDm = mock(() => Promise.resolve(null as number | null));
 export const mockCreateConversationWithMembers = mock(() => Promise.resolve(1));
 export const mockGetConversationMembers = mock(() => Promise.resolve([]));
 export const mockGetConversationMemberUserIds = mock(() => Promise.resolve([] as number[]));
@@ -80,7 +80,7 @@ mock.module("../../src/data/conversation-queries", () => ({
 export const mockInsertAuthToken = mock(() => Promise.resolve());
 export const mockFindAuthToken = mock(() => Promise.resolve(null as unknown as AuthTokenRow));
 export const mockExpireAuthToken = mock(() => Promise.resolve());
-export const mockExchangeConfirmedToken = mock(() => Promise.resolve(null as unknown as IdRow));
+export const mockExchangeConfirmedToken = mock(() => Promise.resolve(null as unknown as AuthTokenRow));
 
 mock.module("../../src/data/auth-queries", () => ({
   insertAuthToken: mockInsertAuthToken,
@@ -126,6 +126,9 @@ export const mockRedisGet = mock(() => Promise.resolve(null as unknown as string
 export const mockRedisSet = mock((..._args: unknown[]) => Promise.resolve("OK"));
 export const mockRedisDel = mock(() => Promise.resolve(1));
 export const mockRedisPublish = mock(() => Promise.resolve(0));
+export const mockRedisIncr = mock(() => Promise.resolve(1));
+export const mockRedisExpire = mock(() => Promise.resolve(1));
+export const mockRedisTtl = mock(() => Promise.resolve(60));
 
 mock.module("../../src/lib/redis", () => ({
   redisPublisher: {
@@ -133,6 +136,9 @@ mock.module("../../src/lib/redis", () => ({
     set: mockRedisSet,
     del: mockRedisDel,
     publish: mockRedisPublish,
+    incr: mockRedisIncr,
+    expire: mockRedisExpire,
+    ttl: mockRedisTtl,
     on: mock(),
   },
   createRedisSubscriber: mock(() => ({
@@ -244,7 +250,7 @@ export function resetAllMocks() {
   // Data: conversation-queries
   mockFetchConversationSummaries.mockReset().mockResolvedValue([]);
   mockFetchConversationSummary.mockReset().mockResolvedValue(null as unknown as ConversationSummary);
-  mockFindExistingDm.mockReset().mockResolvedValue(-1);
+  mockFindExistingDm.mockReset().mockResolvedValue(null);
   mockCreateConversationWithMembers.mockReset().mockResolvedValue(1);
   mockGetConversationMembers.mockReset().mockResolvedValue([]);
   mockGetConversationMemberUserIds.mockReset().mockResolvedValue([]);
@@ -256,7 +262,7 @@ export function resetAllMocks() {
   mockInsertAuthToken.mockReset().mockResolvedValue(undefined);
   mockFindAuthToken.mockReset().mockResolvedValue(null as unknown as AuthTokenRow);
   mockExpireAuthToken.mockReset().mockResolvedValue(undefined);
-  mockExchangeConfirmedToken.mockReset().mockResolvedValue(null as unknown as UserRow);
+  mockExchangeConfirmedToken.mockReset().mockResolvedValue(null as unknown as AuthTokenRow);
 
   // Data: push-queries
   mockFindPushSubscription.mockReset().mockResolvedValue(undefined);
@@ -275,6 +281,9 @@ export function resetAllMocks() {
   mockRedisSet.mockReset().mockResolvedValue("OK");
   mockRedisDel.mockReset().mockResolvedValue(1);
   mockRedisPublish.mockReset().mockResolvedValue(0);
+  mockRedisIncr.mockReset().mockResolvedValue(1);
+  mockRedisExpire.mockReset().mockResolvedValue(1);
+  mockRedisTtl.mockReset().mockResolvedValue(60);
 
   // Lib: jwt
   mockSignToken.mockReset().mockReturnValue("mock-jwt-token");
