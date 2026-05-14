@@ -13,8 +13,8 @@
     "db:nuke": "bun run src/scripts/nuke.ts --confirm"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10",
-    "drizzle-orm": "^0.38"
+    "drizzle-orm": "^0.38",
+    "postgres": "^3.4.9"
   },
   "devDependencies": {
     "@newchat/typescript-config": "workspace:*",
