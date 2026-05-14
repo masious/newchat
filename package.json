@@ -14,7 +14,7 @@
     "db:push": "turbo db:push",
     "db:nuke": "turbo db:nuke",
     "test": "turbo test",
-    "postinstall": "lefthook install"
+    "postinstall": "[ -z \"$CI\" ] && lefthook install || true"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",

@@ -18,7 +18,7 @@ bun run build
 bun lint
 
 # Run tests (Bun test runner, server only for now)
-bun test                          # run all tests via Turbo
+bun run test                          # run all tests via Turbo
 cd apps/server && bun test        # server tests only
 cd apps/server && bun test --watch
 
@@ -48,7 +48,7 @@ Bun monorepo managed by Turborepo with three apps and two shared packages.
 
 ### Packages
 
-- **`packages/db`** — Drizzle ORM schema + Neon PostgreSQL client. Exports `@newchat/db` (db client) and `@newchat/db/schema` (tables/types). Tables: users, authTokens, conversations, conversationMembers, messages, readReceipts.
+- **`packages/db`** — Drizzle ORM schema + Supabase PostgreSQL client (via postgres.js). Exports `@newchat/db` (db client) and `@newchat/db/schema` (tables/types). Tables: users, authTokens, conversations, conversationMembers, messages, readReceipts.
 - **`packages/typescript-config`** — Shared tsconfig bases (base, node, nextjs).
 
 ### Key Patterns
@@ -82,7 +82,7 @@ See **[docs/](docs/README.md)** for comprehensive documentation. Consult before 
 
 ## Environment
 
-Copy `apps/server/.env.example` to `apps/server/.env`. Required: `DATABASE_URL` (Neon), `REDIS_URL`, `TELEGRAM_BOT_TOKEN`, `JWT_SECRET`, `R2_*` credentials. The web app needs `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` set.
+Copy `apps/server/.env.example` to `apps/server/.env`. Required: `DATABASE_URL` (Supabase), `REDIS_URL`, `TELEGRAM_BOT_TOKEN`, `JWT_SECRET`, `R2_*` credentials. The web app needs `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` set.
 
 
 ## Workflow Rules

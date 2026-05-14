@@ -6,7 +6,7 @@ A real-time chat application with Telegram-based authentication. Built as a Bun 
 
 - **Frontend:** Next.js 15 (App Router) + React 19 + Tailwind CSS v4
 - **Backend:** Hono + tRPC v11 on Bun
-- **Database:** Neon PostgreSQL + Drizzle ORM
+- **Database:** Supabase PostgreSQL + Drizzle ORM
 - **Real-time:** Server-Sent Events + Redis pub/sub
 - **Auth:** Telegram bot deep-link flow + JWT
 - **File Storage:** Cloudflare R2
@@ -16,7 +16,7 @@ A real-time chat application with Telegram-based authentication. Built as a Bun 
 
 - [Bun](https://bun.sh) v1.2.5+
 - [Docker](https://www.docker.com/) (for Redis)
-- A [Neon](https://neon.tech) PostgreSQL database
+- A [Supabase](https://supabase.com) PostgreSQL database
 - A [Telegram Bot](https://core.telegram.org/bots#creating-a-new-bot) token
 - [Cloudflare R2](https://developers.cloudflare.com/r2/) credentials (for file uploads)
 
@@ -76,7 +76,7 @@ apps/
   server/         → Hono + tRPC API server (port 4000)
   telegram-bot/   → Grammy bot for Telegram auth
 packages/
-  db/             → Drizzle ORM schema & Neon client
+  db/             → Drizzle ORM schema & postgres.js client
   typescript-config/ → Shared tsconfig bases
 docs/               → Architecture & design documentation
 ```

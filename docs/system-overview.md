@@ -39,7 +39,7 @@
 │            │      │       DATA LAYER             │                       │
 │            │      │                              │                       │
 │  ┌─────────▼──────┼──────────┐   ┌──────────────▼───────────────────┐   │
-│  │  Redis          │         │   │   Neon PostgreSQL                │   │
+│  │  Redis          │         │   │   Supabase PostgreSQL             │   │
 │  │                 │         │   │                                  │   │
 │  │  pub/sub ◄──────┘         │   │   users, conversations,         │   │
 │  │  (SSE fan-out)            │   │   messages, read_receipts,      │   │
@@ -68,8 +68,8 @@
 | Web App | Hono Server | HTTP (tRPC batch) | All API calls (queries + mutations) |
 | Web App | Hono Server | SSE (EventSource) | Real-time events (messages, typing, presence) |
 | Web App | Cloudflare R2 | HTTP PUT | Direct file uploads via presigned URL |
-| Telegram Bot | Neon PostgreSQL | TCP (Drizzle) | User upsert, token confirmation |
-| Hono Server | Neon PostgreSQL | TCP (Drizzle) | All reads/writes |
+| Telegram Bot | Supabase PostgreSQL | TCP (Drizzle) | User upsert, token confirmation |
+| Hono Server | Supabase PostgreSQL | TCP (Drizzle) | All reads/writes |
 | Hono Server | Redis | TCP | Pub/sub, presence, rate limits, SSE tickets |
 | Hono Server | Telegram Bot API | HTTPS | Push notifications to Telegram |
 
@@ -77,7 +77,7 @@
 
 | Service | What breaks if it's down |
 |---|---|
-| Neon PostgreSQL | Everything — all reads/writes fail |
+| Supabase PostgreSQL | Everything — all reads/writes fail |
 | Redis | SSE connections fail, rate limiting fails, presence goes stale |
 | Cloudflare R2 | File uploads fail; existing files still accessible via public URLs |
 | Telegram Bot API | Login flow fails (users can't confirm tokens), Telegram notifications fail |
@@ -91,7 +91,7 @@
 This traces a single `messages.send` call through every layer.
 
 ```
- Web App                          Hono Server                   Redis                    Neon DB
+ Web App                          Hono Server                   Redis                    Supabase DB
  ───────                          ───────────                   ─────                    ───────
 
  1. User types message
@@ -183,7 +183,7 @@ This traces a single `messages.send` call through every layer.
 ### Logging in (end-to-end)
 
 ```
- Web App                    Hono Server              Telegram Bot           Neon DB
+ Web App                    Hono Server              Telegram Bot           Supabase DB
  ───────                    ───────────              ────────────           ───────
 
  1. Open /auth page
@@ -266,7 +266,7 @@ This traces a single `messages.send` call through every layer.
                                  12. markOnline(userId) ───────► 13. SET presence:{userId}
                                      │                               PUBLISH presence:updates
                                      │
-                                 14. Query user's conversations ──────────► Neon DB
+                                 14. Query user's conversations ──────────► Supabase DB
                                      │                           ◄────────
                                      │
                                  15. SUBSCRIBE to: ────────────► conversation:{id} (each)
@@ -287,4 +287,4 @@ This traces a single `messages.send` call through every layer.
 
 ### Horizontal scaling note
 
-Multiple Hono server instances can run simultaneously. Redis pub/sub is the coordination layer — when Server A publishes a message event, Server B's SSE connections receive it through their Redis subscriptions. Each instance maintains its own SSE connections but shares state through Redis (presence, tickets, rate limits) and Neon (all persistent data).
+Multiple Hono server instances can run simultaneously. Redis pub/sub is the coordination layer — when Server A publishes a message event, Server B's SSE connections receive it through their Redis subscriptions. Each instance maintains its own SSE connections but shares state through Redis (presence, tickets, rate limits) and Supabase PostgreSQL (all persistent data).

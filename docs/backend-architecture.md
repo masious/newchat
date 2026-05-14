@@ -333,7 +333,7 @@ The server is stateless — it can be horizontally scaled by running multiple in
 | State | Where | Why |
 |---|---|---|
 | User sessions (JWT) | Client-side (localStorage) | Server only verifies, never stores |
-| Messages, users, conversations | Neon PostgreSQL | Single source of truth |
+| Messages, users, conversations | Supabase PostgreSQL | Single source of truth |
 | Presence, rate limits, SSE tickets | Redis | Ephemeral, TTL-based, auto-healing |
 | Real-time event delivery | Redis pub/sub | Fan-out across server instances |
 | File storage | Cloudflare R2 | Client uploads directly via presigned URLs |
@@ -345,7 +345,7 @@ Redis pub/sub is the coordination layer. When Server A handles a `messages.send`
 ```
 Server A (handles the API call)
   │
-  ├─► INSERT message into Neon
+  ├─► INSERT message into PostgreSQL
   │
   └─► PUBLISH to Redis conversation:{id}
           │
